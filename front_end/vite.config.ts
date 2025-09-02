@@ -17,4 +17,7 @@ export default defineConfig({
       '@api': path.resolve(__dirname, 'src/api'),
     },
   },
+  optimizeDeps: {
+    include: ['yet-another-react-lightbox'],
+  },
 });
