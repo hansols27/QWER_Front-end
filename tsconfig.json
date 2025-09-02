@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "preserve",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",   
+    "paths": {
+      "@/*": ["front_end/src/*", "admin/*"],   
+      "@shared/*": ["shared/*"]
+    }
+  },
+  "include": [
+    "front_end/src",
+    "shared/types",
+    "admin/app/**/*",
+    "admin/lib/**/*",
+    "admin/theme/**/*",
+    "admin/utils/**/*",
+    "admin/styles/**/*"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,62 @@
+/* 메인 영역 */
+.cont.community {
+  flex: 1;              /* 남은 공간 채움 */
+  display: flex;        /* 좌측 타이틀 + 우측 리스트 가로 배치 */
+  gap: 5%;
+  padding: 20px;
+}
+
+/* 좌측 타이틀 */
+.n_left {
+  width: 100%;
+}
+.n_left .n_tt {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* 우측 리스트 */
+.n_right {
+  flex: 1;
+  position: relative;
+  top: 15px;
+}
+
+/* 공지사항 리스트 */
+.communityList {
+  width: 100%;
+}
+.communityList ul {
+  border-top: 2px solid #000;
+}
+.communityList ul li {
+  padding: 20px 10px;
+  border-bottom: 1px solid #ccc;
+}
+.communityList ul li:hover {
+  background-color: #fafafa;
+  transition: all 0.3s;
+}
+.communityList ul li p {
+  float: left;
+}
+
+.communityList .cate {
+  font-size: 11pt;
+  margin-right: 20px;
+  line-height: 28px;
+}
+.communityList .nc_in {
+  display: inline-block;
+  width: 80%;
+}
+.communityList .nc_in .tit {
+  display: block;
+  font-size: 12pt;
+  margin-bottom: 10px;
+}
+.communityList .nc_in .date {
+  display: block;
+  font-size: 10pt;
+  color: #666;
+}

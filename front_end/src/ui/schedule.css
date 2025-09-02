@@ -1,0 +1,94 @@
+.cont.schedule {
+  display: flex;
+  gap: 5%;
+}
+
+.n_left {
+  flex: 1;
+}
+
+.n_right {
+  flex: 1;
+  padding-left: 4%;
+}
+
+.cd_calendar {
+  width: 100%;
+}
+
+.sch_detail {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sch_detail li {
+  font-size: 11pt;
+  line-height: 25px;
+  display: flex;
+  align-items: center;
+}
+
+.sch_detail .dt_date {
+  font-size: 9pt;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.sch_detail li span {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  font-size: 7pt;
+  border-radius: 8px;
+  color: #fff;
+  text-align: center;
+  line-height: 16px;
+  margin-right: 6px;
+}
+
+.sbt_birthday {
+  background-color: #e79c89;
+}
+.sbt_concert {
+  background-color: #72d2c0;
+}
+.sbt_event {
+  background-color: #f1bd4c;
+}
+
+/* 커스텀 Toolbar */
+.rbc-toolbar-custom {
+  display: flex !important;
+  justify-content: center !important; /* 전체 중앙 정렬 */
+  align-items: center;
+  gap: 80px;
+  margin-bottom: 20px;
+}
+
+/* 화살표 버튼 */
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background-color: #000;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.nav-btn img {
+  width: 25px;
+  height: 25px;
+  display: block; /* inline 문제 제거 */
+}
+
+/* Toolbar 레이블 */
+.rbc-toolbar-custom .rbc-toolbar-label {
+  font-size: 20px;      /* 원하는 폰트 크기 */
+  font-weight: 600;     /* 글씨 굵기 */
+  color: #fff;          /* 글씨 색상 */
+}

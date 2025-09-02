@@ -1,0 +1,79 @@
+.cont.video_ct .video_list {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1400px;
+  margin: 80px auto;
+  gap: 20px;
+}
+
+/* 왼쪽 큰 영상 */
+.select_video {
+  flex: 1;
+  max-width: 960px;
+}
+
+.select_video iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9; /* 16:9 자동 유지 */
+  height: auto;
+  border: 0;
+  border-radius: 10px;
+}
+
+/* 오른쪽 썸네일 박스 */
+.thumb_box {
+  width: 320px;
+  max-height: 540px; /* 큰 영상 높이 기준 */
+  overflow-y: auto;
+  padding-right: 4px; /* 스크롤바 공간 확보 */
+}
+
+/* 웹킷 기반 브라우저 (Chrome, Edge, Safari) */
+.thumb_box::-webkit-scrollbar {
+  width: 5px; /* 얇게 */
+  height: 540px;
+}
+
+.thumb_box::-webkit-scrollbar-track {
+  background: transparent; /* 배경 안 보이게 */
+}
+
+.thumb_box::-webkit-scrollbar-thumb {
+  background-color: #fff; /* 살짝만 보이는 회색 */
+  border-radius: 3px;
+}
+
+/* Firefox */
+.thumb_box {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.thumb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.thumb-item {
+  width: 100%;
+  aspect-ratio: 16 / 9; /* 자동으로 높이 맞춤 */
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-item.active,
+.thumb-item:hover {
+  opacity: 1;
+  transform: scale(1.03);
+}
