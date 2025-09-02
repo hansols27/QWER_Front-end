@@ -3,12 +3,16 @@ import react from '@vitejs/plugin-react-swc';
 import svgr from 'vite-plugin-svgr';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import commonjs from '@rollup/plugin-commonjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react(), svgr()],
+  plugins: [react(), svgr(),commonjs({ include: /node_modules/ })],
+  optimizeDeps: {
+    include: ['yet-another-react-lightbox'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
