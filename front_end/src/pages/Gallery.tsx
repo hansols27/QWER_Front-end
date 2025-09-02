@@ -6,8 +6,9 @@ import btn_prev from "@/assets/icons/bg-btn-prev.png";
 import btn_next from "@/assets/icons/bg-btn-next.png";
 
 // Yet Another React Lightbox
-import Lightbox, { Slide, RenderSlideProps } from "yet-another-react-lightbox/*";
-import "yet-another-react-lightbox/styles.css";
+import Lightbox from "yet-another-react-lightbox";
+import { Slide, RenderSlideProps } from "yet-another-react-lightbox";
+
 
 // Slide 타입 확장 (title 사용 가능)
 type MySlide = Slide & { title?: string };

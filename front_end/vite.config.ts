@@ -9,9 +9,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react(), svgr(),commonjs({ include: /node_modules/ })],
+  plugins: [
+    react(),
+    svgr(),
+    commonjs({
+      include: /node_modules/,      
+    })
+  ],
   optimizeDeps: {
-    include: ['yet-another-react-lightbox'],
+    include: [
+      'yet-another-react-lightbox',
+      'react-router-dom',
+      'cookie'
+    ],
   },
   resolve: {
     alias: {
