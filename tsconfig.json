@@ -21,7 +21,6 @@
     "admin/lib/**/*",
     "admin/theme/**/*",
     "admin/utils/**/*",
-    "admin/styles/**/*"
-, "admin/theme/types.ts"  ],
+    "admin/styles/**/*" ],
   "exclude": ["node_modules"]
 }
