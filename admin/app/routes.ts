@@ -1,4 +1,3 @@
-// app/routes.ts
 import DashboardIcon from "@mui/icons-material/Dashboard"
 import ArticleIcon from "@mui/icons-material/Article"
 import PeopleIcon from "@mui/icons-material/People"

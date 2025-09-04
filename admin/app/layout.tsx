@@ -4,11 +4,11 @@ import { ReactNode } from "react"
 import { ThemeProvider, CssBaseline } from "@mui/material"
 import Sidebar from "./Sidebar"
 import theme from "@/theme"
-import "../styles/globals.css"
+import "@/globals.css"
 
 export const metadata = {
-  title: "My Admin",
-  description: "Materio 기반 Next.js Admin",
+  title: "QWER",
+  description: "QWER Admin",
   icons: {
     icon: "/favicon.ico",
   },

@@ -54,11 +54,13 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, onClose }) => {
             NOTICE
           </Link>
         </li>
+        {/*
         <li>
           <Link to="/Community" onClick={onClose}>
             COMMUNITY
           </Link>
         </li>
+        */}
       </ul>
     </nav>
   );
