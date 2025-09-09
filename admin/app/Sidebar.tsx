@@ -1,24 +1,67 @@
 "use client"
 
 import Link from "next/link"
-import { routes } from '@/app/routes'
+import { usePathname } from "next/navigation"
+import {
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+} from "@mui/material"
+
+// MUI 아이콘
+import SettingsIcon from "@mui/icons-material/Settings"
+import PersonIcon from "@mui/icons-material/Person"
+import AlbumIcon from "@mui/icons-material/Album"
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary"
+import EventIcon from "@mui/icons-material/Event"
+import NotificationsIcon from "@mui/icons-material/Notifications"
+
+const menuItems = [
+  { text: "기본설정", path: "/admin/settings", icon: <SettingsIcon /> },
+  { text: "프로필", path: "/admin/profile", icon: <PersonIcon /> },
+  { text: "앨범", path: "/admin/album", icon: <AlbumIcon /> },
+  { text: "갤러리", path: "/admin/gallery", icon: <PhotoLibraryIcon /> },
+  { text: "일정관리", path: "/admin/schedule", icon: <EventIcon /> },
+  { text: "공지사항", path: "/admin/notice", icon: <NotificationsIcon /> },
+]
 
 export default function Sidebar() {
+  const pathname = usePathname()
+
   return (
-    <aside className="w-60 min-h-screen border-r border-gray-200 bg-white">
-      <div className="p-4 flex items-center justify-center">
-        <img src="/logo.svg" alt="Logo" className="w-32" />
-      </div>
-      <nav>
-        <ul>
-          {routes.map((route) => (
-            <li key={route.title} className="p-3 hover:bg-gray-100 flex items-center gap-2">
-              {route.icon}
-              <Link href={route.href}>{route.title}</Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </aside>
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: 240,
+        flexShrink: 0,
+        [`& .MuiDrawer-paper`]: {
+          width: 240,
+          boxSizing: "border-box",
+        },
+      }}
+    >
+      <Toolbar>
+        <Typography variant="h6" noWrap>
+          Admin
+        </Typography>
+      </Toolbar>
+      <List>
+        {menuItems.map((item) => (
+          <ListItemButton
+            key={item.path}
+            component={Link}
+            href={item.path}
+            selected={pathname === item.path}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItemButton>
+        ))}
+      </List>
+    </Drawer>
   )
 }
