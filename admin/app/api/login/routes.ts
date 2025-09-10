@@ -1,29 +1,30 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+
+// 환경변수에서 시크릿 키 관리 (예: .env.local에 넣기)
+const JWT_SECRET = process.env.JWT_SECRET || 'my-secret-key';
 
 export async function POST(req: Request) {
-  try {
-    const { email, password } = await req.json()
+  const { email, password } = await req.json();
 
-    // ⚡ 여기서 실제 DB에서 사용자 확인 로직이 들어가야 함
-    // 지금은 mock 데이터로 처리
-    if (email === "admin@test.com" && password === "1234") {
-      return NextResponse.json({
-        success: true,
-        message: "로그인 성공",
-        user: { email },
-        token: "mock-jwt-token", // 실제로는 JWT나 세션 토큰 발급
-      })
-    }
+  // ✅ 실제 구현: DB에서 유저 확인
+  if (email === 'admin@test.com' && password === '1234') {
+    // JWT 생성
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
 
-    return NextResponse.json(
-      { success: false, message: "이메일 또는 비밀번호가 올바르지 않습니다." },
-      { status: 401 }
-    )
-  } catch (error) {
-    console.error(error)
-    return NextResponse.json(
-      { success: false, message: "서버 오류 발생" },
-      { status: 500 }
-    )
+    // 쿠키에 토큰 저장 (HttpOnly, Secure)
+    const res = NextResponse.json({ success: true, message: '로그인 성공' });
+    res.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 60 * 60, // 1시간
+    });
+    return res;
   }
+
+  return NextResponse.json(
+    { success: false, message: '로그인 실패' },
+    { status: 401 }
+  );
 }
