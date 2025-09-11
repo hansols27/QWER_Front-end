@@ -21,12 +21,12 @@ import EventIcon from "@mui/icons-material/Event"
 import NotificationsIcon from "@mui/icons-material/Notifications"
 
 const menuItems = [
-  { text: "기본설정", path: "/admin/settings", icon: <SettingsIcon /> },
-  { text: "프로필", path: "/admin/profile", icon: <PersonIcon /> },
-  { text: "앨범", path: "/admin/album", icon: <AlbumIcon /> },
-  { text: "갤러리", path: "/admin/gallery", icon: <PhotoLibraryIcon /> },
-  { text: "일정관리", path: "/admin/schedule", icon: <EventIcon /> },
-  { text: "공지사항", path: "/admin/notice", icon: <NotificationsIcon /> },
+  { text: "기본설정", path: "/pages/settings", icon: <SettingsIcon /> },
+  { text: "프로필", path: "/pages/profile", icon: <PersonIcon /> },
+  { text: "앨범", path: "/pages/album", icon: <AlbumIcon /> },
+  { text: "갤러리", path: "/pages/gallery", icon: <PhotoLibraryIcon /> },
+  { text: "일정관리", path: "/pages/schedule", icon: <EventIcon /> },
+  { text: "공지사항", path: "/pages/notice", icon: <NotificationsIcon /> },
 ]
 
 export default function Sidebar() {
