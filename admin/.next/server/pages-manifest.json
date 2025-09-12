@@ -3,7 +3,8 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/api/login": "pages/api/login.js",
   "/login": "pages/login.js",
-  "/settings": "pages/settings.js"
+  "/api/login": "pages/api/login.js",
+  "/settings": "pages/settings.js",
+  "/api/logout": "pages/api/logout.js"
 }

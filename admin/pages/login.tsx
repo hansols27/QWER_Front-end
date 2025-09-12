@@ -10,25 +10,29 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleLogin = async () => {
-    const res = await fetch('api/login', { 
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('/api/login', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (res.ok) {
-      router.push('/settings'); // 
-    } else {
-      alert('로그인 실패');
+      if (!res.ok) return alert('로그인 실패');
+
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+
+      router.replace('/settings'); // 로그인 성공 후 메인 페이지로 이동
+    } catch (error) {
+      console.error('로그인 에러:', error);
+      alert('로그인 중 오류가 발생했습니다.');
     }
   };
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
       <Paper sx={{ p: 6, width: '100%', maxWidth: 400 }}>
-        <Typography variant="h5" align="center" gutterBottom>
-          Admin Login
-        </Typography>
+        <Typography variant="h5" align="center" gutterBottom>로그인</Typography>
         <TextField
           fullWidth
           margin="normal"

@@ -1,24 +1,13 @@
-"use client";
-
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-
-// MUI 아이콘
+import { useRouter } from "next/router";
+import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import AlbumIcon from "@mui/icons-material/Album";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import EventIcon from "@mui/icons-material/Event";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const menuItems = [
   { text: "기본설정", path: "/settings", icon: <SettingsIcon /> },
@@ -30,7 +19,21 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
-  const pathname = usePathname();
+  const router = useRouter();
+  const pathname = router.pathname;
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/logout", { method: "POST" });
+      if (!res.ok) throw new Error("로그아웃 실패");
+
+      localStorage.removeItem("token");
+      router.replace("/login"); // 로그아웃 시 로그인 페이지로 이동
+    } catch (error) {
+      console.error(error);
+      alert("로그아웃에 실패했습니다.");
+    }
+  };
 
   return (
     <Drawer
@@ -38,15 +41,12 @@ export default function Sidebar() {
       sx={{
         width: 240,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: {
-          width: 240,
-          boxSizing: "border-box",
-        },
+        "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
       }}
     >
       <Toolbar>
         <Typography variant="h6" noWrap>
-          Admin
+          QWER
         </Typography>
       </Toolbar>
       <List>
@@ -61,6 +61,12 @@ export default function Sidebar() {
             <ListItemText primary={item.text} />
           </ListItemButton>
         ))}
+        <ListItemButton onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="로그아웃" />
+        </ListItemButton>
       </List>
     </Drawer>
   );

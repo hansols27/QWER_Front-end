@@ -1,36 +1,49 @@
-import { ReactNode } from "react";
-import { CssBaseline, Box } from "@mui/material";
-import Sidebar from "./Sidebar"; // Sidebar는 별도 파일 유지
+import { FC, ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { CssBaseline, Box, CircularProgress } from "@mui/material";
+import Sidebar from "./Sidebar";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+type LayoutProps = {
+  children: ReactNode;
+};
+
+const Layout: FC<LayoutProps> = ({ children }) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    // 로그인 페이지는 Layout 적용 X
+    if (router.pathname === "/login") {
+      setLoading(false);
+      return;
+    }
+
+    if (!token) {
+      router.replace("/login");
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <html lang="ko">
-      <head>
-        <title>Admin Page</title>
-      </head>
-      <body>
-        {/* 전체 레이아웃 */}
-        <Box sx={{ display: "flex" }}>
-          {/* 전역 스타일 리셋 */}
-          <CssBaseline />
-
-          {/* 사이드바 */}
-          <Sidebar />
-
-          {/* 본문 영역 */}
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              p: 3,
-              bgcolor: "grey.50",
-              minHeight: "100vh",
-            }}
-          >
-            {children}
-          </Box>
-        </Box>
-      </body>
-    </html>
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+      <Sidebar />
+      <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: "grey.50", minHeight: "100vh" }}>
+        {children}
+      </Box>
+    </Box>
   );
-}
+};
+
+export default Layout;
