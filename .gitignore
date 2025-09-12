@@ -2,10 +2,16 @@
 node_modules/
 
 # production build
+.next/
+out/
 build/
 
 # environment variables
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # logs
 npm-debug.log*
@@ -18,3 +24,9 @@ yarn-error.log*
 # IDE 관련
 .vscode/
 .idea/
+
+# Optional: npm cache
+.npm/
+
+# Optional: yarn cache
+.yarn/
