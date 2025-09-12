@@ -1,10 +1,9 @@
 {
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/schedule": "pages/schedule.html",
-  "/login": "pages/login.html",
-  "/settings": "pages/settings.html",
-  "/profile": "pages/profile.html",
   "/_document": "pages/_document.js",
-  "/404": "pages/404.html"
+  "/": "pages/index.js",
+  "/api/login": "pages/api/login.js",
+  "/login": "pages/login.js",
+  "/settings": "pages/settings.js"
 }

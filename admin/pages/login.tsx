@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Box, Paper, TextField, Button, Typography } from '@mui/material';
-import { ROUTES } from '../routes/routes';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,14 +10,14 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleLogin = async () => {
-    const res = await fetch('/api/login', {
+    const res = await fetch('api/login', { 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
     if (res.ok) {
-      router.push(ROUTES.SETTINGS);
+      router.push('/settings'); // 
     } else {
       alert('로그인 실패');
     }

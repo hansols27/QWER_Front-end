@@ -10,14 +10,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { email, password } = req.body;
 
-  // 예시: admin 계정
+  // 간단한 admin 계정 예시
   if (email === 'admin@test.com' && password === '1234') {
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
 
-    // 쿠키 설정
+    const isProd = process.env.NODE_ENV === 'production';
     res.setHeader(
       'Set-Cookie',
-      `token=${token}; HttpOnly; Path=/; Max-Age=3600; Secure=${process.env.NODE_ENV === 'production'}`
+      `token=${token}; HttpOnly; Path=/; Max-Age=3600;${isProd ? ' Secure;' : ''} SameSite=Strict`
     );
 
     return res.status(200).json({ success: true, message: '로그인 성공' });
