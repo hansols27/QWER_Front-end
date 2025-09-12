@@ -46,43 +46,12 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   OPTIONS?: (request: NextRequest, context: { params: Promise<ParamMap[Route]> }) => Promise<Response | void> | Response | void
 }
 
-
-// Validate ../../app/login/page.tsx
 {
-  const handler = {} as typeof import("../../app/login/page.js")
+  const handler = {} as typeof import("../../pages/login")
   handler satisfies AppPageConfig<"/login">
 }
 
-// Validate ../../app/pages/profile/page.tsx
 {
-  const handler = {} as typeof import("../../app/pages/profile/page.js")
-  handler satisfies AppPageConfig<"/pages/profile">
-}
-
-// Validate ../../app/pages/schedule/page.tsx
-{
-  const handler = {} as typeof import("../../app/pages/schedule/page.js")
-  handler satisfies AppPageConfig<"/pages/schedule">
-}
-
-// Validate ../../app/pages/settings/page.tsx
-{
-  const handler = {} as typeof import("../../app/pages/settings/page.js")
-  handler satisfies AppPageConfig<"/pages/settings">
-}
-
-// Validate ../../app/api/logout/route.ts
-{
-  const handler = {} as typeof import("../../app/api/logout/route.js")
-  handler satisfies RouteHandlerConfig<"/api/logout">
-}
-
-
-
-
-
-// Validate ../../app/layout.tsx
-{
-  const handler = {} as typeof import("../../app/layout.js")
+  const handler = {} as typeof import("../../components/common/layout.jsx")
   handler satisfies LayoutConfig<"/">
 }
