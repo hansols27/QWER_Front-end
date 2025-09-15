@@ -15,7 +15,9 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["front_end/src/*", "admin/*", "lib/*"], 
+      "@theme/*": ["admin/theme/*"], 
+      "@lib/*": ["admin/lib/*"], 
+      "@frontend/*": ["front_end/src/*"], 
       "@shared/*": ["shared/*"]
     }
   },
