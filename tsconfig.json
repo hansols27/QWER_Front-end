@@ -26,7 +26,8 @@
     "admin/**/*",
     "shared/**/*",
     "server/**/*",
-    "lib/**/*"
+    "lib/**/*",
+    "types/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }
