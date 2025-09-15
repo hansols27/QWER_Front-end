@@ -1,4 +1,3 @@
-// themeConfig.ts
 import type { Mode, Skin } from '@theme/types'
 
 export type Config = {
