@@ -1,4 +1,8 @@
 import '@mui/material/styles';
+import '@mui/lab/Timeline';
+import '@mui/lab/TimelineDot';
+import '@mui/lab/TimelineConnector';
+import '@mui/lab/TimelineContent';
 
 declare module '@mui/material/styles' {
   interface Components {
@@ -6,12 +10,29 @@ declare module '@mui/material/styles' {
       styleOverrides?: {
         root?: React.CSSProperties | ((ownerState: any) => React.CSSProperties);
       };
+      variants?: Array<{
+        props: any;
+        style: React.CSSProperties | ((ownerState: any) => React.CSSProperties);
+      }>;
     };
-    MuiTabPanel?: {
+    MuiTimelineDot?: {
+      styleOverrides?: {
+        root?: React.CSSProperties | ((ownerState: any) => React.CSSProperties);
+      };
+      variants?: Array<{
+        props: any;
+        style: React.CSSProperties | ((ownerState: any) => React.CSSProperties);
+      }>;
+    };
+    MuiTimelineConnector?: {
       styleOverrides?: {
         root?: React.CSSProperties | ((ownerState: any) => React.CSSProperties);
       };
     };
-    // 필요한 다른 컴포넌트도 여기에 추가 가능
+    MuiTimelineContent?: {
+      styleOverrides?: {
+        root?: React.CSSProperties | ((ownerState: any) => React.CSSProperties);
+      };
+    };
   }
 }
