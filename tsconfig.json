@@ -1,26 +1,29 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "jsx": "preserve",
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",   
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",       
+    "baseUrl": ".",          
     "paths": {
-      "@/*": ["front_end/src/*", "admin/*"],   
+      "@/*": ["front_end/src/*", "admin/*"],
       "@shared/*": ["shared/*"]
     }
   },
   "include": [
     "front_end/src",
-    "shared/types",
-    "admin/app/**/*",
-    "admin/lib/**/*",
-    "admin/theme/**/*",
-    "admin/utils/**/*",
-    "admin/styles/**/*" ],
-  "exclude": ["node_modules"]
+    "admin/**/*",
+    "shared/**/*",
+    "server/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
 }
