@@ -5,7 +5,7 @@ import React from 'react'
 import type { Theme } from '@mui/material/styles'
 
 // Type Imports
-import type { Skin } from '@/theme/types'
+import type { Skin } from '../types'
 
 const autocomplete = (skin: Skin): Theme['components'] => ({
   MuiAutocomplete: {

@@ -2,7 +2,7 @@
 import type { Theme } from '@mui/material/styles'
 
 // Config Imports
-import themeConfig from '@/lib/themeConfig'
+import themeConfig from '@lib/themeConfig'
 
 const buttonGroup: Theme['components'] = {
   MuiButtonGroup: {

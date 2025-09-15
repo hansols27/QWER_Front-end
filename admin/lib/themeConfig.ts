@@ -9,8 +9,11 @@ export type Config = {
   disableRipple: boolean
 }
 
-// SkinType은 필요 시 export 가능
-export const SkinType: Skin = 'default'
+// Skin 값
+export const skinType: Skin = 'default'
+
+// Skin 타입 export
+export type { Skin }
 
 const themeConfig: Config = {
   templateName: 'Materio',
