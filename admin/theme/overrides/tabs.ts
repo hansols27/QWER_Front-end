@@ -1,4 +1,3 @@
-// MUI Imports
 import type { Theme } from '@mui/material/styles'
 
 const tabs: Theme['components'] = {
@@ -7,12 +6,9 @@ const tabs: Theme['components'] = {
       root: ({ theme, ownerState }) => ({
         minBlockSize: 38,
         ...(ownerState.orientation === 'horizontal'
-          ? {
-              borderBlockEnd: '1px solid var(--mui-palette-divider)'
-            }
-          : {
-              borderInlineEnd: '1px solid var(--mui-palette-divider)'
-            }),
+          ? { borderBlockEnd: '1px solid var(--mui-palette-divider)' }
+          : { borderInlineEnd: '1px solid var(--mui-palette-divider)' }),
+
         '& .MuiTab-root:hover': {
           ...(ownerState.orientation === 'horizontal'
             ? {
@@ -43,14 +39,12 @@ const tabs: Theme['components'] = {
             borderRadius: theme.shape.borderRadius
           }
         },
-        '& ~ .MuiTabPanel-root': {
+
+        // 여기서 문자열 키로 감싸면 CSSProperties 타입 오류 제거
+        ['& ~ .MuiTabPanel-root']: {
           ...(ownerState.orientation === 'horizontal'
-            ? {
-                paddingBlockStart: theme.spacing(5)
-              }
-            : {
-                paddingInlineStart: theme.spacing(5)
-              })
+            ? { paddingBlockStart: theme.spacing(5) }
+            : { paddingInlineStart: theme.spacing(5) })
         }
       }),
       vertical: {
@@ -70,12 +64,8 @@ const tabs: Theme['components'] = {
         color: 'var(--mui-palette-text-primary)',
         '& > .MuiTab-iconWrapper': {
           fontSize: '1.125rem',
-          ...(ownerState.iconPosition === 'start' && {
-            marginInlineEnd: theme.spacing(1.5)
-          }),
-          ...(ownerState.iconPosition === 'end' && {
-            marginInlineStart: theme.spacing(1.5)
-          })
+          ...(ownerState.iconPosition === 'start' && { marginInlineEnd: theme.spacing(1.5) }),
+          ...(ownerState.iconPosition === 'end' && { marginInlineStart: theme.spacing(1.5) })
         }
       })
     }
