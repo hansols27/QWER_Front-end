@@ -1,4 +1,4 @@
-import type { Mode, Skin } from '@theme/types'
+import type { Mode, Skin } from '../theme/types'
 
 export type Config = {
   templateName: string
