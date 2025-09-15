@@ -12,10 +12,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",       
-    "baseUrl": ".",          
+    "jsx": "preserve",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["front_end/src/*", "admin/*"],
+      "@/*": ["front_end/src/*", "admin/*", "lib/*"], 
       "@shared/*": ["shared/*"]
     }
   },
@@ -23,7 +23,8 @@
     "front_end/src",
     "admin/**/*",
     "shared/**/*",
-    "server/**/*"
+    "server/**/*",
+    "lib/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }
