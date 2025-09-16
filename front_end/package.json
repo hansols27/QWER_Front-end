@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "axios": "^1.12.2",
     "date-fns": "^4.1.0",
     "moment": "^2.30.1",
     "react": "^18.3.1",
@@ -12,6 +13,7 @@
     "yet-another-react-lightbox": "^3.25.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/node": "^24.3.0",
     "@types/react": "^18.3.24",
     "@types/react-big-calendar": "^1.6.5",

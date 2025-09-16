@@ -25,9 +25,10 @@
     "front_end/src",
     "admin/**/*",
     "shared/**/*",
-    "server/**/*",
+    "back_end/**/*",
     "lib/**/*",
-    "types/**/*"
-  ],
+    "types/**/*", 
+    "back_end/routes", 
+    "back_end/app.ts"  ],
   "exclude": ["node_modules", "dist"]
 }
