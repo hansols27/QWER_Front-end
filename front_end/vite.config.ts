@@ -18,6 +18,7 @@ export default defineConfig({
       '@app': path.resolve(__dirname, 'src/app'),
       '@components': path.resolve(__dirname, 'src/components'),
       '@api': path.resolve(__dirname, 'src/api'),
+      '@shared': path.resolve(__dirname, '../shared'),
     },
   },
   optimizeDeps: {
