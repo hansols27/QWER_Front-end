@@ -22,7 +22,7 @@
     }
   },
   "include": [
-    "front_end/src/*",
+    "front_end/src",
     "admin/**/*",
     "shared/**/*",
     "back_end/**/*",
