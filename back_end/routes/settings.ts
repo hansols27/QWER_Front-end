@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import path from "path";
-import { SettingsData } from "@shared/types/settings";
+import { SettingsData } from "../../shared/types/settings";
 
 const router = Router();
 
