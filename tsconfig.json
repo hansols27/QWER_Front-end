@@ -17,7 +17,7 @@
     "paths": {
       "@theme/*": ["admin/theme/*"], 
       "@lib/*": ["admin/lib/*"], 
-      "@frontend/*": ["front_end/src/*"], 
+      "@front_end/*": ["front_end/src/*"], 
       "@shared/*": ["shared/*"]
     }
   },
