@@ -18,7 +18,10 @@
       "@theme/*": ["admin/theme/*"], 
       "@lib/*": ["admin/lib/*"], 
       "@front_end/*": ["front_end/src/*"], 
-      "@shared/*": ["shared/*"]
+      "@shared/*": ["shared/*"],
+      "@app/*": ["front_end/src/app/*"],
+      "@api/*": ["front_end/src/api/*"],
+      "@components/*": ["front_end/src/components/*"],
     }
   },
   "include": [
