@@ -1,5 +1,4 @@
-// front_end/src/pages/settings.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Layout from "../components/common/layout";
 import {
   Box,
@@ -10,15 +9,13 @@ import {
   Card,
   CardContent,
   InputAdornment,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import TiktokIcon from "../components/TiktokIcon";
-import { saveSettings } from "../../front_end/src/services/settings";
+import { saveSettings } from "../../front_end/src/services/settings"; 
 
 const Settings = () => {
   const [mainImage, setMainImage] = useState<File | null>(null);
@@ -31,19 +28,9 @@ const Settings = () => {
     shop: "",
   });
 
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({ open: false, message: "", severity: "success" });
-
-  // 이미지 미리보기 메모리 해제
-  useEffect(() => {
-    return () => {
-      if (preview) URL.revokeObjectURL(preview);
-    };
-  }, [preview]);
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (preview) URL.revokeObjectURL(preview); // 이전 URL 해제
       setMainImage(file);
       setPreview(URL.createObjectURL(file));
     }
@@ -61,14 +48,10 @@ const Settings = () => {
     Object.entries(snsLinks).forEach(([key, value]) => formData.append(key, value));
     try {
       await saveSettings(formData);
-      setSnackbar({ open: true, message: "설정이 저장되었습니다.", severity: "success" });
-    } catch (err) {
-      setSnackbar({ open: true, message: "저장 중 오류가 발생했습니다.", severity: "error" });
+      alert("설정이 저장되었습니다.");
+    } catch {
+      alert("저장 중 오류가 발생했습니다.");
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -77,11 +60,10 @@ const Settings = () => {
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           기본 설정
         </Typography>
-        <Card sx={{ maxWidth: { xs: "100%", sm: 600 }, mx: "auto" }}>
+        <Card sx={{ maxWidth: 600 }}>
           <CardContent>
             <form onSubmit={handleSubmit}>
               <Stack spacing={4}>
-                {/* 이미지 업로드 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
                     프론트 메인 이미지
@@ -101,8 +83,6 @@ const Settings = () => {
                     </Box>
                   )}
                 </Box>
-
-                {/* SNS 링크 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
                     SNS 링크
@@ -114,9 +94,7 @@ const Settings = () => {
                       name="instagram"
                       value={snsLinks.instagram}
                       onChange={handleChange}
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start"><InstagramIcon sx={{ color: "#E1306C" }} /></InputAdornment>
-                      }}
+                      InputProps={{ startAdornment: <InputAdornment position="start"><InstagramIcon sx={{ color: "#E1306C" }} /></InputAdornment> }}
                     />
                     <TextField
                       fullWidth
@@ -124,9 +102,7 @@ const Settings = () => {
                       name="youtube"
                       value={snsLinks.youtube}
                       onChange={handleChange}
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start"><YouTubeIcon sx={{ color: "#FF0000" }} /></InputAdornment>
-                      }}
+                      InputProps={{ startAdornment: <InputAdornment position="start"><YouTubeIcon sx={{ color: "#FF0000" }} /></InputAdornment> }}
                     />
                     <TextField
                       fullWidth
@@ -134,9 +110,7 @@ const Settings = () => {
                       name="tiktok"
                       value={snsLinks.tiktok}
                       onChange={handleChange}
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start"><TiktokIcon sx={{ fontSize: 28, color: "#000" }} /></InputAdornment>
-                      }}
+                      InputProps={{ startAdornment: <InputAdornment position="start"><TiktokIcon sx={{ fontSize: 28, color: "#000" }} /></InputAdornment> }}
                     />
                     <TextField
                       fullWidth
@@ -144,9 +118,7 @@ const Settings = () => {
                       name="cafe"
                       value={snsLinks.cafe}
                       onChange={handleChange}
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start"><LocalCafeIcon sx={{ color: "#6F4E37" }} /></InputAdornment>
-                      }}
+                      InputProps={{ startAdornment: <InputAdornment position="start"><LocalCafeIcon sx={{ color: "#6F4E37" }} /></InputAdornment> }}
                     />
                     <TextField
                       fullWidth
@@ -154,14 +126,10 @@ const Settings = () => {
                       name="shop"
                       value={snsLinks.shop}
                       onChange={handleChange}
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start"><StorefrontIcon sx={{ color: "#0078D7" }} /></InputAdornment>
-                      }}
+                      InputProps={{ startAdornment: <InputAdornment position="start"><StorefrontIcon sx={{ color: "#0078D7" }} /></InputAdornment> }}
                     />
                   </Stack>
                 </Box>
-
-                {/* 저장 버튼 */}
                 <Box textAlign="right">
                   <Button variant="contained" color="primary" type="submit">
                     저장하기
@@ -171,13 +139,6 @@ const Settings = () => {
             </form>
           </CardContent>
         </Card>
-
-        {/* Snackbar 알림 */}
-        <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
-          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </Box>
     </Layout>
   );

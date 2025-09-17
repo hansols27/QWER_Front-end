@@ -1,12 +1,12 @@
 {
-  "/api/login": "pages/api/login.js",
-  "/api/logout": "pages/api/logout.js",
-  "/": "pages/index.js",
-  "/login": "pages/login.js",
-  "/profile": "pages/profile.js",
-  "/schedule": "pages/schedule.js",
-  "/settings": "pages/settings.js",
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
+  "/": "pages/index.js",
+  "/api/login": "pages/api/login.js",
+  "/api/logout": "pages/api/logout.js",
+  "/profile": "pages/profile.js",
+  "/login": "pages/login.js",
+  "/settings": "pages/settings.js",
+  "/schedule": "pages/schedule.js",
   "/_document": "pages/_document.js"
 }
