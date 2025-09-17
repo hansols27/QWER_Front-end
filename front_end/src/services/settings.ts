@@ -1,14 +1,12 @@
-import api from "../utils/api"; 
 import { SettingsData } from "@shared/types/settings";
+import { get, postFormData } from "../utils/api";
 
+// 설정 불러오기
 export const getSettings = async (): Promise<SettingsData> => {
-  const { data } = await api.get("/api/settings");
-  return data;
+  return get<SettingsData>("/settings"); // GET /api/settings
 };
 
-export const saveSettings = async (formData: FormData) => {
-  const { data } = await api.post("/api/settings", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return data;
+// 설정 저장
+export const saveSettings = async (formData: FormData): Promise<SettingsData> => {
+  return postFormData<SettingsData>("/settings", formData); // POST /api/settings
 };
