@@ -22,6 +22,9 @@
     }
   },
   "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
     "front_end/src",
     "admin/**/*",
     "shared/**/*",
