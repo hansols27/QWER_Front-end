@@ -18,7 +18,7 @@
       "@theme/*": ["admin/theme/*"], 
       "@lib/*": ["admin/lib/*"], 
       "@front_end/*": ["front_end/src/*"], 
-      "@shared/*": ["../../shared/*"]
+      "@shared/*": ["shared/*"]
     }
   },
   "include": [
