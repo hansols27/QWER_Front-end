@@ -1,5 +1,5 @@
 import api from "../utils/api"; 
-import { SettingsData } from "@shared/types/settings";
+import { SettingsData } from "../../../shared/types/settings";
 
 export const getSettings = async (): Promise<SettingsData> => {
   const { data } = await api.get("/api/settings");
