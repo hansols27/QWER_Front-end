@@ -19,7 +19,7 @@ export default defineConfig({
       '@components': path.resolve(__dirname, 'src/components'),
       '@api': path.resolve(__dirname, 'src/api'),
       '@shared': path.resolve(__dirname, '../shared'),
-      '@front_end': path.resolve(__dirname, 'src'),
+      '@front_end': path.resolve(__dirname, './front_end/src'),
     },
   },
   optimizeDeps: {
