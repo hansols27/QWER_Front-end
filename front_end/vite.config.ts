@@ -17,7 +17,7 @@ export default defineConfig({
       '@front': path.resolve(__dirname, 'src'),               // front_end/src
       '@app': path.resolve(__dirname, 'src/app'),
       '@components': path.resolve(__dirname, 'src/components'),
-      '@api': path.resolve(__dirname, 'src/utils'),           // api.ts 위치
+      '@api': path.resolve(__dirname, 'src/utils/api.ts'),           // api.ts 위치
       '@shared': path.resolve(__dirname, '../shared')         // shared
     },
   },
