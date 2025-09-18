@@ -3,7 +3,7 @@ import instagramIcon from '@front/assets/icons/sns_instagram.png';
 import twitterIcon from '@front/assets/icons/sns_twitter.png';
 import youtubeIcon from '@front/assets/icons/sns_youtube.png';
 import cafeIcon from '@front/assets/icons/sns_cafe.png';
-import shopIcon from '@/frontassets/icons/sns_shop.png';
+import shopIcon from '@/front/assets/icons/sns_shop.png';
 
 export const socialLinks = [
   {
