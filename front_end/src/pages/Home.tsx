@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import menu from "@front/assets/images/main.png";
-import { getSettings } from "@front/services/settings";
+import { getSettings } from "@shared/services/settings";
 import { SettingsData } from "@shared/types/settings";
 
 const Home = () => {
