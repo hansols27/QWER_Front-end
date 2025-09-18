@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '@/ui/detail/commudetail.css';
+import '@front/ui/detail/commudetail.css';
 
 export default function CommuDetail() {
   return (

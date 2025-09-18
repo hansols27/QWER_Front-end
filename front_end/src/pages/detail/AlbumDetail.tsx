@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { albums } from '@/data/albumlist';
-import '@/ui/detail/albumdetail.css';
+import { albums } from '@front/data/albumlist';
+import '@front/ui/detail/albumdetail.css';
 
 export default function AlbumDetail() {
   const { title } = useParams<{ title: string }>();

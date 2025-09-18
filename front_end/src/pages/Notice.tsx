@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import "@/ui/notice.css";
-import { notice } from "@/data/noticelist";
+import "@front/ui/notice.css";
+import { notice } from "@front/data/noticelist";
 
-import btn_prev from "@/assets/icons/bg-btn-prev.png";
-import btn_next from "@/assets/icons/bg-btn-next.png";
+import btn_prev from "@front/assets/icons/bg-btn-prev.png";
+import btn_next from "@front/assets/icons/bg-btn-next.png";
 
 export default function Notice() {
   const [page, setPage] = useState(1);

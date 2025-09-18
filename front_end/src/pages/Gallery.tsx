@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import "@/ui/gallery.css";
-import { gallery } from "@/data/gallerylist";
+import "@front/ui/gallery.css";
+import { gallery } from "@front/data/gallerylist";
 
-import btn_prev from "@/assets/icons/bg-btn-prev.png";
-import btn_next from "@/assets/icons/bg-btn-next.png";
+import btn_prev from "@front/assets/icons/bg-btn-prev.png";
+import btn_next from "@front/assets/icons/bg-btn-next.png";
 
 // Yet Another React Lightbox
 import Lightbox from "yet-another-react-lightbox";

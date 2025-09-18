@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { albums } from '@/data/albumlist';
-import '@/ui/album.css';
+import { albums } from '@front/data/albumlist';
+import '@front/ui/album.css';
 
-import more_view from '@/assets/icons/more_view.png';
-import btn_prev from '@/assets/icons/bg-btn-prev.png';
-import btn_next from '@/assets/icons/bg-btn-next.png';
+import more_view from '@front/assets/icons/more_view.png';
+import btn_prev from '@front/assets/icons/bg-btn-prev.png';
+import btn_next from '@front/assets/icons/bg-btn-next.png';
 
 export default function Album() {
   const [currentPage, setCurrentPage] = useState(1);

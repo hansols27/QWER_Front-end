@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '@/ui/detail/noticedetail.css';
+import '@front/ui/detail/noticedetail.css';
 
 export default function NoticeDetail() {
   return (

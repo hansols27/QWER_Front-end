@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { members } from '@/data/members';
-import '@/ui/profile.css';
-import ImageSlider from '@/components/common/ImageSlider';
+import { members } from '@front/data/members';
+import '@front/ui/profile.css';
+import ImageSlider from '@front/components/common/ImageSlider';
 
-import youtubeIcon from '@/assets/icons/youtube.svg';
-import instagramIcon from '@/assets/icons/instagram.svg';
-import twitterIcon from '@/assets/icons/twitter.png';
-import weverseIcon from '@/assets/icons/weverse.png';
-import tiktokIcon from '@/assets/icons/tiktok.svg';
-import cafeIcon from '@/assets/icons/cafe.svg';
+import youtubeIcon from '@front/assets/icons/youtube.svg';
+import instagramIcon from '@front/assets/icons/instagram.svg';
+import twitterIcon from '@front/assets/icons/twitter.png';
+import weverseIcon from '@front/assets/icons/weverse.png';
+import tiktokIcon from '@front/assets/icons/tiktok.svg';
+import cafeIcon from '@front/assets/icons/cafe.svg';
 
 const snsIcons = {
   youtube: youtubeIcon,

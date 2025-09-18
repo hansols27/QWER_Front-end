@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import menu from "@/assets/images/main.png";
+import menu from "@front/assets/images/main.png";
 import { getSettings } from "@front/services/settings";
 import { SettingsData } from "@shared/types/settings";
 

@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-import '@/ui/video.css';
-import { videos } from '@/data/videolist';
-
-import btn_prev from '@/assets/icons/bg-btn-prev.png';
-import btn_next from '@/assets/icons/bg-btn-next.png';
+import '@front/ui/video.css';
+import { videos } from '@front/data/videolist';
 
 function getYoutubeThumbnail(src: string): string {
   const match = src.match(/embed\/([^?]+)/);

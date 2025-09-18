@@ -8,11 +8,11 @@ import { format, parse, startOfWeek, getDay, isWithinInterval } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { CSSProperties } from 'react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import '@/ui/schedule.css';
-import { ScheduleEvent } from '../../../shared/types/schedule';
-import { getEventsInRange } from '@/data/schedule';
-import btn_prev from '@/assets/icons/bg-btn-prev.png';
-import btn_next from '@/assets/icons/bg-btn-next.png';
+import '@front/ui/schedule.css';
+import { ScheduleEvent } from '@shared/types/schedule';
+import { getEventsInRange } from '@front/data/schedule';
+import btn_prev from '@front/assets/icons/bg-btn-prev.png';
+import btn_next from '@front/assets/icons/bg-btn-next.png';
 
 // date-fns localizer
 const locales = { ko };
