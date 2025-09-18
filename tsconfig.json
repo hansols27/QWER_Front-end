@@ -13,28 +13,29 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "baseUrl": ".",
+    "baseUrl": ".", 
     "paths": {
-      "@theme/*": ["admin/theme/*"], 
-      "@lib/*": ["admin/lib/*"], 
-      "@front_end/*": ["front_end/src/*"], 
-      "@shared/*": ["shared/*"],
-      "@app/*": ["front_end/src/app/*"],
-      "@api/*": ["front_end/src/api/*"],
+      "@front/*": ["front_end/src/*"],         // front_end 전용
+      "@app/*": ["front_end/src/app/*"],       // front_end 앱
+      "@api/*": ["front_end/src/utils/*"],     // front_end utils/api.ts
       "@components/*": ["front_end/src/components/*"],
+      "@shared/*": ["shared/*"],               // 공용 타입/유틸
+      "@theme/*": ["admin/theme/*"],           // admin 전용
+      "@lib/*": ["admin/lib/*"]                // admin 전용
     }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "front_end/src/**/*",
-    "admin/**/*",
-    "shared/**/*",
-    "back_end/**/*",
-    "lib/**/*",
+    "next-env.d.ts", 
+    "**/*.ts", 
+    "**/*.tsx", 
+    "front_end/src/**/*", 
+    "admin/**/*", 
+    "shared/**/*", 
+    "back_end/**/*", 
+    "lib/**/*", 
     "types/**/*", 
     "back_end/routes", 
-    "back_end/app.ts"  ],
+    "back_end/app.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

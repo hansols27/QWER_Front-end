@@ -14,12 +14,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@front': path.resolve(__dirname, 'src'),               // front_end/src
       '@app': path.resolve(__dirname, 'src/app'),
       '@components': path.resolve(__dirname, 'src/components'),
-      '@api': path.resolve(__dirname, 'src/api'),
-      '@shared': path.resolve(__dirname, '../shared'),
-      '@front_end': path.resolve(__dirname, './front_end/src'),
+      '@api': path.resolve(__dirname, 'src/utils'),           // api.ts 위치
+      '@shared': path.resolve(__dirname, '../shared')         // shared
     },
   },
   optimizeDeps: {
