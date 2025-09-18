@@ -1,1 +1,13 @@
-{}
+{
+  "/api/login": "pages/api/login.js",
+  "/api/logout": "pages/api/logout.js",
+  "/": "pages/index.html",
+  "/login": "pages/login.html",
+  "/profile": "pages/profile.html",
+  "/schedule": "pages/schedule.html",
+  "/settings": "pages/settings.html",
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/404": "pages/404.html"
+}
