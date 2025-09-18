@@ -1,9 +1,9 @@
 import type { Album } from '@shared/types/album';
 
-import Discord from '@/assets/images/albums/discord.jpg';
-import Manito from '@/assets/images/albums/manito.jpg';
-import Algorithm from '@/assets/images/albums/algorithm.jpg';
-import Dear from '@/assets/images/albums/dear.jpg';
+import Discord from '@front/assets/images/albums/discord.jpg';
+import Manito from '@front/assets/images/albums/manito.jpg';
+import Algorithm from '@front/assets/images/albums/algorithm.jpg';
+import Dear from '@front/assets/images/albums/dear.jpg';
 
 export const albums: Album[] = [
   {

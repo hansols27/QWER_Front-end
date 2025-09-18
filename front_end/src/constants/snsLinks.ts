@@ -1,9 +1,9 @@
 // 이미지 import
-import instagramIcon from '@/assets/icons/sns_instagram.png';
-import twitterIcon from '@/assets/icons/sns_twitter.png';
-import youtubeIcon from '@/assets/icons/sns_youtube.png';
-import cafeIcon from '@/assets/icons/sns_cafe.png';
-import shopIcon from '@/assets/icons/sns_shop.png';
+import instagramIcon from '@front/assets/icons/sns_instagram.png';
+import twitterIcon from '@front/assets/icons/sns_twitter.png';
+import youtubeIcon from '@front/assets/icons/sns_youtube.png';
+import cafeIcon from '@front/assets/icons/sns_cafe.png';
+import shopIcon from '@/frontassets/icons/sns_shop.png';
 
 export const socialLinks = [
   {

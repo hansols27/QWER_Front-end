@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '@/assets/images/logo.svg';
-import menu from '@/assets/icons/menu.png';
-import SideNav from '@/components/layout/SideNav';
+import logo from '@front/assets/images/logo.svg';
+import menu from '@front/assets/icons/menu.png';
+import SideNav from '@front/components/layout/SideNav';
 
 const Header = () => {
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);

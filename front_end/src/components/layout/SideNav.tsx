@@ -1,5 +1,5 @@
 import React from 'react';
-import close from '@/assets/icons/close.png';
+import close from '@front/assets/icons/close.png';
 import { Link } from 'react-router-dom';
 
 interface SideNavProps {

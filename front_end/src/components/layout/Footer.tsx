@@ -1,5 +1,5 @@
-import { socialLinks } from '@/constants/snsLinks';
-import { openInNewTab } from '@/utils/openInNewTab';
+import { socialLinks } from '@front/constants/snsLinks';
+import { openInNewTab } from '@front/utils/openInNewTab';
 
 const Footer = () => {
   return (

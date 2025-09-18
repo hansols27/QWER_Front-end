@@ -1,26 +1,26 @@
 import type { Member } from '@shared/types/member';
 
-import qwerImg from '@/assets/images/members/QWER.jpg';
+import qwerImg from '@front/assets/images/members/QWER.jpg';
 
-import QImg1 from '@/assets/images/members/Q1_001.jpg';
-import QImg2 from '@/assets/images/members/Q1_002.jpg';
-import QImg3 from '@/assets/images/members/Q2_001.jpg';
-import QImg4 from '@/assets/images/members/Q2_002.jpg';
+import QImg1 from '@front/assets/images/members/Q1_001.jpg';
+import QImg2 from '@front/assets/images/members/Q1_002.jpg';
+import QImg3 from '@front/assets/images/members/Q2_001.jpg';
+import QImg4 from '@front/assets/images/members/Q2_002.jpg';
 
-import WImg1 from '@/assets/images/members/W1_001.jpg';
-import WImg2 from '@/assets/images/members/W1_002.jpg';
-import WImg3 from '@/assets/images/members/W2_001.jpg';
-import WImg4 from '@/assets/images/members/W3_002.jpg';
+import WImg1 from '@front/assets/images/members/W1_001.jpg';
+import WImg2 from '@front/assets/images/members/W1_002.jpg';
+import WImg3 from '@front/assets/images/members/W2_001.jpg';
+import WImg4 from '@front/assets/images/members/W3_002.jpg';
 
-import EImg1 from '@/assets/images/members/E1_001.jpg';
-import EImg2 from '@/assets/images/members/E2_001.jpg';
-import EImg3 from '@/assets/images/members/E2_002.jpg';
-import EImg4 from '@/assets/images/members/E3_002.jpg';
+import EImg1 from '@front/assets/images/members/E1_001.jpg';
+import EImg2 from '@front/assets/images/members/E2_001.jpg';
+import EImg3 from '@front/assets/images/members/E2_002.jpg';
+import EImg4 from '@front/assets/images/members/E3_002.jpg';
 
-import RImg1 from '@/assets/images/members/R1_001.jpg';
-import RImg2 from '@/assets/images/members/R1_002.jpg';
-import RImg3 from '@/assets/images/members/R2_001.jpg';
-import RImg4 from '@/assets/images/members/R2_002.jpg';
+import RImg1 from '@front/assets/images/members/R1_001.jpg';
+import RImg2 from '@front/assets/images/members/R1_002.jpg';
+import RImg3 from '@front/assets/images/members/R2_001.jpg';
+import RImg4 from '@front/assets/images/members/R2_002.jpg';
 
 export const members: Member[] = [
   {
