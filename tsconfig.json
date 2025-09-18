@@ -17,7 +17,6 @@
     "paths": {
       "@front/*": ["front_end/src/*"],         // front_end 전용
       "@app/*": ["front_end/src/app/*"],       // front_end 앱
-      "@api": ["shared/utils/api.ts"],     // utils/api.ts
       "@components/*": ["front_end/src/components/*"],
       "@shared/*": ["shared/*"],               // 공용 타입/유틸
       "@theme/*": ["admin/theme/*"],           // admin 전용

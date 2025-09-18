@@ -6,7 +6,6 @@
       "@front/*": ["../front_end/src/*"],
       "@shared/*": ["../shared/*"],
       "@theme/*": ["theme/*"],
-      "@api": ["../shared/utils/api.ts"],
       "@lib/*": ["lib/*"]
     }
   },
