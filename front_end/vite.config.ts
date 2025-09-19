@@ -14,17 +14,18 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@front': path.resolve(__dirname, 'src'),               // front_end/src
+      '@front': path.resolve(__dirname, 'src'),
       '@app': path.resolve(__dirname, 'src/app'),
       '@components': path.resolve(__dirname, 'src/components'),
-      '@shared': path.resolve(__dirname, '../shared'),         // shared
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@shared': path.resolve(__dirname, '../shared'), // services 폴더
     },
   },
   optimizeDeps: {
     include: [
       'react-router-dom',
       'yet-another-react-lightbox',
-      "axios"
+      'axios'
     ]
   }
 });

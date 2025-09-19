@@ -1,13 +1,15 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".", 
+    "baseUrl": ".",
     "paths": {
       "@front/*": ["../front_end/src/*"],
+      "@utils/*": ["../front_end/src/utils/*"],
       "@shared/*": ["../shared/*"],
       "@theme/*": ["theme/*"],
       "@lib/*": ["lib/*"]
     }
   },
-  "include": ["src/**/*", "../shared/**/*"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

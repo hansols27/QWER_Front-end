@@ -1,5 +1,5 @@
 import { SettingsData } from "@shared/types/settings";
-import { get, postFormData } from "@shared/utils/api";
+import { get, postFormData } from "@utils/api";
 
 // 설정 불러오기
 export const getSettings = async (): Promise<SettingsData> => {

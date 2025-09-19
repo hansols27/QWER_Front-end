@@ -1,13 +1,16 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".", 
+    "baseUrl": ".",
     "paths": {
-      "@front/*": ["../front_end/src/*"],
+      "@front/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@components/*": ["src/components/*"],
+      "@utils/*": ["src/utils/*"],
       "@shared/*": ["../shared/*"],
       "@theme/*": ["theme/*"],
       "@lib/*": ["lib/*"]
     }
   },
-  "include": ["src/**/*", "../shared/**/*"]
+  "include": ["src/**/*"]
 }

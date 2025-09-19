@@ -2,14 +2,12 @@ const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 🔑 shared 폴더도 빌드 타겟으로 포함
-  transpilePackages: ["shared"],
-
   webpack: (config) => {
-    config.resolve.alias["@theme"] = path.resolve(__dirname, "theme"); // admin/theme
-    config.resolve.alias["@lib"] = path.resolve(__dirname, "lib"); // admin/lib
-    config.resolve.alias["@front"] = path.resolve(__dirname, "../front_end/src"); // front_end/src
-    config.resolve.alias["@shared"] = path.resolve(__dirname, "../shared"); // shared
+    config.resolve.alias["@theme"] = path.resolve(__dirname, "theme");
+    config.resolve.alias["@lib"] = path.resolve(__dirname, "lib");
+    config.resolve.alias["@front"] = path.resolve(__dirname, "../front_end/src");
+    config.resolve.alias["@utils"] = path.resolve(__dirname, "../front_end/src/utils");
+    config.resolve.alias["@shared"] = path.resolve(__dirname, "../shared/");
     return config;
   },
 };

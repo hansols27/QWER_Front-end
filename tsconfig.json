@@ -13,24 +13,24 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "baseUrl": ".", 
+    "baseUrl": ".",
     "paths": {
-      "@front/*": ["front_end/src/*"],         // front_end 전용
-      "@app/*": ["front_end/src/app/*"],       // front_end 앱
+      "@front/*": ["front_end/src/*"],
+      "@app/*": ["front_end/src/app/*"],
       "@components/*": ["front_end/src/components/*"],
-      "@shared/*": ["shared/*"],               // 공용 타입/유틸
-      "@theme/*": ["admin/theme/*"],           // admin 전용
-      "@lib/*": ["admin/lib/*"]                // admin 전용
+      "@utils/*": ["front_end/src/utils/*"],
+      "@shared/*": ["shared/*"],
+      "@theme/*": ["admin/theme/*"],
+      "@lib/*": ["admin/lib/*"]
     }
   },
   "include": [
-    "front_end/src/**/*", 
-    "admin/**/*", 
-    "shared/**/*", 
-    "back_end/**/*", 
-    "lib/**/*", 
-    "types/**/*", 
-    "back_end/routes", 
+    "front_end/src/**/*",
+    "admin/**/*",
+    "shared/**/*",
+    "back_end/**/*",
+    "lib/**/*",
+    "back_end/routes",
     "back_end/app.ts"
   ],
   "exclude": ["node_modules", "dist"]
