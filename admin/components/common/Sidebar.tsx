@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Box } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
@@ -8,6 +7,7 @@ import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import EventIcon from "@mui/icons-material/Event";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { useRouter } from "next/router";
 
 const menuItems = [
   { text: "기본설정", path: "/settings", icon: <SettingsIcon /> },
@@ -44,34 +44,31 @@ export default function Sidebar() {
         "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
       }}
     >
-    <Toolbar>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.2,
-          cursor: "pointer",
-        }}
-        component={Link}
-        href="/"
-      >
-        {/* 로고 이미지 */}
-        <img src="/logo.svg" alt="로고" width={28} height={28} />
-
-        {/* 텍스트 */}
-        <Typography
-          variant="h6"
-          noWrap
+      <Toolbar>
+        <Box
           sx={{
-            fontWeight: 600,
-            fontSize: "1.1rem",  // 로고와 크기 맞춤
-            letterSpacing: "0.5px",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.2,
           }}
         >
-          QWER
-        </Typography>
-      </Box>
-    </Toolbar>
+          {/* 로고 이미지 */}
+          <img src="/logo.svg" alt="로고" width={28} height={28} />
+
+          {/* 텍스트 */}
+          <Typography
+            variant="h6"
+            noWrap
+            sx={{
+              fontWeight: 600,
+              fontSize: "1.1rem", // 로고와 크기 맞춤
+              letterSpacing: "0.5px",
+            }}
+          >
+            QWER
+          </Typography>
+        </Box>
+      </Toolbar>
 
       <List>
         {menuItems.map((item) => (

@@ -181,7 +181,7 @@ const Settings = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LocalCafeIcon sx={{ color: "#6F4E37" }} />
+                            <LocalCafeIcon sx={{ color: "#2edd31ff" }} />
                           </InputAdornment>
                         ),
                       }}
@@ -195,7 +195,7 @@ const Settings = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <StorefrontIcon sx={{ color: "#0078D7" }} />
+                            <StorefrontIcon sx={{ color: "#000" }} />
                           </InputAdornment>
                         ),
                       }}
