@@ -15,7 +15,7 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import TiktokIcon from "../components/TiktokIcon";
-import { getSettings, saveSettings } from "@services/settings";
+import { getSettings, saveSettings } from "@shared/services/settings";
 
 const Settings = () => {
   const [mainImage, setMainImage] = useState<File | null>(null);
