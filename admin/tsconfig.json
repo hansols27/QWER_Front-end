@@ -3,13 +3,30 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@front/*": ["../front_end/src/*"],
-      "@utils/*": ["../front_end/src/utils/*"],
-      "@shared/*": ["../shared/*"],
-      "@theme/*": ["theme/*"],
-      "@lib/*": ["lib/*"]
-    }
+      "@front/*": [
+        "../front_end/src/*"
+      ],
+      "@utils/*": [
+        "../front_end/src/utils/*"
+      ],
+      "@shared/*": [
+        "../shared/*"
+      ],
+      "@theme/*": [
+        "theme/*"
+      ],
+      "@lib/*": [
+        "lib/*"
+      ]
+    },
+    "incremental": true
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

@@ -1,12 +1,13 @@
 {
+  "/_app": "pages/_app.js",
   "/api/login": "pages/api/login.js",
   "/api/logout": "pages/api/logout.js",
-  "/_app": "pages/_app.js",
-  "/login": "pages/login.js",
-  "/": "pages/index.js",
-  "/profile": "pages/profile.js",
-  "/schedule": "pages/schedule.js",
-  "/settings": "pages/settings.js",
   "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js"
+  "/": "pages/index.html",
+  "/schedule": "pages/schedule.html",
+  "/login": "pages/login.html",
+  "/profile": "pages/profile.html",
+  "/settings": "pages/settings.html",
+  "/_document": "pages/_document.js",
+  "/404": "pages/404.html"
 }
