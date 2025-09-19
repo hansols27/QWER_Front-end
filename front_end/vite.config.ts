@@ -18,8 +18,14 @@ export default defineConfig({
       '@app': path.resolve(__dirname, 'src/app'),
       '@components': path.resolve(__dirname, 'src/components'),
       '@utils': path.resolve(__dirname, 'src/utils'),
-      '@shared': path.resolve(__dirname, '../shared'), // services 폴더
+      '@shared': path.resolve(__dirname, '../shared'),
     },
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
+  },
+  server: {
+    fs: {
+      allow: ['..'] // 상위 폴더 접근 허용
+    }
   },
   optimizeDeps: {
     include: [
