@@ -15,7 +15,7 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import TiktokIcon from "../components/TiktokIcon";
-import { getSettings, saveSettings } from "@shared/services/settings";
+//import { getSettings, saveSettings } from "@shared/services/settings";
 
 const Settings = () => {
   const [mainImage, setMainImage] = useState<File | null>(null);
@@ -27,7 +27,7 @@ const Settings = () => {
     cafe: "",
     shop: "",
   });
-
+/*
   // 기존 설정 불러오기
   useEffect(() => {
     (async () => {
@@ -46,7 +46,7 @@ const Settings = () => {
       }
     })();
   }, []);
-
+*/
   // 이미지 선택
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -77,14 +77,14 @@ const Settings = () => {
     Object.entries(snsLinks).forEach(([key, value]) =>
       formData.append(key, value)
     );
-
+/*
     try {
       await saveSettings(formData);
       alert("설정이 저장되었습니다.");
     } catch (err) {
       console.error(err);
       alert("저장 중 오류가 발생했습니다.");
-    }
+    }*/
   };
 
   return (
