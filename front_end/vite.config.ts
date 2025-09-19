@@ -23,7 +23,8 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       'react-router-dom',
-      'yet-another-react-lightbox'
+      'yet-another-react-lightbox',
+      "axios"
     ]
   }
 });
