@@ -3,30 +3,23 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@front/*": [
-        "../front_end/src/*"
-      ],
-      "@utils/*": [
-        "../front_end/src/utils/*"
-      ],
-      "@shared/*": [
-        "../shared/*"
-      ],
-      "@theme/*": [
-        "theme/*"
-      ],
-      "@lib/*": [
-        "lib/*"
-      ]
+      "@theme/*": ["theme/*"],
+      "@lib/*": ["lib/*"],
+      "@shared/*": ["../shared/*"]
     },
-    "incremental": true
+    "incremental": true,
+    "jsx": "preserve",
+    "noEmit": true,
+    "isolatedModules": true
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    ".next"
   ]
 }

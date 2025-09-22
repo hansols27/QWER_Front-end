@@ -1,14 +1,13 @@
 {
-  "dependencies": {
-    "axios": "^1.12.2",
-    "express": "^5.1.0",
-    "multer": "^2.0.2"
-  },
+  "name": "my-monorepo",
+  "private": true,
+  "workspaces": [
+    "admin",
+    "front_end",
+    "back_end",
+    "shared"
+  ],
   "devDependencies": {
-    "@types/axios": "^0.9.36",
-    "@types/express": "^5.0.3",
-    "@types/multer": "^2.0.0",
-    "ts-loader": "^9.5.4",
     "typescript": "^5.9.2"
   }
 }

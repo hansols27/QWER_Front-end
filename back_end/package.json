@@ -1,16 +1,25 @@
 {
+  "name": "@myorg/back_end",
+  "version": "1.0.0",
+  "private": true,
   "dependencies": {
-    "axios": "^1.12.2",
-    "cors": "^2.8.5",
     "express": "^5.1.0",
-    "multer": "^2.0.2"
+    "cors": "^2.8.5",
+    "multer": "^2.0.2",
+    "axios": "^1.12.2",
+    "@myorg/shared": "1.0.0"
   },
   "devDependencies": {
-    "@types/axios": "^0.9.36",
-    "@types/cors": "^2.8.19",
+    "typescript": "^5.9.2",
     "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.19",
     "@types/multer": "^2.0.0",
-    "ts-loader": "^9.5.4",
-    "typescript": "^5.9.2"
+    "@types/axios": "^0.9.36",
+    "ts-node-dev": "^2.0.0"
+  },
+  "scripts": {
+    "dev": "ts-node-dev src/app.ts",
+    "build": "tsc -p .",
+    "start": "node dist/app.js"
   }
 }

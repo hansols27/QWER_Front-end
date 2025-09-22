@@ -15,24 +15,14 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@front/*": ["front_end/src/*"],
-      "@app/*": ["front_end/src/app/*"],
-      "@components/*": ["front_end/src/components/*"],
-      "@utils/*": ["front_end/src/utils/*"],
-      "@shared/*": ["shared/*"],
-      "@theme/*": ["admin/theme/*"],
-      "@lib/*": ["admin/lib/*"]
+      "@shared/*": ["shared/*"]
     }
   },
   "include": [
-    "next-env.d.ts",
-    "front_end/src/**/*",
     "admin/**/*",
-    "shared/**/*",
-    "back_end/**/*",
-    "lib/**/*",
-    "back_end/routes",
-    "back_end/app.ts"
+    "front_end/src/**/*",
+    "back_end/src/**/*",
+    "shared/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }
