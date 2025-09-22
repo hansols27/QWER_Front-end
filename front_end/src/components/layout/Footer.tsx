@@ -1,5 +1,5 @@
 import { socialLinks } from '@front/constants/snsLinks';
-import { openInNewTab } from '@front/utils/openInNewTab';
+import { openInNewTab } from '@utils/openInNewTab';
 
 const Footer = () => {
   return (
@@ -8,10 +8,9 @@ const Footer = () => {
         {/* SNS 메뉴 */}
         <aside className="sns-menu">
           <ul>
-            {socialLinks.map(({ id, icon, url, type }) => (
+            {socialLinks.map(({ id, icon, url }) => (
               <li
                 key={id}
-                className={type || ''}
                 onClick={() => openInNewTab(url)}
                 title={id}
               >
