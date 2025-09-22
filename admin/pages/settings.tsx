@@ -14,7 +14,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import TiktokIcon from "../components/TiktokIcon";
+import TwiterIcon from "../components/TwiterIcon";
 import type { SettingsData } from "@shared/types/settings";
 
 const API_URL = "http://localhost:4000/api/settings";
@@ -25,7 +25,7 @@ const Settings = () => {
   const [snsLinks, setSnsLinks] = useState({
     instagram: "",
     youtube: "",
-    tiktok: "",
+    twiter: "",
     cafe: "",
     shop: "",
   });
@@ -113,7 +113,7 @@ const Settings = () => {
                   <Stack spacing={2}>
                     <TextField label="Instagram URL" name="instagram" value={snsLinks.instagram} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><InstagramIcon sx={{ color: "#E1306C" }} /></InputAdornment>)}} />
                     <TextField label="YouTube URL" name="youtube" value={snsLinks.youtube} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><YouTubeIcon sx={{ color: "#FF0000" }} /></InputAdornment>)}} />
-                    <TextField label="TikTok URL" name="tiktok" value={snsLinks.tiktok} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><TiktokIcon sx={{ fontSize: 28, color: "#000" }} /></InputAdornment>)}} />
+                    <TextField label="Twiter URL" name="twiter" value={snsLinks.twiter} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><TwiterIcon sx={{ fontSize: 28, color: "#000" }} /></InputAdornment>)}} />
                     <TextField label="Cafe URL" name="cafe" value={snsLinks.cafe} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><LocalCafeIcon sx={{ color: "#00eb5aff" }} /></InputAdornment>)}} />
                     <TextField label="Shop URL" name="shop" value={snsLinks.shop} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><StorefrontIcon sx={{ color: "#000" }} /></InputAdornment>)}} />
                   </Stack>
