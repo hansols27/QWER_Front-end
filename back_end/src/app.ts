@@ -1,21 +1,13 @@
-import express from 'express';
-import cors from 'cors';
-import path from 'path';
-import settingsRouter from './routes/settings';
+import express from "express";
+import cors from "cors";
+import settingsRouter from "./routes/settings";
 
 const app = express();
-const PORT = 4000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use("/api/settings", settingsRouter);
 
-// 업로드 폴더 static 경로 설정
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// API 라우트
-app.use('/api/settings', settingsRouter);
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+app.listen(4000, () => {
+  console.log("Server running on http://localhost:4000");
 });
