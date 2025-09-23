@@ -150,7 +150,7 @@ const Settings = () => {
                         startAdornment: (
                           <InputAdornment position="start">
                             <img
-                              src="/twiter.png" // <- import 제거, public 경로 사용
+                              src="/twitter.png" // <- import 제거, public 경로 사용
                               alt="Twitter"
                               style={{ width: 28, height: 28 }}
                             />
