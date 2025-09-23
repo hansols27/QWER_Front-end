@@ -6,7 +6,7 @@ import type { SettingsData, SnsLink } from "@shared/types/settings";
 
 const router = Router();
 
-// 업로드 폴더와 multer 설정
+// multer 설정 (이미지 업로드용)
 const upload = multer({ dest: path.join(__dirname, "../../uploads/") });
 
 // JSON 저장 경로
@@ -27,14 +27,16 @@ const defaultSettings: SettingsData = {
 // JSON 불러오기
 function loadSettings(): SettingsData {
   if (fs.existsSync(settingsFile)) {
-    const raw = fs.readFileSync(settingsFile, "utf-8");
-    return JSON.parse(raw) as SettingsData;
+    return JSON.parse(fs.readFileSync(settingsFile, "utf-8")) as SettingsData;
   }
   return defaultSettings;
 }
 
 // JSON 저장
 function saveSettings(data: SettingsData) {
+  if (!fs.existsSync(path.dirname(settingsFile))) {
+    fs.mkdirSync(path.dirname(settingsFile), { recursive: true });
+  }
   fs.writeFileSync(settingsFile, JSON.stringify(data, null, 2), "utf-8");
 }
 
@@ -46,18 +48,30 @@ router.get("/", (req, res) => {
 
 // POST /api/settings → 이미지 + SNS 링크
 router.post("/", upload.single("image"), (req, res) => {
-  const snsLinks: SnsLink[] = JSON.parse(req.body.snsLinks || "[]");
   const settings = loadSettings();
 
-  // 이미지 업로드 처리
+  // SNS 링크 파싱
+  let snsLinks: SnsLink[] = [];
+  try {
+    snsLinks = JSON.parse(req.body.snsLinks || "[]");
+  } catch (err) {
+    console.error("SNS 링크 파싱 실패:", err);
+    return res.status(400).json({ success: false, message: "잘못된 SNS 링크 데이터" });
+  }
+
+  // 이미지 업로드 처리 (선택)
   if (req.file) {
-    const ext = path.extname(req.file.originalname);
-    const targetPath = path.join(
-      __dirname,
-      "../../front_end/src/assets/images/main.png"
-    );
-    fs.renameSync(req.file.path, targetPath);
-    settings.mainImage = "/assets/images/main.png";
+    try {
+      const targetPath = path.join(
+        __dirname,
+        "../../front_end/src/assets/images/main.png"
+      );
+      fs.renameSync(req.file.path, targetPath);
+      settings.mainImage = "/assets/images/main.png";
+    } catch (err) {
+      console.error("이미지 저장 실패:", err);
+      return res.status(500).json({ success: false, message: "이미지 저장 실패" });
+    }
   }
 
   // SNS 링크 업데이트
@@ -66,8 +80,13 @@ router.post("/", upload.single("image"), (req, res) => {
     return updated ? { ...link, url: updated.url } : link;
   });
 
-  // JSON 파일에 저장
-  saveSettings(settings);
+  // JSON 저장
+  try {
+    saveSettings(settings);
+  } catch (err) {
+    console.error("설정 저장 실패:", err);
+    return res.status(500).json({ success: false, message: "설정 저장 실패" });
+  }
 
   res.json({ success: true, data: settings });
 });
