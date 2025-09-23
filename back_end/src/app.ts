@@ -4,10 +4,19 @@ import settingsRouter from "./routes/settings";
 
 const app = express();
 
-app.use(cors());
+// ✅ CORS (admin, user front 둘 다 허용)
+app.use(cors({
+  origin: [
+    "https://qwer-fansite-admin.vercel.app/", // 관리자
+    "https://qwer-fansite-front.vercel.app/"        // 사용자 사이트
+  ],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+}));
+
 app.use(express.json());
+
+// ✅ 라우트 등록
 app.use("/api/settings", settingsRouter);
 
-app.listen(4000, () => {
-  console.log("Server running on http://localhost:4000");
-});
+export default app;
