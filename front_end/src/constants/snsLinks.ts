@@ -1,17 +1,46 @@
+import { useEffect, useState } from "react";
 import instagramIcon from '@front/assets/icons/sns_instagram.png';
 import twitterIcon from '@front/assets/icons/sns_twitter.png';
 import youtubeIcon from '@front/assets/icons/sns_youtube.png';
 import cafeIcon from '@front/assets/icons/sns_cafe.png';
 import shopIcon from '@front/assets/icons/sns_shop.png';
+import type { SnsLink, SettingsData } from '@shared/types/settings';
 
-// 타입 import
-import { SnsLink } from '@shared/types/settings';
-
-// admin에서 입력한 URL이 반영될 수 있는 기본값
-export const socialLinks: SnsLink[] = [
-  { id: 'instagram', url: 'https://www.instagram.com/qwerband_official/#', icon: instagramIcon },
-  { id: 'twitter', url: 'https://x.com/official_QWER', icon: twitterIcon },
-  { id: 'youtube', url: 'https://www.youtube.com/channel/UCgD0APk2x9uBlLM0UsmhQjw', icon: youtubeIcon },
-  { id: 'cafe', url: 'https://cafe.naver.com/eggkim', icon: cafeIcon },
-  { id: 'shop', url: 'https://qwershop.kr/index.html', icon: shopIcon }
+// 기본 구조: 아이콘만 지정, URL은 나중에 API에서 가져옴
+const defaultLinks: SnsLink[] = [
+  { id: 'instagram', url: '', icon: instagramIcon },
+  { id: 'twitter', url: '', icon: twitterIcon },
+  { id: 'youtube', url: '', icon: youtubeIcon },
+  { id: 'cafe', url: '', icon: cafeIcon },
+  { id: 'shop', url: '', icon: shopIcon },
 ];
+
+// 훅으로 동적 SNS 링크 가져오기
+export function useSocialLinks() {
+  const [socialLinks, setSocialLinks] = useState<SnsLink[]>(defaultLinks);
+
+  useEffect(() => {
+    async function fetchLinks() {
+      try {
+        const res = await fetch("http://localhost:4000/api/settings");
+        if (!res.ok) throw new Error("Failed to fetch settings");
+        const data: SettingsData = await res.json();
+
+        // admin에서 입력한 URL로 덮어쓰기
+        const mergedLinks = defaultLinks.map(link => {
+          const match = data.snsLinks.find(l => l.id === link.id);
+          return { ...link, url: match?.url ?? '' };
+        });
+
+        setSocialLinks(mergedLinks);
+      } catch (err) {
+        console.error("SNS 링크 불러오기 실패", err);
+        setSocialLinks(defaultLinks); // 실패 시 기본값 유지
+      }
+    }
+
+    fetchLinks();
+  }, []);
+
+  return socialLinks;
+}

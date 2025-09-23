@@ -14,7 +14,6 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import TwitterIcon from "../public/twiter.png";
 import type { SettingsData } from "@shared/types/settings";
 
 const API_URL = "http://localhost:4000/api/settings";
@@ -102,7 +101,11 @@ const Settings = () => {
                     이미지 업로드
                     <input hidden accept="image/*" type="file" onChange={handleImageChange} />
                   </Button>
-                  {preview && <Box mt={2}><img src={preview} alt="Preview" style={{ width: 250, borderRadius: 8 }} /></Box>}
+                  {preview && (
+                    <Box mt={2}>
+                      <img src={preview} alt="Preview" style={{ width: 250, borderRadius: 8 }} />
+                    </Box>
+                  )}
                 </Box>
 
                 {/* SNS 링크 */}
@@ -111,16 +114,83 @@ const Settings = () => {
                     SNS 링크
                   </Typography>
                   <Stack spacing={2}>
-                    <TextField label="Instagram URL" name="instagram" value={snsLinks.instagram} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><InstagramIcon sx={{ color: "#E1306C" }} /></InputAdornment>)}} />
-                    <TextField label="YouTube URL" name="youtube" value={snsLinks.youtube} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"><YouTubeIcon sx={{ color: "#FF0000" }} /></InputAdornment>)}} />
-                    <TextField fullWidth label="Twitter URL" name="twitter" value={snsLinks.twitter} onChange={handleChange} InputProps={{ startAdornment: ( <InputAdornment position="start"> <img src={TwitterIcon.src} alt="X" style={{ width: 28, height: 28 }}/></InputAdornment>),}}/>
-                    <TextField label="Cafe URL" name="cafe" value={snsLinks.cafe} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"> <LocalCafeIcon sx={{ color: "#00eb5aff" }}/></InputAdornment>)}}/>
-                    <TextField label="Shop URL" name="shop" value={snsLinks.shop} onChange={handleChange} InputProps={{ startAdornment: (<InputAdornment position="start"> <StorefrontIcon sx={{ color: "#000" }}/></InputAdornment>)}}/>
+                    <TextField
+                      label="Instagram URL"
+                      name="instagram"
+                      value={snsLinks.instagram}
+                      onChange={handleChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <InstagramIcon sx={{ color: "#E1306C" }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      label="YouTube URL"
+                      name="youtube"
+                      value={snsLinks.youtube}
+                      onChange={handleChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <YouTubeIcon sx={{ color: "#FF0000" }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Twitter URL"
+                      name="twitter"
+                      value={snsLinks.twitter}
+                      onChange={handleChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <img
+                              src="/twiter.png" // <- import 제거, public 경로 사용
+                              alt="Twitter"
+                              style={{ width: 28, height: 28 }}
+                            />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      label="Cafe URL"
+                      name="cafe"
+                      value={snsLinks.cafe}
+                      onChange={handleChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LocalCafeIcon sx={{ color: "#00eb5aff" }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      label="Shop URL"
+                      name="shop"
+                      value={snsLinks.shop}
+                      onChange={handleChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <StorefrontIcon sx={{ color: "#000" }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
                   </Stack>
                 </Box>
 
                 <Box textAlign="right">
-                  <Button variant="contained" color="primary" type="submit">저장하기</Button>
+                  <Button variant="contained" color="primary" type="submit">
+                    저장하기
+                  </Button>
                 </Box>
               </Stack>
             </form>
