@@ -20,8 +20,14 @@ export function useSocialLinks() {
   useEffect(() => {
     async function fetchLinks() {
       try {
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL!);
+        const API_URL =
+          process.env.NODE_ENV === "development"
+            ? process.env.NEXT_PUBLIC_API_URL_DEV
+            : process.env.NEXT_PUBLIC_API_URL_PROD;
+
+        const res = await fetch(API_URL!);
         if (!res.ok) throw new Error("Failed to fetch settings");
+
         const data: SettingsData = await res.json();
 
         const mergedLinks = defaultLinks.map(link => {
@@ -35,6 +41,7 @@ export function useSocialLinks() {
         setSocialLinks(defaultLinks);
       }
     }
+
     fetchLinks();
   }, []);
 
