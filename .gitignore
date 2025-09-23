@@ -30,3 +30,6 @@ yarn-error.log*
 
 # Optional: yarn cache
 .yarn/
+
+# .env
+.env.local

@@ -14,11 +14,9 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import type { SettingsData } from "@shared/types/settings";
-
-const API_URL = "http://localhost:4000/api/settings";
 
 const Settings = () => {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL!;
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [snsLinks, setSnsLinks] = useState({
@@ -34,24 +32,23 @@ const Settings = () => {
     (async () => {
       try {
         const res = await fetch(API_URL);
-        const data: SettingsData = await res.json();
+        if (!res.ok) throw new Error("설정 불러오기 실패");
+        const data = await res.json();
         setSnsLinks(
-          Object.fromEntries(
-            data.snsLinks.map((l) => [l.id, l.url])
-          ) as typeof snsLinks
+          Object.fromEntries(data.snsLinks.map((l: any) => [l.id, l.url])) as typeof snsLinks
         );
         setPreview(data.mainImage || null);
       } catch (err) {
         console.error(err);
       }
     })();
-  }, []);
+  }, [API_URL]);
 
   // 이미지 선택
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setMainImage(file);
+    const file = e.target.files?.[0] ?? null;
     if (file) {
+      setMainImage(file);
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -66,28 +63,23 @@ const Settings = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
-
-    // 이미지가 선택된 경우만 추가
     if (mainImage) formData.append("image", mainImage);
-
-    // SNS 링크는 선택 입력 → 빈 문자열도 그대로 저장
     formData.append(
       "snsLinks",
       JSON.stringify(
         Object.entries(snsLinks)
-          .filter(([_, url]) => url.trim() !== "") // 빈 값 제외 가능
+          .filter(([, url]) => url) // URL 입력한 항목만
           .map(([id, url]) => ({ id, url }))
       )
     );
 
     try {
       const res = await fetch(API_URL, { method: "POST", body: formData });
-      const result = await res.json();
-      if (!res.ok || !result.success) throw new Error(result.message || "저장 실패");
+      if (!res.ok) throw new Error("저장 실패");
       alert("설정이 저장되었습니다.");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert(`저장 중 오류가 발생했습니다: ${err.message}`);
+      alert("저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -95,7 +87,7 @@ const Settings = () => {
     <Layout>
       <Box sx={{ p: 4 }}>
         <Typography variant="h4" fontWeight="bold" gutterBottom>
-          기본 설정 (선택 입력 가능)
+          기본 설정
         </Typography>
         <Card sx={{ maxWidth: 600 }}>
           <CardContent>
@@ -104,16 +96,11 @@ const Settings = () => {
                 {/* 메인 이미지 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
-                    메인 이미지 (선택)
+                    메인 이미지
                   </Typography>
                   <Button variant="contained" component="label">
                     이미지 업로드
-                    <input
-                      hidden
-                      accept="image/*"
-                      type="file"
-                      onChange={handleImageChange}
-                    />
+                    <input hidden accept="image/*" type="file" onChange={handleImageChange} />
                   </Button>
                   {preview && (
                     <Box mt={2}>
@@ -129,7 +116,7 @@ const Settings = () => {
                 {/* SNS 링크 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
-                    SNS 링크 (선택)
+                    SNS 링크
                   </Typography>
                   <Stack spacing={2}>
                     <TextField
@@ -144,6 +131,7 @@ const Settings = () => {
                           </InputAdornment>
                         ),
                       }}
+                      placeholder="선택 입력"
                     />
                     <TextField
                       label="YouTube URL"
@@ -157,9 +145,9 @@ const Settings = () => {
                           </InputAdornment>
                         ),
                       }}
+                      placeholder="선택 입력"
                     />
                     <TextField
-                      fullWidth
                       label="Twitter URL"
                       name="twitter"
                       value={snsLinks.twitter}
@@ -175,6 +163,7 @@ const Settings = () => {
                           </InputAdornment>
                         ),
                       }}
+                      placeholder="선택 입력"
                     />
                     <TextField
                       label="Cafe URL"
@@ -188,6 +177,7 @@ const Settings = () => {
                           </InputAdornment>
                         ),
                       }}
+                      placeholder="선택 입력"
                     />
                     <TextField
                       label="Shop URL"
@@ -201,6 +191,7 @@ const Settings = () => {
                           </InputAdornment>
                         ),
                       }}
+                      placeholder="선택 입력"
                     />
                   </Stack>
                 </Box>
