@@ -18,7 +18,7 @@ const defaultSettings: SettingsData = {
   snsLinks: [
     { id: "instagram", url: "" },
     { id: "youtube", url: "" },
-    { id: "tiktok", url: "" },
+    { id: "twitter", url: "" },
     { id: "cafe", url: "" },
     { id: "shop", url: "" },
   ],
