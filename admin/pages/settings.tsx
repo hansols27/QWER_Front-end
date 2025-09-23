@@ -14,9 +14,11 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import type { SettingsData } from "@shared/types/settings";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!; // 루트 도메인 호출
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_API_URL_PROD
+    : process.env.NEXT_PUBLIC_API_URL;
 
 const Settings = () => {
   const [mainImage, setMainImage] = useState<File | null>(null);
@@ -33,12 +35,12 @@ const Settings = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(`${API_URL}/api/settings`);
         if (!res.ok) throw new Error("설정 불러오기 실패");
-        const data: SettingsData = await res.json();
+        const data = await res.json();
         setSnsLinks(
           Object.fromEntries(
-            data.snsLinks.map((l) => [l.id, l.url])
+            data.snsLinks.map((l: any) => [l.id, l.url])
           ) as typeof snsLinks
         );
         setPreview(data.mainImage || null);
@@ -70,11 +72,18 @@ const Settings = () => {
     if (mainImage) formData.append("image", mainImage);
     formData.append(
       "snsLinks",
-      JSON.stringify(Object.entries(snsLinks).map(([id, url]) => ({ id, url })))
+      JSON.stringify(
+        Object.entries(snsLinks)
+          .filter(([_, url]) => url) // 입력한 필드만 보내기
+          .map(([id, url]) => ({ id, url }))
+      )
     );
 
     try {
-      const res = await fetch(API_URL, { method: "POST", body: formData });
+      const res = await fetch(`${API_URL}/api/settings`, {
+        method: "POST",
+        body: formData,
+      });
       if (!res.ok) throw new Error("저장 실패");
       alert("설정이 저장되었습니다.");
     } catch (err) {
@@ -96,11 +105,16 @@ const Settings = () => {
                 {/* 메인 이미지 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
-                    메인 이미지 (선택)
+                    메인 이미지
                   </Typography>
                   <Button variant="contained" component="label">
                     이미지 업로드
-                    <input hidden accept="image/*" type="file" onChange={handleImageChange} />
+                    <input
+                      hidden
+                      accept="image/*"
+                      type="file"
+                      onChange={handleImageChange}
+                    />
                   </Button>
                   {preview && (
                     <Box mt={2}>
@@ -116,7 +130,7 @@ const Settings = () => {
                 {/* SNS 링크 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
-                    SNS 링크 (선택)
+                    SNS 링크 (선택 입력)
                   </Typography>
                   <Stack spacing={2}>
                     <TextField
@@ -146,7 +160,6 @@ const Settings = () => {
                       }}
                     />
                     <TextField
-                      fullWidth
                       label="Twitter URL"
                       name="twitter"
                       value={snsLinks.twitter}

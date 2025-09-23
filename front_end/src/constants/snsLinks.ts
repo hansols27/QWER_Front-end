@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import instagramIcon from '@front/assets/icons/sns_instagram.png';
 import twitterIcon from '@front/assets/icons/sns_twitter.png';
 import youtubeIcon from '@front/assets/icons/sns_youtube.png';
@@ -15,17 +15,24 @@ const defaultLinks: SnsLink[] = [
   { id: 'shop', url: '', icon: shopIcon },
 ];
 
+// 환경변수 기반 API URL
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_API_URL_PROD
+    : process.env.NEXT_PUBLIC_API_URL;
+
+// 훅으로 동적 SNS 링크 가져오기
 export function useSocialLinks() {
   const [socialLinks, setSocialLinks] = useState<SnsLink[]>(defaultLinks);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
   useEffect(() => {
     async function fetchLinks() {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(`${API_URL}/api/settings`);
         if (!res.ok) throw new Error("Failed to fetch settings");
         const data: SettingsData = await res.json();
 
+        // admin에서 입력한 URL로 덮어쓰기
         const mergedLinks = defaultLinks.map(link => {
           const match = data.snsLinks.find(l => l.id === link.id);
           return { ...link, url: match?.url ?? '' };
@@ -34,12 +41,12 @@ export function useSocialLinks() {
         setSocialLinks(mergedLinks);
       } catch (err) {
         console.error("SNS 링크 불러오기 실패", err);
-        setSocialLinks(defaultLinks);
+        setSocialLinks(defaultLinks); // 실패 시 기본값 유지
       }
     }
 
     fetchLinks();
-  }, [API_URL]);
+  }, []);
 
   return socialLinks;
 }
