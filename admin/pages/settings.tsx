@@ -16,6 +16,8 @@ import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import type { SettingsData } from "@shared/types/settings";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL!; // 루트 도메인 호출
+
 const Settings = () => {
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -27,39 +29,41 @@ const Settings = () => {
     shop: "",
   });
 
-  const API_URL =
-    process.env.NODE_ENV === "development"
-      ? process.env.NEXT_PUBLIC_API_URL_DEV
-      : process.env.NEXT_PUBLIC_API_URL_PROD;
-
+  // 기존 설정 불러오기
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(API_URL!);
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("설정 불러오기 실패");
         const data: SettingsData = await res.json();
         setSnsLinks(
-          Object.fromEntries(data.snsLinks.map(l => [l.id, l.url])) as typeof snsLinks
+          Object.fromEntries(
+            data.snsLinks.map((l) => [l.id, l.url])
+          ) as typeof snsLinks
         );
         setPreview(data.mainImage || null);
       } catch (err) {
         console.error(err);
       }
     })();
-  }, [API_URL]);
+  }, []);
 
+  // 이미지 선택
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
+    if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setMainImage(file);
       setPreview(URL.createObjectURL(file));
     }
   };
 
+  // SNS 입력
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSnsLinks(prev => ({ ...prev, [name]: value }));
+    setSnsLinks((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 저장
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
@@ -70,7 +74,7 @@ const Settings = () => {
     );
 
     try {
-      const res = await fetch(API_URL!, { method: "POST", body: formData });
+      const res = await fetch(API_URL, { method: "POST", body: formData });
       if (!res.ok) throw new Error("저장 실패");
       alert("설정이 저장되었습니다.");
     } catch (err) {
@@ -92,15 +96,19 @@ const Settings = () => {
                 {/* 메인 이미지 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
-                    메인 이미지
+                    메인 이미지 (선택)
                   </Typography>
                   <Button variant="contained" component="label">
                     이미지 업로드
-                    <input hidden type="file" accept="image/*" onChange={handleImageChange} />
+                    <input hidden accept="image/*" type="file" onChange={handleImageChange} />
                   </Button>
                   {preview && (
                     <Box mt={2}>
-                      <img src={preview} alt="Preview" style={{ width: 250, borderRadius: 8 }} />
+                      <img
+                        src={preview}
+                        alt="Preview"
+                        style={{ width: 250, borderRadius: 8 }}
+                      />
                     </Box>
                   )}
                 </Box>
@@ -108,7 +116,7 @@ const Settings = () => {
                 {/* SNS 링크 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
-                    SNS 링크
+                    SNS 링크 (선택)
                   </Typography>
                   <Stack spacing={2}>
                     <TextField
@@ -138,6 +146,7 @@ const Settings = () => {
                       }}
                     />
                     <TextField
+                      fullWidth
                       label="Twitter URL"
                       name="twitter"
                       value={snsLinks.twitter}
@@ -145,7 +154,11 @@ const Settings = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <img src="/twitter.png" alt="Twitter" style={{ width: 28, height: 28 }} />
+                            <img
+                              src="/twitter.png"
+                              alt="Twitter"
+                              style={{ width: 28, height: 28 }}
+                            />
                           </InputAdornment>
                         ),
                       }}
