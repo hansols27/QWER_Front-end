@@ -5,14 +5,16 @@ import settingsRouter from "./routes/settings";
 const app = express();
 
 // ✅ CORS (admin, user front 둘 다 허용)
-app.use(cors({
-  origin: [
-    "https://qwer-fansite-admin.vercel.app/", // 관리자
-    "https://qwer-fansite-front.vercel.app/"        // 사용자 사이트
-  ],
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
-}));
+app.use(
+  cors({
+    origin: [
+      "https://qwer-fansite-admin.vercel.app", // 관리자
+      "https://qwer-fansite-front.vercel.app", // 사용자 사이트
+    ],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 
 app.use(express.json());
 
@@ -20,3 +22,9 @@ app.use(express.json());
 app.use("/api/settings", settingsRouter);
 
 export default app;
+
+// ✅ 로컬 개발용
+if (process.env.NODE_ENV !== "production") {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log(`Server running on port ${port}`));
+}
