@@ -20,10 +20,18 @@ const API_URL =
     ? process.env.NEXT_PUBLIC_API_URL_PROD
     : process.env.NEXT_PUBLIC_API_URL;
 
+type SnsLinks = {
+  instagram: string;
+  youtube: string;
+  twitter: string;
+  cafe: string;
+  shop: string;
+};
+
 const Settings = () => {
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [snsLinks, setSnsLinks] = useState({
+  const [snsLinks, setSnsLinks] = useState<SnsLinks>({
     instagram: "",
     youtube: "",
     twitter: "",
@@ -38,11 +46,14 @@ const Settings = () => {
         const res = await fetch(`${API_URL}/api/settings`);
         if (!res.ok) throw new Error("설정 불러오기 실패");
         const data = await res.json();
-        setSnsLinks(
-          Object.fromEntries(
-            data.snsLinks.map((l: any) => [l.id, l.url])
-          ) as typeof snsLinks
-        );
+
+        // Firestore에서 불러온 snsLinks 배열 → 객체로 변환
+        const snsObj: Partial<SnsLinks> = {};
+        data.snsLinks?.forEach((l: { id: keyof SnsLinks; url: string }) => {
+          snsObj[l.id] = l.url;
+        });
+        setSnsLinks((prev) => ({ ...prev, ...snsObj }));
+
         setPreview(data.mainImage || null);
       } catch (err) {
         console.error(err);
@@ -70,14 +81,13 @@ const Settings = () => {
     e.preventDefault();
     const formData = new FormData();
     if (mainImage) formData.append("image", mainImage);
-    formData.append(
-      "snsLinks",
-      JSON.stringify(
-        Object.entries(snsLinks)
-          .filter(([_, url]) => url) // 입력한 필드만 보내기
-          .map(([id, url]) => ({ id, url }))
-      )
-    );
+
+    // 입력된 SNS 링크만 배열로 변환
+    const snsArray = (Object.entries(snsLinks) as [keyof SnsLinks, string][])
+      .filter(([_, url]) => url)
+      .map(([id, url]) => ({ id, url }));
+
+    formData.append("snsLinks", JSON.stringify(snsArray));
 
     try {
       const res = await fetch(`${API_URL}/api/settings`, {
