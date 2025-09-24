@@ -6,7 +6,7 @@
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "noEmit": false,
     "module": "ESNext",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
