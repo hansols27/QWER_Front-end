@@ -22,6 +22,7 @@
   "scripts": {
     "dev": "ts-node-dev src/app.ts",
     "build": "tsc -p .",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "vercel-build": "npm run build"
   }
 }
