@@ -36,3 +36,5 @@ yarn-error.log*
 
 # Firebase service account key
 back_end/src/firebase-service-key.json
+
+back_end/tsconfig.tsbuildinfo

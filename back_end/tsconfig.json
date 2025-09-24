@@ -14,7 +14,7 @@
     "noEmit": false,
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["node_modules/@myorg/shared/*"]
+      "@shared/*": ["../shared/*"]
     }
   },
   "include": ["src/**/*"],
