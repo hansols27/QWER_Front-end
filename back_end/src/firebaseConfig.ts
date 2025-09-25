@@ -5,14 +5,14 @@ import admin from "firebase-admin";
 function getEnv(key: string): string {
   const value = process.env[key];
   if (!value) throw new Error(`Missing environment variable ${key}`);
-  return key === "FB_PRIVATE_KEY" ? value.replace(/\\n/g, "\n") : value;
+  return key === "NEXT_PUBLIC_PRIVATE_KEY" ? value.replace(/\\n/g, "\n") : value;
 }
 
 // 최소 필수 필드만 사용해서 ServiceAccount 생성
 const serviceAccount: admin.ServiceAccount = {
-  projectId: getEnv("FB_PROJECT_ID"),
-  privateKey: getEnv("FB_PRIVATE_KEY"),
-  clientEmail: getEnv("FB_CLIENT_EMAIL"),
+  projectId: getEnv("NEXT_PUBLIC_PROJECT_ID"),
+  privateKey: getEnv("NEXT_PUBLIC_PRIVATE_KEY"),
+  clientEmail: getEnv("NEXT_PUBLIC_CLIENT_EMAIL"),
 };
 
 // Firebase Admin 초기화
