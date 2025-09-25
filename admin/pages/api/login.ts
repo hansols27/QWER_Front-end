@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { email, password } = req.body;
 
   // 간단한 admin 계정 예시
-  if (email === 'admin@test.com' && password === '1234') {
+  if (email === 'admin@test.com' && password === 'qwer1018') {
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
 
     const isProd = process.env.NODE_ENV === 'production';
