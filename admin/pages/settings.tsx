@@ -10,10 +10,6 @@ import {
   CardContent,
   InputAdornment,
 } from "@mui/material";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import YouTubeIcon from "@mui/icons-material/YouTube";
-import LocalCafeIcon from "@mui/icons-material/LocalCafe";
-import StorefrontIcon from "@mui/icons-material/Storefront";
 
 const API_URL =
   process.env.NODE_ENV === "production"
@@ -151,7 +147,11 @@ const Settings = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <InstagramIcon sx={{ color: "#E1306C" }} />
+                            <img
+                              src="/instagram.png"
+                              alt="Instagram"
+                              style={{ width: 28, height: 28 }}
+                            />
                           </InputAdornment>
                         ),
                       }}
@@ -164,7 +164,11 @@ const Settings = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <YouTubeIcon sx={{ color: "#FF0000" }} />
+                            <img
+                              src="/youtube.png"
+                              alt="YouTube"
+                              style={{ width: 28, height: 28 }}
+                            />
                           </InputAdornment>
                         ),
                       }}
@@ -194,7 +198,11 @@ const Settings = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LocalCafeIcon sx={{ color: "#00eb5aff" }} />
+                            <img
+                              src="/cafe.png"
+                              alt="Cafe"
+                              style={{ width: 28, height: 28 }}
+                            />
                           </InputAdornment>
                         ),
                       }}
@@ -207,7 +215,11 @@ const Settings = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <StorefrontIcon sx={{ color: "#000" }} />
+                            <img
+                              src="/shop.png"
+                              alt="Shop"
+                              style={{ width: 28, height: 28 }}
+                            />
                           </InputAdornment>
                         ),
                       }}
