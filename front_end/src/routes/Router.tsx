@@ -1,17 +1,17 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from 'src/pages/Home';
-import Profile from 'src/pages/Profile';
-import Album from 'src/pages/Album';
-import AlbumDetail from 'src/pages/detail/AlbumDetail';
-import Gallery from 'src/pages/Gallery';
-import Video from 'src/pages/Video';
-import Schedule from 'src/pages/Schedule';
-import NoticeDetail from 'src/pages/detail/NoticeDetail';
-import Notice from 'src/pages/Notice';
-//import Community from 'src/pages/Community';
-//import CommuDetail from 'src/pages/detail/CommuDetail';
-import Footer from 'src/components/layout/Footer';
-import Header from 'src/components/layout/Header';
+import Home from '@front/pages/Home';
+import Profile from '@front/pages/Profile';
+import Album from '@front/pages/Album';
+import AlbumDetail from '@front/pages/detail/AlbumDetail';
+import Gallery from '@front/pages/Gallery';
+import Video from '@front/pages/Video';
+import Schedule from '@front/pages/Schedule';
+import NoticeDetail from '@front/pages/detail/NoticeDetail';
+import Notice from '@front/pages/Notice';
+//import Community from '@front/pages/Community';
+//import CommuDetail from '@front/pages/detail/CommuDetail';
+import Footer from '@front/components/layout/Footer';
+import Header from '@front/components/layout/Header';
 
 export const Router = () => (
   <div id="wrap">

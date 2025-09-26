@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "@front/ui/gallery.css";
-import { gallery } from "src/data/gallerylist";
+import { gallery } from "@front/data/gallerylist";
 
 import btn_prev from "@front/assets/icons/bg-btn-prev.png";
 import btn_next from "@front/assets/icons/bg-btn-next.png";

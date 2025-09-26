@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "@front/ui/notice.css";
-import { notice } from "src/data/noticelist";
+import { notice } from "@front/data/noticelist";
 
 import btn_prev from "@front/assets/icons/bg-btn-prev.png";
 import btn_next from "@front/assets/icons/bg-btn-next.png";

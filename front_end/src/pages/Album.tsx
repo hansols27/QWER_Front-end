@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { albums } from 'src/data/albumlist';
+import { albums } from '@front/data/albumlist';
 import '@front/ui/album.css';
 
 import more_view from '@front/assets/icons/more_view.png';

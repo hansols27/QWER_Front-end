@@ -10,7 +10,7 @@ import { CSSProperties } from 'react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '@front/ui/schedule.css';
 import { ScheduleEvent } from '@shared/types/schedule';
-import { getEventsInRange } from 'src/data/schedule';
+import { getEventsInRange } from '@front/data/schedule';
 import btn_prev from '@front/assets/icons/bg-btn-prev.png';
 import btn_next from '@front/assets/icons/bg-btn-next.png';
 
