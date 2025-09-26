@@ -136,7 +136,7 @@ const Settings = () => {
                 {/* SNS 링크 */}
                 <Box>
                   <Typography variant="subtitle1" gutterBottom>
-                    SNS 링크 (선택 입력)
+                    SNS 링크 
                   </Typography>
                   <Stack spacing={2}>
                     <TextField
