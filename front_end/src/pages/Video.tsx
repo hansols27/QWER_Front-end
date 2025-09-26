@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '@front/ui/video.css';
-import { videos } from '@front/data/videolist';
+import { videos } from 'src/data/videolist';
 
 function getYoutubeThumbnail(src: string): string {
   const match = src.match(/embed\/([^?]+)/);

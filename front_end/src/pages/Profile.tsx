@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { members } from '@front/data/members';
+import { members } from 'src/data/members';
 import '@front/ui/profile.css';
-import ImageSlider from '@front/components/common/ImageSlider';
+import ImageSlider from 'src/components/common/ImageSlider';
 
 import youtubeIcon from '@front/assets/icons/youtube.svg';
 import instagramIcon from '@front/assets/icons/instagram.svg';

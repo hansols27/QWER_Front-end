@@ -1,5 +1,5 @@
-import { useSocialLinks } from '@front/constants/snsLinks';
-import { openInNewTab } from '@utils/openInNewTab';
+import { useSocialLinks } from 'src/constants/snsLinks';
+import { openInNewTab } from 'src/utils/openInNewTab';
 
 const Footer = () => {
   const socialLinks = useSocialLinks(); // admin에서 입력한 URL 반영
