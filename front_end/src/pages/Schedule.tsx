@@ -10,11 +10,13 @@ import { CSSProperties } from 'react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '@front/ui/schedule.css';
 import { ScheduleEvent } from '@shared/types/schedule';
-import { getEventsInRange } from '@front/data/schedule';
+import axios from 'axios';
 import btn_prev from '@front/assets/icons/bg-btn-prev.png';
 import btn_next from '@front/assets/icons/bg-btn-next.png';
 
-// date-fns localizer
+// ===========================
+// date-fns localizer 설정
+// ===========================
 const locales = { ko };
 const localizer = dateFnsLocalizer({
   format,
@@ -24,7 +26,9 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
+// ===========================
 // 커스텀 툴바
+// ===========================
 const CustomToolbar = ({ date, onNavigate }: ToolbarProps<ScheduleEvent, object>) => {
   const handlePrev = () => {
     const newDate = new Date(date);
@@ -52,20 +56,55 @@ const CustomToolbar = ({ date, onNavigate }: ToolbarProps<ScheduleEvent, object>
   );
 };
 
+// ===========================
 // 타입별 이모지 매핑
+// ===========================
 const typeEmojiMap: Record<string, string> = {
-  B: '🎂',
-  C: '🎵',
-  E: '⭐',
+  B: '🎂', // Birthday
+  C: '🎵', // Concert
+  E: '⭐', // Event
 };
 
+// ===========================
+// Schedule 페이지 컴포넌트
+// ===========================
 export default function Schedule() {
+  // 상태 관리
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedEvents, setSelectedEvents] = useState<ScheduleEvent[]>([]);
 
-  // 범위 변경 시 이벤트 가져오기
+  // ===========================
+  // Firebase/Back-End에서 이벤트 불러오기
+  // ===========================
+  const fetchEvents = async () => {
+    try {
+      const res = await axios.get<ScheduleEvent[]>('/api/schedule');
+      const data = res.data.map((e) => ({
+        ...e,
+        start: new Date(e.start),
+        end: new Date(e.end),
+      }));
+      setEvents(data);
+
+      // 오늘 날짜 기준 이벤트 선택
+      const todayEvents = data.filter((e) =>
+        isWithinInterval(new Date(), { start: e.start, end: e.end })
+      );
+      setSelectedEvents(todayEvents);
+    } catch (err) {
+      console.error('Failed to fetch events', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // ===========================
+  // 달력 범위 변경 시
+  // ===========================
   const handleRangeChange = (range: any) => {
     let start: Date;
     let end: Date;
@@ -76,10 +115,17 @@ export default function Schedule() {
       start = range.start;
       end = range.end;
     }
-    setEvents(getEventsInRange(start, end));
+
+    // 범위 안 이벤트 필터링
+    const filtered = events.filter((e) =>
+      isWithinInterval(e.start, { start, end })
+    );
+    setEvents(filtered);
   };
 
-  // 날짜 클릭
+  // ===========================
+  // 날짜 클릭 시 좌측 일정 갱신
+  // ===========================
   const handleSelectSlot = ({ start }: { start: Date }) => {
     setSelectedDate(start);
     const filtered = events.filter((e) =>
@@ -88,40 +134,35 @@ export default function Schedule() {
     setSelectedEvents(filtered);
   };
 
-  // 이벤트 클릭
+  // ===========================
+  // 이벤트 클릭 시 좌측 일정 갱신
+  // ===========================
   const handleSelectEvent = (event: ScheduleEvent) => {
     setSelectedDate(event.start);
     setSelectedEvents([event]);
   };
 
-  useEffect(() => {
-    const todayEvents = events.filter((e) =>
-      isWithinInterval(new Date(), { start: e.start, end: e.end })
-    );
-    setSelectedEvents(todayEvents);
-  }, [events]);
-
-  // 이벤트 스타일
+  // ===========================
+  // 이벤트 스타일 설정
+  // ===========================
   const eventStyleGetter = (event: ScheduleEvent) => {
-    let backgroundColor = '';
-    if (event.type === 'B') backgroundColor = '#e79c89';
-    if (event.type === 'C') backgroundColor = '#72d2c0';
-    if (event.type === 'E') backgroundColor = '#f1bd4c';
-
     const style: CSSProperties = {
       backgroundColor: 'transparent',
       border: 'none',
       color: 'inherit',
       fontSize: '1rem',
-      textAlign: 'left', // ← 왼쪽 정렬
-      padding: '0 10px',  // 좌우 여백 약간
+      textAlign: 'left',
+      padding: '0 10px',
     };
-
     return { style };
   };
 
+  // ===========================
+  // 렌더링
+  // ===========================
   return (
     <div className="container">
+      {/* 왼쪽 사이드 */}
       <div id="side">
         <div className="side2">
           05
@@ -130,7 +171,9 @@ export default function Schedule() {
         </div>
       </div>
 
+      {/* 본문 */}
       <div className="cont schedule">
+        {/* 좌측: 일정 목록 */}
         <div className="n_left">
           <div className="title n_tt">SCHEDULE</div>
           <div className="sch_cont">
@@ -165,6 +208,7 @@ export default function Schedule() {
           </div>
         </div>
 
+        {/* 우측: 달력 */}
         <div className="n_right">
           <div className="cd_calendar">
             <Calendar<ScheduleEvent>
@@ -183,17 +227,17 @@ export default function Schedule() {
               components={{
                 toolbar: CustomToolbar,
                 event: ({ event }) => (
-                      <span
-      style={{
-        display: 'block',
-        width: '100%',
-        textAlign: 'left', // 반드시 여기에도 적용
-      }}
-    >
-      {typeEmojiMap[event.type] || ''}
-    </span>
-  ),
-}}
+                  <span
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {typeEmojiMap[event.type] || ''}
+                  </span>
+                ),
+              }}
             />
           </div>
         </div>
