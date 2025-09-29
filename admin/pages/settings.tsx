@@ -73,7 +73,7 @@ const SettingsPage = () => {
     <Layout>
       <Box p={4}>
         <Typography variant="h4" mb={2}>
-          Settings Admin
+          기본 설정
         </Typography>
 
         {alert && <Alert severity="success" sx={{ mb: 2 }}>{alert}</Alert>}
@@ -85,7 +85,7 @@ const SettingsPage = () => {
             <Typography variant="h6" mb={2}>Main Image</Typography>
             <Stack direction="row" spacing={2} alignItems="center">
               <Button variant="outlined" component="label">
-                Upload Image
+                업로드
                 <input type="file" hidden onChange={e => e.target.files && setImageFile(e.target.files[0])} />
               </Button>
               {mainImageUrl && <img src={mainImageUrl} alt="main" width={100} />}
@@ -111,7 +111,7 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
 
-        <Button variant="contained" onClick={saveSettings}>Save Settings</Button>
+        <Button variant="contained" onClick={saveSettings}>저장</Button>
       </Box>
     </Layout>
   );

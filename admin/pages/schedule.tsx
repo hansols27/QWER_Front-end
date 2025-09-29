@@ -147,7 +147,7 @@ const SchedulePage = () => {
     <Layout>
       <Box p={4}>
         <Typography variant="h4" mb={2}>
-          Schedule Admin
+          일정관리
         </Typography>
 
         {alert && <Alert severity="success" sx={{ mb: 2 }}>{alert}</Alert>}
@@ -214,9 +214,9 @@ const SchedulePage = () => {
             </Stack>
           </DialogContent>
           <DialogActions>
-            {editId && <Button color="error" onClick={deleteEvent}>Delete</Button>}
-            <Button onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button variant="contained" onClick={saveEvent}>{editId ? "Update" : "Save"}</Button>
+            {editId && <Button color="error" onClick={deleteEvent}>삭제</Button>}
+            <Button onClick={() => setModalOpen(false)}>취소</Button>
+            <Button variant="contained" onClick={saveEvent}>{editId ? "저장" : "저장"}</Button>
           </DialogActions>
         </Dialog>
       </Box>
