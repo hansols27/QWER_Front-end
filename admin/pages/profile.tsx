@@ -8,7 +8,6 @@ import {
   Stack,
   Card,
   CardContent,
-  IconButton,
   Alert,
   CircularProgress,
   MenuItem,
@@ -16,290 +15,164 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import { Add, Delete } from "@mui/icons-material";
+import axios from "axios";
 import type { MemberState, MemberPayload } from "@shared/types/member";
 
-const MEMBER_IDS = ["All", "Chodan", "Majenta", "Hina", "Siyeon"];
-const SNS_KEYS = ["youtube", "instagram", "twitter", "tiktok", "weverse", "cafe"];
-const MAX_IMAGES = 4;
-const MIN_IMAGES = 1;
-const MAX_SNS = 6;
-const MIN_SNS = 1;
+type MemberId = "All" | "Chodan" | "Majenta" | "Hina" | "Siyeon";
 
-type SNSField = { key: string; url: string };
+const initialState: MemberState = { text: [""], image: [""], sns: {} };
 
-export default function ProfilePage() {
-  const [members, setMembers] = useState<Record<string, MemberState & { snsList: SNSField[] }>>(
-    Object.fromEntries(
-      MEMBER_IDS.map((id) => [
-        id,
-        { text: [""], image: [], sns: {}, snsList: [{ key: "youtube", url: "" }] },
-      ])
-    ) as Record<string, MemberState & { snsList: SNSField[] }>
-  );
+const ProfilePage = () => {
+  const [memberId, setMemberId] = useState<MemberId>("All");
+  const [state, setState] = useState<MemberState>(initialState);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [alert, setAlert] = useState("");
 
-  // ----------------------
-  // 데이터 불러오기
-  // ----------------------
+  // Fetch profile
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfile = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("/api/members");
-        if (!res.ok) throw new Error("데이터 불러오기 실패");
-        const data = await res.json();
-
-        const formatted: Record<string, MemberState & { snsList: SNSField[] }> = {} as any;
-        MEMBER_IDS.forEach((id) => {
-          const member = data.find((m: any) => m.id === id);
-          formatted[id] = {
-            text: member
-              ? member.contents.filter((c: any) => c.type === "text").map((c: any) => c.content)
-              : [""],
-            image: member
-              ? member.contents.filter((c: any) => c.type === "image").map((c: any) => c.content)
-              : [],
-            sns: member?.sns || {},
-            snsList: member?.sns
-              ? Object.entries(member.sns).map(([key, url]) => ({
-                  key,
-                  url: typeof url === "string" ? url : "", // ✅ url을 string으로 보장
-                }))
-              : [{ key: "youtube", url: "" }],
-          };
-        });
-        setMembers(formatted);
+        const res = await axios.get<{ success: boolean; data: MemberPayload }>(`/api/profile/${memberId}`);
+        const data = res.data.data;
+        if (data) {
+          const texts = data.contents.filter(c => c.type === "text").map(c => c.content);
+          const images = data.contents.filter(c => c.type === "image").map(c => c.content);
+          setState({
+            text: texts.length ? texts : [""],
+            image: images.length ? images : [""],
+            sns: data.sns || {},
+          });
+        } else {
+          setState(initialState);
+        }
       } catch (err) {
         console.error(err);
-        setAlert({ type: "error", message: "데이터 로드 실패" });
+        setAlert("Failed to load profile");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    fetchProfile();
+  }, [memberId]);
 
-  // ----------------------
-  // 핸들러
-  // ----------------------
-  const handleTextChange = (id: string, index: number, value: string) => {
-    setMembers((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], text: prev[id].text.map((t, i) => (i === index ? value : t)) },
-    }));
-  };
-  const handleAddText = (id: string) =>
-    setMembers((prev) => ({ ...prev, [id]: { ...prev[id], text: [...prev[id].text, ""] } }));
-  const handleRemoveText = (id: string, index: number) =>
-    setMembers((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], text: prev[id].text.filter((_, i) => i !== index) },
-    }));
+  // Text handlers
+  const addText = () => setState(prev => ({ ...prev, text: [...prev.text, ""] }));
+  const removeText = (i: number) => setState(prev => ({ ...prev, text: prev.text.filter((_, idx) => idx !== i) }));
+  const updateText = (i: number, val: string) =>
+    setState(prev => ({ ...prev, text: prev.text.map((t, idx) => (idx === i ? val : t)) }));
 
-  // 이미지
-  const handleImageChange = (id: string, files: FileList | null) => {
-    if (!files) return;
-    setMembers((prev) => {
-      const current = prev[id].image;
-      const newImages = [...current, ...Array.from(files)];
-      if (newImages.length > MAX_IMAGES) {
-        setAlert({ type: "error", message: `이미지는 최대 ${MAX_IMAGES}개까지 업로드 가능합니다.` });
-        return prev;
-      }
-      return { ...prev, [id]: { ...prev[id], image: newImages } };
-    });
-  };
-  const handleRemoveImage = (id: string, index: number) =>
-    setMembers((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], image: prev[id].image.filter((_, i) => i !== index) },
-    }));
+  // Image handlers
+  const addImage = () => setState(prev => ({ ...prev, image: [...prev.image, ""] }));
+  const removeImage = (i: number) => setState(prev => ({ ...prev, image: prev.image.filter((_, idx) => idx !== i) }));
+  const updateImage = (i: number, file: File | string) =>
+    setState(prev => ({ ...prev, image: prev.image.map((img, idx) => (idx === i ? file : img)) }));
 
-  // SNS
-  const handleSNSKeyChange = (id: string, idx: number, newKey: string) => {
-    setMembers((prev) => {
-      const snsList = [...prev[id].snsList];
-      snsList[idx].key = newKey;
-      return { ...prev, [id]: { ...prev[id], snsList } };
-    });
-  };
-  const handleSNSUrlChange = (id: string, idx: number, url: string) => {
-    setMembers((prev) => {
-      const snsList = [...prev[id].snsList];
-      snsList[idx].url = url;
-      return { ...prev, [id]: { ...prev[id], snsList } };
-    });
-  };
-  const handleAddSNS = (id: string) => {
-    setMembers((prev) => {
-      if (prev[id].snsList.length >= MAX_SNS) {
-        setAlert({ type: "error", message: `SNS는 최대 ${MAX_SNS}개까지 등록 가능합니다.` });
-        return prev;
-      }
-      return {
-        ...prev,
-        [id]: { ...prev[id], snsList: [...prev[id].snsList, { key: "youtube", url: "" }] },
-      };
-    });
-  };
-  const handleRemoveSNS = (id: string, idx: number) =>
-    setMembers((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], snsList: prev[id].snsList.filter((_, i) => i !== idx) },
-    }));
+  // SNS handlers
+  const updateSns = (key: keyof typeof state.sns, val: string) =>
+    setState(prev => ({ ...prev, sns: { ...prev.sns, [key]: val } }));
 
-  // ----------------------
-  // 저장
-  // ----------------------
-  const handleSave = async () => {
+  // Save profile
+  const saveProfile = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const formData = new FormData();
+      const files = state.image.filter(i => i instanceof File) as File[];
+      files.forEach(f => formData.append("images", f));
+      formData.append("data", JSON.stringify({ text: state.text, sns: state.sns }));
+      formData.append("name", memberId);
 
-      const payload: MemberPayload[] = MEMBER_IDS.map((id) => {
-        const snsObj = Object.fromEntries(
-          members[id].snsList
-            .filter((s) => s.url.trim() !== "")
-            .map((s) => [s.key, s.url])
-            .slice(0, MAX_SNS)
-        );
-        return {
-          id,
-          name: id,
-          contents: [
-            ...members[id].text.filter((t) => t.trim() !== "").map((t) => ({ type: "text" as const, content: t })),
-            ...members[id].image
-              .filter((img): img is string => typeof img === "string")
-              .map((url) => ({ type: "image" as const, content: url })),
-          ],
-          sns: snsObj,
-        };
+      await axios.post<{ success: boolean; data: MemberPayload }>(`/api/profile/${memberId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const formData = new FormData();
-      formData.append("members", JSON.stringify(payload));
-
-      Object.entries(members).forEach(([id, state]) =>
-        state.image.forEach((img, idx) => {
-          if (img instanceof File) {
-            formData.append("images", img, `${id}_${idx}.${img.name.split(".").pop()}`);
-          }
-        })
-      );
-
-      const res = await fetch("/api/members/save", { method: "POST", body: formData });
-      const result = await res.json();
-      if (!result.success) throw new Error(result.error || "저장 실패");
-
-      setAlert({ type: "success", message: "저장 완료!" });
-    } catch (err: any) {
+      setAlert("Profile saved successfully!");
+    } catch (err) {
       console.error(err);
-      setAlert({ type: "error", message: err.message || "저장 중 오류 발생" });
+      setAlert("Failed to save profile");
     } finally {
       setLoading(false);
     }
   };
 
-  // ----------------------
-  // 렌더
-  // ----------------------
   return (
     <Layout>
-      <Box p={3}>
-        <Typography variant="h4" gutterBottom>
-          Member Profile
+      <Box p={4}>
+        <Typography variant="h4" mb={2}>
+          Profile Admin
         </Typography>
 
-        {alert && (
-          <Alert severity={alert.type} sx={{ mb: 2 }}>
-            {alert.message}
-          </Alert>
-        )}
+        <FormControl fullWidth sx={{ mb: 3 }}>
+          <InputLabel>Member</InputLabel>
+          <Select value={memberId} label="Member" onChange={e => setMemberId(e.target.value as MemberId)}>
+            <MenuItem value="All">All</MenuItem>
+            <MenuItem value="Chodan">Chodan</MenuItem>
+            <MenuItem value="Majenta">Majenta</MenuItem>
+            <MenuItem value="Hina">Hina</MenuItem>
+            <MenuItem value="Siyeon">Siyeon</MenuItem>
+          </Select>
+        </FormControl>
 
-        <Stack spacing={3}>
-          {MEMBER_IDS.map((id) => (
-            <Card key={id}>
-              <CardContent>
-                <Typography variant="h6">{id}</Typography>
+        {alert && <Alert severity="success" sx={{ mb: 2 }}>{alert}</Alert>}
+        {loading && <CircularProgress sx={{ mb: 2 }} />}
 
-                {/* 텍스트 */}
-                <Typography variant="subtitle1"></Typography>
-                {members[id]?.text.map((t, idx) => (
-                  <Stack key={idx} direction="row" spacing={1} alignItems="center" mb={1}>
-                    <TextField fullWidth value={t} onChange={(e) => handleTextChange(id, idx, e.target.value)} />
-                    <IconButton onClick={() => handleRemoveText(id, idx)}>
-                      <Delete />
-                    </IconButton>
-                  </Stack>
-                ))}
-                <Button startIcon={<Add />} onClick={() => handleAddText(id)}>
-                  추가
-                </Button>
-
-                {/* 이미지 */}
-                <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                  Images (1~{MAX_IMAGES}개)
-                </Typography>
-                <Button variant="contained" component="label" sx={{ mb: 1 }}>
-                  업로드
-                  <input type="file" hidden multiple accept="image/*" onChange={(e) => handleImageChange(id, e.target.files)} />
-                </Button>
-                <Stack spacing={1}>
-                  {members[id]?.image.map((img, idx) => (
-                    <Stack key={idx} direction="row" spacing={1} alignItems="center">
-                      {typeof img === "string" ? <img src={img} width={80} /> : <Typography>{img.name}</Typography>}
-                      <IconButton onClick={() => handleRemoveImage(id, idx)}>
-                        <Delete />
-                      </IconButton>
-                    </Stack>
-                  ))}
+        {/* Text Fields */}
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" mb={2}>Texts</Typography>
+            <Stack spacing={2}>
+              {state.text.map((t, i) => (
+                <Stack direction="row" spacing={1} key={i}>
+                  <TextField fullWidth value={t} onChange={e => updateText(i, e.target.value)} />
+                  <Button variant="outlined" color="error" onClick={() => removeText(i)}>Remove</Button>
                 </Stack>
+              ))}
+              <Button variant="contained" onClick={addText}>Add Text</Button>
+            </Stack>
+          </CardContent>
+        </Card>
 
-                {/* SNS */}
-                <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                  SNS (1~{MAX_SNS}개)
-                </Typography>
-                <Stack spacing={1}>
-                  {members[id]?.snsList.map((sns, idx) => (
-                    <Stack key={idx} direction="row" spacing={1} alignItems="center">
-                      <FormControl sx={{ minWidth: 120 }}>
-                        <InputLabel>SNS</InputLabel>
-                        <Select
-                          value={sns.key}
-                          label="SNS"
-                          onChange={(e) => handleSNSKeyChange(id, idx, e.target.value)}
-                        >
-                          {SNS_KEYS.map((k) => (
-                            <MenuItem key={k} value={k}>
-                              {k}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <TextField
-                        fullWidth
-                        placeholder="URL 입력"
-                        value={sns.url}
-                        onChange={(e) => handleSNSUrlChange(id, idx, e.target.value)}
-                      />
-                      <IconButton onClick={() => handleRemoveSNS(id, idx)}>
-                        <Delete />
-                      </IconButton>
-                    </Stack>
-                  ))}
+        {/* Images */}
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" mb={2}>Images</Typography>
+            <Stack spacing={2}>
+              {state.image.map((img, i) => (
+                <Stack direction="row" spacing={1} key={i} alignItems="center">
+                  <Button variant="outlined" component="label">
+                    Upload
+                    <input type="file" hidden onChange={e => e.target.files && updateImage(i, e.target.files[0])} />
+                  </Button>
+                  {typeof img === "string" && <img src={img} alt="preview" width={50} />}
+                  <Button variant="outlined" color="error" onClick={() => removeImage(i)}>Remove</Button>
                 </Stack>
-                <Button startIcon={<Add />} onClick={() => handleAddSNS(id)} sx={{ mt: 1 }}>
-                  추가
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </Stack>
+              ))}
+              <Button variant="contained" onClick={addImage}>Add Image</Button>
+            </Stack>
+          </CardContent>
+        </Card>
 
-        <Box mt={3}>
-          <Button variant="contained" onClick={handleSave} disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : "저장"}
-          </Button>
-        </Box>
+        {/* SNS Links */}
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" mb={2}>SNS Links</Typography>
+            <Stack spacing={2}>
+              {["instagram", "youtube", "twitter", "tiktok", "weverse", "cafe"].map(k => (
+                <TextField
+                  key={k}
+                  label={k}
+                  value={state.sns[k] || ""}
+                  onChange={e => updateSns(k, e.target.value)}
+                />
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+
+        <Button variant="contained" onClick={saveProfile}>Save Profile</Button>
       </Box>
     </Layout>
   );
-}
+};
+
+export default ProfilePage;
