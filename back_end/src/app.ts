@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import settingsRouter from "./routes/settings";
 import profileRoutes from "./routes/members";
+import scheduleRoutes from "./routes/schedule";
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.use(cors({
 app.use(express.json());
 app.use("/api/settings", settingsRouter);
 app.use("/api/members", profileRoutes);
+app.use("/api/schedule", scheduleRoutes);
 
 export default app;
