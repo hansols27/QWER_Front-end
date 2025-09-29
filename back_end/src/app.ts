@@ -3,6 +3,7 @@ import cors from "cors";
 import settingsRouter from "./routes/settings";
 import profileRoutes from "./routes/members";
 import scheduleRoutes from "./routes/schedule";
+import noticeRoutes from "./routes/notice";
 
 const app = express();
 
@@ -16,5 +17,6 @@ app.use(express.json());
 app.use("/api/settings", settingsRouter);
 app.use("/api/members", profileRoutes);
 app.use("/api/schedule", scheduleRoutes);
+app.use("/api/notice", noticeRoutes);
 
 export default app;
