@@ -1,6 +1,10 @@
 'use client';
 
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import dynamic from "next/dynamic";
+import { forwardRef, useImperativeHandle, useState } from "react";
+import "react-quill/dist/quill.snow.css";
+
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 export interface SmartEditorHandle {
   getContent: () => string;
@@ -14,32 +18,22 @@ export interface SmartEditorProps {
 
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
   ({ initialContent = "" }, ref) => {
-    const editorRef = useRef<HTMLDivElement>(null);
-    let content = initialContent;
+    const [content, setContent] = useState(initialContent);
+    const [readOnly, setReadOnlyState] = useState(false);
 
     useImperativeHandle(ref, () => ({
       getContent: () => content,
-      setContent: (c: string) => {
-        content = c;
-        if (editorRef.current) editorRef.current.innerHTML = c;
-      },
-      setReadOnly: (r: boolean) => {
-        if (editorRef.current) editorRef.current.contentEditable = (!r).toString();
-      },
+      setContent: (c: string) => setContent(c),
+      setReadOnly: (r: boolean) => setReadOnlyState(r),
     }));
 
     return (
-      <div
-        ref={editorRef}
-        dangerouslySetInnerHTML={{ __html: initialContent }}
-        style={{
-          minHeight: "300px",
-          border: "1px solid #ccc",
-          padding: "8px",
-          borderRadius: "4px",
-          overflowY: "auto",
-          backgroundColor: "#fff",
-        }}
+      <ReactQuill
+        theme="snow"
+        value={content}
+        onChange={setContent}
+        readOnly={readOnly}
+        style={{ minHeight: "300px", backgroundColor: "#fff" }}
       />
     );
   }

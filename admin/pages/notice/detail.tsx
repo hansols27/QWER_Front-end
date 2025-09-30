@@ -8,10 +8,7 @@ import type { SmartEditorHandle } from "../../components/common/SmartEditor";
 import { Box, Button, Typography, Stack, TextField, Select, MenuItem } from "@mui/material";
 import axios from "axios";
 
-const SmartEditor = dynamic(
-  () => import("../../components/common/SmartEditor"),
-  { ssr: false }
-);
+const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
 
 interface Notice {
   id: number;
@@ -50,9 +47,7 @@ export default function NoticeDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.setReadOnly(!isEdit);
-    }
+    if (editorRef.current) editorRef.current.setReadOnly(!isEdit);
   }, [isEdit]);
 
   const handleSave = async () => {
