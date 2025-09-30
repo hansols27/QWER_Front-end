@@ -34,7 +34,6 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
 
       const wrapper = wrapperRef.current;
       const toolbar = wrapper.querySelector(".ql-toolbar") as HTMLElement | null;
-
       const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
 
       let minHeight = 300;
@@ -57,9 +56,11 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
       <div
         ref={wrapperRef}
         style={{
-          backgroundColor: "#ff0000ff",
-          minHeight: "500px",
+          backgroundColor: "#fff",
+          minHeight: "300px",
           width: "100%",
+          display: "flex",
+          flexDirection: "column", // 툴바 위쪽, 에디터 아래쪽
           boxSizing: "border-box",
         }}
       >
@@ -69,11 +70,12 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
           onChange={setContent}
           readOnly={readOnly}
           style={{
-            height: editorHeight,
+            flex: 1, // 남은 공간 모두 차지
             backgroundColor: "#fff",
             padding: 0,
             margin: 0,
             boxSizing: "border-box",
+            height: editorHeight, // 필요시 fallback
           }}
           className="smart-editor"
         />
@@ -89,10 +91,20 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
             line-height: 32px;
             margin: 0;
           }
+          /* 에디터 내용 영역 */
+          .smart-editor .ql-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+          }
           .smart-editor .ql-editor {
+            flex: 1;
             padding: 0;
             margin: 0;
             overflow-y: auto;
+            box-sizing: border-box;
           }
         `}</style>
       </div>
