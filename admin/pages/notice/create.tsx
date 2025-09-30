@@ -42,10 +42,12 @@ export default function NoticeCreate() {
         <TextField label="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
 
         <Box>
-          <SmartEditor ref={editorRef} />
+          {/* SmartEditor에 원하는 높이 (예: 400px)를 명시적으로 전달 */}
+          <SmartEditor ref={editorRef} height="400px" /> 
         </Box>
 
-        <Box>
+        {/* 버튼 Box에 상단 margin을 넉넉하게 주어 에디터와의 간격을 확보 */}
+        <Box sx={{ mt: 3 }}> 
           <Button variant="contained" onClick={handleSubmit}>저장</Button>
           <Button sx={{ ml: 1 }} onClick={() => router.push("/notice")}>취소</Button>
         </Box>
