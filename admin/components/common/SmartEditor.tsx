@@ -13,8 +13,8 @@ export interface SmartEditorProps {
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
   ({ initialContent = "" }, ref) => {
     const editorRef = useRef<HTMLDivElement>(null);
-    let readOnly = false;
     let content = initialContent;
+    let readOnly = false;
 
     useImperativeHandle(ref, () => ({
       getContent: () => content,

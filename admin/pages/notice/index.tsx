@@ -48,7 +48,7 @@ export default function NoticeList() {
             <TableRow
               key={notice.id}
               hover
-              onClick={() => router.push(`/notice/${notice.id}`)}
+              onClick={() => router.push(`/notice/detail/${notice.id}`)}
               style={{ cursor: "pointer" }}
             >
               <TableCell>{notice.type}</TableCell>
