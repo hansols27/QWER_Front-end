@@ -59,6 +59,33 @@ type ApiRouteConfig = {
   type __Unused = __Check
 }
 
+// Validate ../../pages/notice/create.tsx
+{
+  type __IsExpected<Specific extends PagesPageConfig> = Specific
+  const handler = {} as typeof import("../../pages/notice/create.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../pages/notice/detail.tsx
+{
+  type __IsExpected<Specific extends PagesPageConfig> = Specific
+  const handler = {} as typeof import("../../pages/notice/detail.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../pages/notice/index.tsx
+{
+  type __IsExpected<Specific extends PagesPageConfig> = Specific
+  const handler = {} as typeof import("../../pages/notice/index.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../pages/profile.tsx
 {
   type __IsExpected<Specific extends PagesPageConfig> = Specific
