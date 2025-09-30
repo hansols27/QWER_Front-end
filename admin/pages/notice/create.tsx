@@ -1,5 +1,7 @@
+'use client';
+
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import Layout from "../../components/common/layout";
 import SmartEditor, { SmartEditorHandle } from "../../components/common/SmartEditor";
@@ -17,7 +19,7 @@ export default function NoticeCreate() {
   const [type, setType] = useState<"공지" | "이벤트">("공지");
   const [title, setTitle] = useState("");
   const editorRef = useRef<SmartEditorHandle>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async () => {
     const content = editorRef.current?.getContent() || "";
@@ -30,7 +32,7 @@ export default function NoticeCreate() {
     try {
       await axios.post("/api/notices", { type, title, content });
       alert("등록 완료!");
-      navigate("/notice");
+      router.push("/notice");
     } catch (err) {
       console.error(err);
       alert("등록 중 오류가 발생했습니다.");
@@ -43,7 +45,6 @@ export default function NoticeCreate() {
         공지사항 등록
       </Typography>
       <Stack spacing={2}>
-        {/* 구분 선택 */}
         <Select
           value={type}
           onChange={(e) => setType(e.target.value as "공지" | "이벤트")}
@@ -52,22 +53,19 @@ export default function NoticeCreate() {
           <MenuItem value="이벤트">이벤트</MenuItem>
         </Select>
 
-        {/* 제목 입력 */}
         <TextField
           label="제목"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
-        {/* SmartEditor2 */}
         <SmartEditor ref={editorRef} />
 
-        {/* 버튼 */}
         <Box>
           <Button variant="contained" onClick={handleSubmit}>
             저장
           </Button>
-          <Button sx={{ ml: 1 }} onClick={() => navigate("/notice")}>
+          <Button sx={{ ml: 1 }} onClick={() => router.push("/notice")}>
             취소
           </Button>
         </Box>
