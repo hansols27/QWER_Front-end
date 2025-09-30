@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Layout from "../../components/common/layout";
+import SmartEditor, { SmartEditorHandle } from "../../components/common/SmartEditor";
 import {
   Box,
   Button,
@@ -15,12 +16,25 @@ import {
 export default function NoticeCreate() {
   const [type, setType] = useState<"공지" | "이벤트">("공지");
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState(""); // 스마트에디터 적용 예정
+  const editorRef = useRef<SmartEditorHandle>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    await axios.post("/api/notices", { type, title, content });
-    navigate("/notice");
+    const content = editorRef.current?.getContent() || "";
+
+    if (!title.trim()) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
+
+    try {
+      await axios.post("/api/notices", { type, title, content });
+      alert("등록 완료!");
+      navigate("/notice");
+    } catch (err) {
+      console.error(err);
+      alert("등록 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -29,22 +43,26 @@ export default function NoticeCreate() {
         공지사항 등록
       </Typography>
       <Stack spacing={2}>
-        <Select value={type} onChange={(e) => setType(e.target.value as "공지" | "이벤트")}>
+        {/* 구분 선택 */}
+        <Select
+          value={type}
+          onChange={(e) => setType(e.target.value as "공지" | "이벤트")}
+        >
           <MenuItem value="공지">공지</MenuItem>
           <MenuItem value="이벤트">이벤트</MenuItem>
         </Select>
+
+        {/* 제목 입력 */}
         <TextField
           label="제목"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <TextField
-          label="내용"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          multiline
-          rows={6}
-        />
+
+        {/* SmartEditor2 */}
+        <SmartEditor ref={editorRef} />
+
+        {/* 버튼 */}
         <Box>
           <Button variant="contained" onClick={handleSubmit}>
             저장

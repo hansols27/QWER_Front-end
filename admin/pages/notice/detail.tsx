@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Layout from "../../components/common/layout";
+import SmartEditor, { SmartEditorHandle } from "../../components/common/SmartEditor";
 import {
   Box,
   Button,
@@ -16,27 +17,53 @@ import type { Notice } from "@shared/types/notice";
 export default function NoticeDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const editorRef = useRef<SmartEditorHandle>(null);
+
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [type, setType] = useState<"공지" | "이벤트">("공지");
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
-    axios.get<Notice>(`/api/notices/${id}`).then((res) => setNotice(res.data));
+    if (!id) return;
+    axios.get<Notice>(`/api/notices/${id}`).then((res) => {
+      setNotice(res.data);
+      setType(res.data.type);
+      setTitle(res.data.title);
+      if (editorRef.current) {
+        editorRef.current.setContent(res.data.content);
+      }
+    });
   }, [id]);
 
   const handleUpdate = async () => {
     if (!notice) return;
-    await axios.put(`/api/notices/${notice.id}`, {
-      type: notice.type,
-      title: notice.title,
-      content: notice.content,
-    });
-    alert("수정 완료");
+    const content = editorRef.current?.getContent() || "";
+
+    try {
+      await axios.put(`/api/notices/${notice.id}`, {
+        type,
+        title,
+        content,
+      });
+      alert("수정 완료!");
+      navigate("/notice");
+    } catch (err) {
+      console.error(err);
+      alert("수정 중 오류가 발생했습니다.");
+    }
   };
 
   const handleDelete = async () => {
     if (!notice) return;
     if (confirm("삭제하시겠습니까?")) {
-      await axios.delete(`/api/notices/${notice.id}`);
-      navigate("/notice");
+      try {
+        await axios.delete(`/api/notices/${notice.id}`);
+        alert("삭제 완료!");
+        navigate("/notice");
+      } catch (err) {
+        console.error(err);
+        alert("삭제 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -45,36 +72,26 @@ export default function NoticeDetail() {
   return (
     <Layout>
       <Typography variant="h5" mb={2}>
-        공지사항 상세 
+        공지사항 상세
       </Typography>
       <Stack spacing={2}>
-        <Select
-          value={notice.type}
-          onChange={(e) =>
-            setNotice((prev) =>
-              prev ? { ...prev, type: e.target.value as "공지" | "이벤트" } : prev
-            )
-          }
-        >
+        {/* 구분 선택 */}
+        <Select value={type} onChange={(e) => setType(e.target.value as "공지" | "이벤트")}>
           <MenuItem value="공지">공지</MenuItem>
           <MenuItem value="이벤트">이벤트</MenuItem>
         </Select>
+
+        {/* 제목 입력 */}
         <TextField
           label="제목"
-          value={notice.title}
-          onChange={(e) =>
-            setNotice((prev) => (prev ? { ...prev, title: e.target.value } : prev))
-          }
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
-        <TextField
-          label="내용"
-          value={notice.content}
-          onChange={(e) =>
-            setNotice((prev) => (prev ? { ...prev, content: e.target.value } : prev))
-          }
-          multiline
-          rows={6}
-        />
+
+        {/* SmartEditor2 */}
+        <SmartEditor ref={editorRef} initialContent={notice.content} />
+
+        {/* 버튼 */}
         <Box>
           <Button variant="contained" onClick={handleUpdate}>
             수정
