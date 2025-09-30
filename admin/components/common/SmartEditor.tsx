@@ -14,15 +14,13 @@ export interface SmartEditorHandle {
 
 export interface SmartEditorProps {
   initialContent?: string;
-  padding?: string; // 부모 박스 패딩
 }
 
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
-  ({ initialContent = "", padding = "16px" }, ref) => {
+  ({ initialContent = "" }, ref) => {
     const [content, setContent] = useState(initialContent);
     const [readOnly, setReadOnlyState] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
-    const [editorHeight, setEditorHeight] = useState<number>(300);
 
     useImperativeHandle(ref, () => ({
       getContent: () => content,
@@ -30,35 +28,10 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
       setReadOnly: (r: boolean) => setReadOnlyState(r),
     }));
 
+    // 높이는 flex와 min-height:0으로 자동 처리
     const updateHeight = () => {
       if (!wrapperRef.current) return;
-
-      const wrapper = wrapperRef.current;
-      const toolbar = wrapper.querySelector(".ql-toolbar") as HTMLElement | null;
-      const container = wrapper.querySelector(".ql-container") as HTMLElement | null;
-
-      const wrapperStyles = getComputedStyle(wrapper);
-      const wrapperPaddingTop = parseFloat(wrapperStyles.paddingTop) || 0;
-      const wrapperPaddingBottom = parseFloat(wrapperStyles.paddingBottom) || 0;
-
-      const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
-      const containerMarginTop = container ? parseFloat(getComputedStyle(container).marginTop) : 0;
-      const containerMarginBottom = container ? parseFloat(getComputedStyle(container).marginBottom) : 0;
-
-      let minHeight = 300;
-      const width = window.innerWidth;
-      if (width < 768) minHeight = 200;
-      else if (width < 1024) minHeight = 250;
-
-      const availableHeight =
-        wrapper.clientHeight -
-        toolbarHeight -
-        wrapperPaddingTop -
-        wrapperPaddingBottom -
-        (containerMarginTop || 0) -
-        (containerMarginBottom || 0);
-
-      setEditorHeight(availableHeight > minHeight ? availableHeight : minHeight);
+      // 필요 시 다른 계산 추가 가능
     };
 
     useEffect(() => {
@@ -74,8 +47,9 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
           backgroundColor: "#fff",
           minHeight: "300px",
           width: "100%",
+          display: "flex",
+          flexDirection: "column",
           boxSizing: "border-box",
-          padding,
         }}
       >
         <ReactQuill
@@ -83,28 +57,40 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
           value={content}
           onChange={setContent}
           readOnly={readOnly}
-          style={{
-            height: editorHeight,
-            padding: 0,
-            boxSizing: "border-box",
-          }}
           className="smart-editor"
         />
         <style jsx>{`
-          /* 툴바 버튼 크기, 간격 통일 */
+          .smart-editor {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+          }
+          /* 툴바 */
           .smart-editor .ql-toolbar {
             min-height: 40px;
-            padding: 4px;
+            padding: 0;
           }
           .smart-editor .ql-toolbar button {
             height: 32px;
             width: 32px;
             line-height: 32px;
-            margin: 0 2px;
+            margin: 0;
+          }
+          /* 에디터 내용 영역 */
+          .smart-editor .ql-container {
+            flex: 1;
+            min-height: 0; /* 부모 높이 벗어나지 않도록 */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
           }
           .smart-editor .ql-editor {
-            padding: 8px 12px;
-            overflow-y: auto;
+            flex: 1;
+            min-height: 0; /* 부모 높이 벗어나지 않도록 */
+            padding: 0;
+            margin: 0;
+            overflow-y: auto; /* 내용이 길면 스크롤 */
+            box-sizing: border-box;
           }
         `}</style>
       </div>
