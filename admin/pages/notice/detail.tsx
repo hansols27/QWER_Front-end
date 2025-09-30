@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/router";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Layout from "../../components/common/layout";
 import type { SmartEditorHandle } from "../../components/common/SmartEditor";
@@ -20,35 +20,59 @@ interface Notice {
   content: string;
 }
 
-interface NoticeDetailProps {
-  notice: Notice;
-}
-
-export default function NoticeDetail({ notice }: NoticeDetailProps) {
-  const editorRef = useRef<SmartEditorHandle>(null);
-  const [isEdit, setIsEdit] = useState(false);
-  const [title, setTitle] = useState(notice.title);
-  const [type, setType] = useState<"공지" | "이벤트">(notice.type);
+export default function NoticeDetailPage() {
+  const params = useParams();
+  const id = params?.id;
   const router = useRouter();
+  const editorRef = useRef<SmartEditorHandle>(null);
 
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [title, setTitle] = useState("");
+  const [type, setType] = useState<"공지" | "이벤트">("공지");
+
+  // 공지사항 데이터 가져오기
+  useEffect(() => {
+    if (!id) return;
+
+    axios.get<Notice>(`/api/notices/${id}`) // ✅ axios 제네릭 타입 지정
+      .then(res => {
+        const data = res.data;
+        setNotice(data);
+        setTitle(data.title);
+        setType(data.type);
+        editorRef.current?.setContent(data.content);
+        editorRef.current?.setReadOnly(true);
+      })
+      .catch(err => {
+        console.error(err);
+        alert("공지사항을 불러오는데 실패했습니다.");
+      });
+  }, [id]);
+
+  // 편집 모드 토글 시 SmartEditor 읽기/쓰기
   useEffect(() => {
     if (editorRef.current) {
-      editorRef.current.setContent(notice.content);
-      editorRef.current.setReadOnly(!isEdit); // isEdit 상태에 따라 읽기/쓰기
+      editorRef.current.setReadOnly(!isEdit);
     }
-  }, [notice, isEdit]);
+  }, [isEdit]);
 
   const handleSave = async () => {
+    if (!id || !notice) return;
     const content = editorRef.current?.getContent() || "";
+
     try {
-      await axios.put(`/api/notices/${notice.id}`, { title, type, content });
+      await axios.put(`/api/notices/${id}`, { title, type, content });
       alert("수정 완료!");
       setIsEdit(false);
+      setNotice({ ...notice, title, type, content }); // Notice 타입 유지
     } catch (err) {
       console.error(err);
       alert("수정 중 오류가 발생했습니다.");
     }
   };
+
+  if (!notice) return <Layout>로딩 중...</Layout>;
 
   return (
     <Layout>
@@ -63,12 +87,12 @@ export default function NoticeDetail({ notice }: NoticeDetailProps) {
           </>
         ) : (
           <>
-            <Typography variant="h5">{title}</Typography>
-            <Typography variant="subtitle2">{type}</Typography>
+            <Typography variant="h5">{notice.title}</Typography>
+            <Typography variant="subtitle2">{notice.type}</Typography>
           </>
         )}
 
-        {/* SmartEditor */}
+        {/* SmartEditor 영역 */}
         <Box>
           <SmartEditor ref={editorRef} />
         </Box>

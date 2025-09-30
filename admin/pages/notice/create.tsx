@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import Layout from "../../components/common/layout";
 import dynamic from "next/dynamic";
@@ -41,7 +41,6 @@ export default function NoticeCreate() {
 
         <TextField label="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-        {/* SmartEditor 영역 */}
         <Box>
           <SmartEditor ref={editorRef} />
         </Box>

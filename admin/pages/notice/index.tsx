@@ -1,20 +1,17 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import Layout from "../../components/common/layout";
-import {
-  Box,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
-import type { Notice } from "@shared/types/notice";
+import { Box, Button, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+
+interface Notice {
+  id: number;
+  type: "공지" | "이벤트";
+  title: string;
+  createdAt?: string;
+}
 
 export default function NoticeList() {
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -22,17 +19,15 @@ export default function NoticeList() {
 
   useEffect(() => {
     axios.get<Notice[]>("/api/notices")
-      .then((res) => setNotices(res.data))
-      .catch((err) => console.error(err));
+      .then(res => setNotices(res.data))
+      .catch(err => console.error(err));
   }, []);
 
   return (
     <Layout>
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h5">공지사항 관리</Typography>
-        <Button variant="contained" onClick={() => router.push("/notice/create")}>
-          등록
-        </Button>
+        <Button variant="contained" onClick={() => router.push("/notice/create")}>등록</Button>
       </Box>
 
       <Table>
@@ -41,22 +36,19 @@ export default function NoticeList() {
             <TableCell>구분</TableCell>
             <TableCell>제목</TableCell>
             <TableCell>작성일</TableCell>
+            <TableCell>수정</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {notices.map((notice) => (
-            <TableRow
-              key={notice.id}
-              hover
-              onClick={() => router.push(`/notice/detail/${notice.id}`)}
-              style={{ cursor: "pointer" }}
-            >
-              <TableCell>{notice.type}</TableCell>
-              <TableCell>{notice.title}</TableCell>
+            <TableRow key={notice.id} hover>
+              <TableCell onClick={() => router.push(`/notice/detail/${notice.id}`)} style={{ cursor: "pointer" }}>{notice.type}</TableCell>
+              <TableCell onClick={() => router.push(`/notice/detail/${notice.id}`)} style={{ cursor: "pointer" }}>{notice.title}</TableCell>
+              <TableCell onClick={() => router.push(`/notice/detail/${notice.id}`)} style={{ cursor: "pointer" }}>
+                {notice.createdAt ? new Date(notice.createdAt).toLocaleDateString() : "-"}
+              </TableCell>
               <TableCell>
-                {notice.createdAt
-                  ? new Date(notice.createdAt).toLocaleDateString()
-                  : "-"}
+                <Button variant="outlined" size="small" onClick={() => router.push(`/notice/detail/${notice.id}`)}>수정</Button>
               </TableCell>
             </TableRow>
           ))}

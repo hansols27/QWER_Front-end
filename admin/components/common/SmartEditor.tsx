@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
 export interface SmartEditorHandle {
@@ -31,12 +33,12 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
         ref={editorRef}
         dangerouslySetInnerHTML={{ __html: initialContent }}
         style={{
-          minHeight: "300px",          // 최소 높이 지정
-          border: "1px solid #ccc",    // 테두리 표시
+          minHeight: "300px",
+          border: "1px solid #ccc",
           padding: "8px",
           borderRadius: "4px",
           overflowY: "auto",
-          backgroundColor: "#fff",     // 배경색
+          backgroundColor: "#fff",
         }}
       />
     );
