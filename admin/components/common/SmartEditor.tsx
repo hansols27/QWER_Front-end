@@ -14,7 +14,6 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
   ({ initialContent = "" }, ref) => {
     const editorRef = useRef<HTMLDivElement>(null);
     let content = initialContent;
-    let readOnly = false;
 
     useImperativeHandle(ref, () => ({
       getContent: () => content,
@@ -23,12 +22,24 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
         if (editorRef.current) editorRef.current.innerHTML = c;
       },
       setReadOnly: (r: boolean) => {
-        readOnly = r;
         if (editorRef.current) editorRef.current.contentEditable = (!r).toString();
       },
     }));
 
-    return <div ref={editorRef} dangerouslySetInnerHTML={{ __html: initialContent }} />;
+    return (
+      <div
+        ref={editorRef}
+        dangerouslySetInnerHTML={{ __html: initialContent }}
+        style={{
+          minHeight: "300px",          // 최소 높이 지정
+          border: "1px solid #ccc",    // 테두리 표시
+          padding: "8px",
+          borderRadius: "4px",
+          overflowY: "auto",
+          backgroundColor: "#fff",     // 배경색
+        }}
+      />
+    );
   }
 );
 

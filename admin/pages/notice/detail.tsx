@@ -1,12 +1,17 @@
-import { GetServerSideProps } from "next";
+'use client';
+
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import Layout from "../../components/common/layout";
-import { useRef, useEffect } from "react";
 import type { SmartEditorHandle } from "../../components/common/SmartEditor";
-import { Box, Button, Typography, Stack } from "@mui/material";
+import { Box, Button, Typography, Stack, TextField, Select, MenuItem } from "@mui/material";
 import axios from "axios";
 
-const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
+const SmartEditor = dynamic(
+  () => import("../../components/common/SmartEditor"),
+  { ssr: false }
+);
 
 interface Notice {
   id: number;
@@ -21,38 +26,65 @@ interface NoticeDetailProps {
 
 export default function NoticeDetail({ notice }: NoticeDetailProps) {
   const editorRef = useRef<SmartEditorHandle>(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [title, setTitle] = useState(notice.title);
+  const [type, setType] = useState<"공지" | "이벤트">(notice.type);
+  const router = useRouter();
 
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.setContent(notice.content);
-      editorRef.current.setReadOnly(true);
+      editorRef.current.setReadOnly(!isEdit); // isEdit 상태에 따라 읽기/쓰기
     }
-  }, [notice]);
+  }, [notice, isEdit]);
+
+  const handleSave = async () => {
+    const content = editorRef.current?.getContent() || "";
+    try {
+      await axios.put(`/api/notices/${notice.id}`, { title, type, content });
+      alert("수정 완료!");
+      setIsEdit(false);
+    } catch (err) {
+      console.error(err);
+      alert("수정 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <Layout>
       <Stack spacing={2}>
-        <Typography variant="h5">{notice.title}</Typography>
-        <Typography variant="subtitle2">{notice.type}</Typography>
-        <SmartEditor ref={editorRef} />
+        {isEdit ? (
+          <>
+            <Select value={type} onChange={(e) => setType(e.target.value as "공지" | "이벤트")}>
+              <MenuItem value="공지">공지</MenuItem>
+              <MenuItem value="이벤트">이벤트</MenuItem>
+            </Select>
+            <TextField label="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </>
+        ) : (
+          <>
+            <Typography variant="h5">{title}</Typography>
+            <Typography variant="subtitle2">{type}</Typography>
+          </>
+        )}
+
+        {/* SmartEditor */}
         <Box>
-          <Button variant="contained" href="/notice">
-            목록
-          </Button>
+          <SmartEditor ref={editorRef} />
+        </Box>
+
+        <Box>
+          {isEdit ? (
+            <>
+              <Button variant="contained" onClick={handleSave}>저장</Button>
+              <Button sx={{ ml: 1 }} onClick={() => setIsEdit(false)}>취소</Button>
+            </>
+          ) : (
+            <Button variant="contained" onClick={() => setIsEdit(true)}>수정</Button>
+          )}
+          <Button sx={{ ml: 1 }} onClick={() => router.push("/notice")}>목록</Button>
         </Box>
       </Stack>
     </Layout>
   );
 }
-
-// 서버사이드에서 동적 params 처리
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params!;
-  try {
-    const res = await axios.get(`https://qwer-fansite-admin.vercel.app/api/notices/${id}`);
-    return { props: { notice: res.data } };
-  } catch (err) {
-    console.error(err);
-    return { notFound: true };
-  }
-};
