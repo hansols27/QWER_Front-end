@@ -1,101 +1,70 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Layout from "../../components/common/layout";
-import SmartEditor, { SmartEditorHandle } from "../../components/common/SmartEditor";
+import dynamic from "next/dynamic";
 import {
   Box,
   Button,
-  MenuItem,
-  Select,
-  TextField,
   Typography,
   Stack,
+  CircularProgress,
 } from "@mui/material";
-import type { Notice } from "@shared/types/notice";
+import type { SmartEditorHandle } from "../../components/common/SmartEditor";
 
-export default function NoticeDetail() {
+const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
+
+interface Notice {
+  id: number;
+  type: "공지" | "이벤트";
+  title: string;
+  content: string;
+}
+
+export default function NoticeDetail({ params }: { params: { id: string } }) {
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { id } = router.query;
+  const { id } = params;
   const editorRef = useRef<SmartEditorHandle>(null);
 
-  const [notice, setNotice] = useState<Notice | null>(null);
-  const [type, setType] = useState<"공지" | "이벤트">("공지");
-  const [title, setTitle] = useState("");
-
   useEffect(() => {
-    if (!id) return;
-    axios.get<Notice>(`/api/notices/${id}`)
-      .then((res) => {
-        setNotice(res.data);
-        setType(res.data.type);
-        setTitle(res.data.title);
-        if (editorRef.current) {
-          editorRef.current.setContent(res.data.content);
-        }
-      })
-      .catch((err) => console.error(err));
-  }, [id]);
-
-  const handleUpdate = async () => {
-    if (!notice) return;
-    const content = editorRef.current?.getContent() || "";
-
-    try {
-      await axios.put(`/api/notices/${notice.id}`, { type, title, content });
-      alert("수정 완료!");
-      router.push("/notice");
-    } catch (err) {
-      console.error(err);
-      alert("수정 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!notice) return;
-    if (confirm("삭제하시겠습니까?")) {
+    const fetchNotice = async () => {
       try {
-        await axios.delete(`/api/notices/${notice.id}`);
-        alert("삭제 완료!");
-        router.push("/notice");
+        const res = await axios.get<Notice>(`/api/notices/${id}`);
+        setNotice(res.data);
       } catch (err) {
         console.error(err);
-        alert("삭제 중 오류가 발생했습니다.");
+        alert("공지사항을 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
       }
-    }
-  };
+    };
+    fetchNotice();
+  }, [id]);
 
-  if (!notice) return <div>Loading...</div>;
+  useEffect(() => {
+    if (notice && editorRef.current) {
+      editorRef.current.setContent(notice.content);
+      editorRef.current.setReadOnly(true);
+    }
+  }, [notice]);
+
+  if (loading) return <CircularProgress />;
+  if (!notice) return <Typography>공지사항이 존재하지 않습니다.</Typography>;
 
   return (
     <Layout>
-      <Typography variant="h5" mb={2}>
-        공지사항 상세
-      </Typography>
       <Stack spacing={2}>
-        <Select value={type} onChange={(e) => setType(e.target.value as "공지" | "이벤트")}>
-          <MenuItem value="공지">공지</MenuItem>
-          <MenuItem value="이벤트">이벤트</MenuItem>
-        </Select>
+        <Typography variant="h5">{notice.title}</Typography>
+        <Typography variant="subtitle2">{notice.type}</Typography>
 
-        <TextField
-          label="제목"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <SmartEditor ref={editorRef} initialContent={notice.content} />
+        <SmartEditor ref={editorRef} />
 
         <Box>
-          <Button variant="contained" onClick={handleUpdate}>
-            수정
-          </Button>
-          <Button color="error" sx={{ ml: 1 }} onClick={handleDelete}>
-            삭제
-          </Button>
-          <Button sx={{ ml: 1 }} onClick={() => router.push("/notice")}>
+          <Button variant="contained" onClick={() => router.push("/notice")}>
             목록
           </Button>
         </Box>

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Layout from "../../components/common/layout";
-import SmartEditor, { SmartEditorHandle } from "../../components/common/SmartEditor";
+import dynamic from "next/dynamic";
 import {
   Box,
   Button,
@@ -14,6 +14,9 @@ import {
   Typography,
   Stack,
 } from "@mui/material";
+import type { SmartEditorHandle } from "../../components/common/SmartEditor";
+
+const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
 
 export default function NoticeCreate() {
   const [type, setType] = useState<"공지" | "이벤트">("공지");
