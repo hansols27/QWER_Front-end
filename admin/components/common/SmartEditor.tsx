@@ -57,8 +57,8 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
       <div
         ref={wrapperRef}
         style={{
-          backgroundColor: "#fff",
-          minHeight: "300px",
+          backgroundColor: "#ff0000ff",
+          minHeight: "500px",
           width: "100%",
           boxSizing: "border-box",
         }}
