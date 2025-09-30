@@ -1,105 +1,103 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import Layout from "../../components/common/layout";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+} from "@mui/material";
 import type { Album } from "@shared/types/album";
 
 export default function AlbumDetail() {
+  const { id } = useParams(); // 동적 세그먼트에서 id 가져오기
   const router = useRouter();
-  const { id } = useParams();
-  const [album, setAlbum] = useState<Album | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [tracks, setTracks] = useState<string[]>([]);
-  const [videoUrl, setVideoUrl] = useState("");
-  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [album, setAlbum] = useState<Album | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
-    axios.get<Album>(`/api/album/${id}`).then(res => {
-      setAlbum(res.data);
-      setTitle(res.data.title);
-      setDate(res.data.date);
-      setDescription(res.data.description || "");
-      setTracks(res.data.tracks || []);
-      setVideoUrl(res.data.videoUrl || "");
-    });
+
+    const fetchAlbum = async () => {
+      try {
+        const res = await axios.get(`/api/albums/${id}`);
+        setAlbum(res.data as Album);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlbum();
   }, [id]);
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setCoverFile(e.target.files[0]);
-  };
-
-  const handleUpdate = async () => {
-    if (!album) return;
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("date", date);
-    formData.append("description", description);
-    formData.append("videoUrl", videoUrl);
-    if (coverFile) formData.append("coverFile", coverFile);
-    tracks.forEach((track, idx) => formData.append(`tracks[${idx}]`, track));
-
-    try {
-      const res = await axios.put<{ success: boolean; data?: Album }>(`/api/album/${album.id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (res.data.success) router.push("/album");
-    } catch (err) {
-      console.error(err);
-      alert("수정 실패");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!album) return;
-
-    if (!confirm("정말 삭제하시겠습니까?")) return;
-
-    try {
-      const res = await axios.delete<{ success: boolean }>(`/api/album/${album.id}`);
-      if (res.data.success) router.push("/album");
-    } catch (err) {
-      console.error(err);
-      alert("삭제 실패");
-    }
-  };
-
-  if (!album) return <Layout>Loading...</Layout>;
+  if (loading) return <Layout>로딩중...</Layout>;
+  if (!album) return <Layout>앨범을 찾을 수 없습니다.</Layout>;
 
   return (
     <Layout>
-      <Typography variant="h5" mb={2}>앨범 수정</Typography>
-      <Box display="flex" flexDirection="column" gap={2}>
-        <TextField label="타이틀" value={title} onChange={e => setTitle(e.target.value)} />
-        <TextField label="발매일" type="date" value={date} onChange={e => setDate(e.target.value)} InputLabelProps={{ shrink: true }} />
-        <TextField label="설명" multiline minRows={3} value={description} onChange={e => setDescription(e.target.value)} />
-        <TextField label="유튜브 링크" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} />
-        {tracks.map((track, idx) => (
-          <TextField
-            key={idx}
-            label={`트랙 ${idx + 1}`}
-            value={track}
-            onChange={e => {
-              const newTracks = [...tracks];
-              newTracks[idx] = e.target.value;
-              setTracks(newTracks);
-            }}
-          />
-        ))}
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        <Box display="flex" gap={2}>
-          <Button variant="contained" onClick={handleUpdate}>수정</Button>
-          <Button variant="outlined" color="error" onClick={handleDelete}>삭제</Button>
-        </Box>
+      <Box mb={2}>
+        <Typography variant="h5">앨범 상세 / 수정</Typography>
       </Box>
+
+      <Stack spacing={2}>
+        <TextField
+          label="타이틀"
+          value={album.title}
+          onChange={(e) => setAlbum({ ...album, title: e.target.value })}
+        />
+
+        <TextField
+          label="발매일"
+          type="date"
+          value={album.date}
+          onChange={(e) => setAlbum({ ...album, date: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+        />
+
+        <TextField
+          label="설명"
+          multiline
+          rows={4}
+          value={album.description || ""}
+          onChange={(e) => setAlbum({ ...album, description: e.target.value })}
+        />
+
+        <TextField
+          label="트랙 리스트 (쉼표로 구분)"
+          value={album.tracks?.join(", ") || ""}
+          onChange={(e) =>
+            setAlbum({ ...album, tracks: e.target.value.split(",").map(t => t.trim()) })
+          }
+        />
+
+        <TextField
+          label="유튜브 영상 URL"
+          value={album.videoUrl || ""}
+          onChange={(e) => setAlbum({ ...album, videoUrl: e.target.value })}
+        />
+
+        <Button
+          variant="contained"
+          onClick={async () => {
+            if (!album) return;
+            try {
+              await axios.put(`/api/albums/${id}`, album);
+              router.push("/album"); // 목록으로 이동
+            } catch (err) {
+              console.error(err);
+            }
+          }}
+        >
+          저장
+        </Button>
+      </Stack>
     </Layout>
   );
 }
