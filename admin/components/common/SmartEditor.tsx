@@ -14,10 +14,11 @@ export interface SmartEditorHandle {
 
 export interface SmartEditorProps {
   initialContent?: string;
+  padding?: string; // 부모 박스 패딩
 }
 
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
-  ({ initialContent = "" }, ref) => {
+  ({ initialContent = "", padding = "16px" }, ref) => {
     const [content, setContent] = useState(initialContent);
     const [readOnly, setReadOnlyState] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -34,14 +35,28 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
 
       const wrapper = wrapperRef.current;
       const toolbar = wrapper.querySelector(".ql-toolbar") as HTMLElement | null;
+      const container = wrapper.querySelector(".ql-container") as HTMLElement | null;
+
+      const wrapperStyles = getComputedStyle(wrapper);
+      const wrapperPaddingTop = parseFloat(wrapperStyles.paddingTop) || 0;
+      const wrapperPaddingBottom = parseFloat(wrapperStyles.paddingBottom) || 0;
+
       const toolbarHeight = toolbar ? toolbar.offsetHeight : 0;
+      const containerMarginTop = container ? parseFloat(getComputedStyle(container).marginTop) : 0;
+      const containerMarginBottom = container ? parseFloat(getComputedStyle(container).marginBottom) : 0;
 
       let minHeight = 300;
       const width = window.innerWidth;
       if (width < 768) minHeight = 200;
       else if (width < 1024) minHeight = 250;
 
-      const availableHeight = wrapper.clientHeight - toolbarHeight;
+      const availableHeight =
+        wrapper.clientHeight -
+        toolbarHeight -
+        wrapperPaddingTop -
+        wrapperPaddingBottom -
+        (containerMarginTop || 0) -
+        (containerMarginBottom || 0);
 
       setEditorHeight(availableHeight > minHeight ? availableHeight : minHeight);
     };
@@ -59,9 +74,8 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
           backgroundColor: "#fff",
           minHeight: "300px",
           width: "100%",
-          display: "flex",
-          flexDirection: "column", // 툴바 위쪽, 에디터 아래쪽
           boxSizing: "border-box",
+          padding,
         }}
       >
         <ReactQuill
@@ -70,41 +84,27 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
           onChange={setContent}
           readOnly={readOnly}
           style={{
-            flex: 1, // 남은 공간 모두 차지
-            backgroundColor: "#fff",
+            height: editorHeight,
             padding: 0,
-            margin: 0,
             boxSizing: "border-box",
-            height: editorHeight, // 필요시 fallback
           }}
           className="smart-editor"
         />
         <style jsx>{`
-          /* 툴바 버튼 크기 통일 */
+          /* 툴바 버튼 크기, 간격 통일 */
           .smart-editor .ql-toolbar {
             min-height: 40px;
-            padding: 0;
+            padding: 4px;
           }
           .smart-editor .ql-toolbar button {
             height: 32px;
             width: 32px;
             line-height: 32px;
-            margin: 0;
-          }
-          /* 에디터 내용 영역 */
-          .smart-editor .ql-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            box-sizing: border-box;
+            margin: 0 2px;
           }
           .smart-editor .ql-editor {
-            flex: 1;
-            padding: 0;
-            margin: 0;
+            padding: 8px 12px;
             overflow-y: auto;
-            box-sizing: border-box;
           }
         `}</style>
       </div>
