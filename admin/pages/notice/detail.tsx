@@ -31,11 +31,10 @@ export default function NoticeDetailPage() {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<"공지" | "이벤트">("공지");
 
-  // 공지사항 데이터 가져오기
   useEffect(() => {
     if (!id) return;
 
-    axios.get<Notice>(`/api/notices/${id}`) // ✅ axios 제네릭 타입 지정
+    axios.get<Notice>(`/api/notices/${id}`)
       .then(res => {
         const data = res.data;
         setNotice(data);
@@ -50,7 +49,6 @@ export default function NoticeDetailPage() {
       });
   }, [id]);
 
-  // 편집 모드 토글 시 SmartEditor 읽기/쓰기
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.setReadOnly(!isEdit);
@@ -65,7 +63,7 @@ export default function NoticeDetailPage() {
       await axios.put(`/api/notices/${id}`, { title, type, content });
       alert("수정 완료!");
       setIsEdit(false);
-      setNotice({ ...notice, title, type, content }); // Notice 타입 유지
+      setNotice({ ...notice, title, type, content });
     } catch (err) {
       console.error(err);
       alert("수정 중 오류가 발생했습니다.");
@@ -92,7 +90,6 @@ export default function NoticeDetailPage() {
           </>
         )}
 
-        {/* SmartEditor 영역 */}
         <Box>
           <SmartEditor ref={editorRef} />
         </Box>
