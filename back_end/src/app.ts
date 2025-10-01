@@ -1,28 +1,18 @@
 import express from "express";
 import cors from "cors";
-import settingsRouter from "./routes/settings";
-import profileRoutes from "./routes/members";
-import scheduleRoutes from "./routes/schedule";
-import noticeRoutes from "./routes/notice";
-import galleryRoutes from "./routes/gallery";
-import discographyRoutes from "./routes/discography";
-import videoRoutes from "./routes/video";
+import mainRouter from "./routes/index"; // ⭐️ 중앙 라우터를 임포트
 
 const app = express();
 
 app.use(cors({
-  origin: [
-    "https://qwer-fansite-admin.vercel.app", // admin 페이지의 실제 URL
-    "https://qwer-fansite-front.vercel.app" // front_end 페이지의 실제 URL 
-  ]
+  origin: [
+    "https://qwer-fansite-admin.vercel.app", // admin 페이지의 실제 URL
+    "https://qwer-fansite-front.vercel.app" // front_end 페이지의 실제 URL 
+  ]
 }));
 app.use(express.json());
-app.use("/api/settings", settingsRouter);
-app.use("/api/members", profileRoutes);
-app.use("/api/schedule", scheduleRoutes);
-app.use("/api/notice", noticeRoutes);
-app.use("/api/gallery", galleryRoutes);
-app.use("/api/discography", discographyRoutes);
-app.use("/api/video", videoRoutes);
+
+// ⭐️ 모든 API 요청을 '/api'로 묶고, 상세 경로는 index.ts 라우터에 위임
+app.use("/api", mainRouter); 
 
 export default app;
