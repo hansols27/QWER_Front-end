@@ -116,7 +116,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
       });
 
       // ⭐️ 절대 경로 사용
-      await axios.post(`${API_BASE_URL}/api/member`, formData, {
+      await axios.post(`${API_BASE_URL}/api/members`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

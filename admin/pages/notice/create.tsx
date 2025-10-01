@@ -50,7 +50,7 @@ export default function NoticeCreate() {
 
         try {
             // ⭐️ 절대 경로 API 사용
-            await axios.post(`${API_BASE_URL}/api/notices`, { type, title, content });
+            await axios.post(`${API_BASE_URL}/api/notice`, { type, title, content });
             
             setAlertMessage({ message: "등록 완료! 목록으로 이동합니다.", severity: "success" });
             

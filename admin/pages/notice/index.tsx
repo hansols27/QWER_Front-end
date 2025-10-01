@@ -46,7 +46,7 @@ export default function NoticeList() {
             setAlertMessage(null);
             try {
                 // ⭐️ 절대 경로 API 사용
-                const res = await axios.get<Notice[]>(`${API_BASE_URL}/api/notices`);
+                const res = await axios.get<Notice[]>(`${API_BASE_URL}/api/notice`);
                 setNotices(res.data);
             } catch (err) {
                 console.error("공지사항 목록 로드 실패:", err);

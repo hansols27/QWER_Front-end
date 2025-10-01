@@ -63,7 +63,7 @@ const SchedulePage = () => {
       setLoading(true);
       setAlertMessage(null);
       try {
-        // ⭐️ 수정: 절대 경로 사용
+        // ⭐️ 절대 경로 사용
         const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule`);
         setEvents(res.data.data);
       } catch (err) {

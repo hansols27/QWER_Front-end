@@ -59,7 +59,7 @@ export default function NoticeDetailPage() {
             setLoading(true);
             setAlertMessage(null);
             try {
-                const res = await axios.get<Notice>(`${API_BASE_URL}/api/notices/${id}`);
+                const res = await axios.get<Notice>(`${API_BASE_URL}/api/notice/${id}`);
                 const data = res.data;
                 
                 setNotice(data);
