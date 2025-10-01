@@ -12,6 +12,7 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
 # logs
 npm-debug.log*
@@ -30,10 +31,6 @@ yarn-error.log*
 
 # Optional: yarn cache
 .yarn/
-
-# .env
-.env.local
-.env.production
 
 # Firebase service account key
 back_end/src/firebase-service-key.json
