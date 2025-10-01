@@ -7,6 +7,7 @@ import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import EventIcon from "@mui/icons-material/Event";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
+import VideocamIcon from "@mui/icons-material/Videocam";
 import { useRouter } from "next/router";
 
 const menuItems = [
@@ -14,6 +15,7 @@ const menuItems = [
   { text: "프로필", path: "/profile", icon: <PersonIcon /> },
   { text: "앨범", path: "/album", icon: <AlbumIcon /> },
   { text: "갤러리", path: "/gallery", icon: <PhotoLibraryIcon /> },
+  { text: "비디오", path: "/video", icon: <VideocamIcon /> },
   { text: "일정관리", path: "/schedule", icon: <EventIcon /> },
   { text: "공지사항", path: "/notice", icon: <NotificationsIcon /> },
 ];
