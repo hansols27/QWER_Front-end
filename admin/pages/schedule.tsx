@@ -26,6 +26,13 @@ import type { ScheduleEvent, EventType } from "@shared/types/schedule";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
+// ⭐️ 환경 변수를 사용하여 API 기본 URL 설정
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+if (!API_BASE_URL) {
+  console.error("API_BASE_URL 환경 변수가 설정되지 않았습니다. API 호출이 실패할 수 있습니다.");
+}
+
 const EVENT_TYPES: { [key in EventType]: string } = {
   B: "Birthday",
   C: "Concert",
@@ -35,7 +42,8 @@ const EVENT_TYPES: { [key in EventType]: string } = {
 const SchedulePage = () => {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState("");
+  // ⭐️ 알림 메시지를 객체 형태로 관리하여 severity도 표시
+  const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error" } | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [title, setTitle] = useState("");
@@ -48,13 +56,19 @@ const SchedulePage = () => {
   // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
+      if (!API_BASE_URL) {
+        setAlertMessage({ message: "API 주소가 설정되지 않아 일정을 불러올 수 없습니다.", severity: "error" });
+        return;
+      }
       setLoading(true);
+      setAlertMessage(null);
       try {
-        const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>("/api/schedule");
+        // ⭐️ 수정: 절대 경로 사용
+        const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule`);
         setEvents(res.data.data);
       } catch (err) {
         console.error(err);
-        setAlert("Failed to load events");
+        setAlertMessage({ message: "일정 로드에 실패했습니다.", severity: "error" });
       } finally {
         setLoading(false);
       }
@@ -62,7 +76,8 @@ const SchedulePage = () => {
     fetchEvents();
   }, []);
 
-  // 날짜 클릭
+  // 날짜 클릭 및 이벤트 클릭 핸들러는 API 호출과 관련 없으므로 생략 (기존 로직 유지)
+
   const handleDateClick = (arg: any) => {
     setSelectedDate(arg.date || new Date());
     setTitle("");
@@ -74,7 +89,6 @@ const SchedulePage = () => {
     setModalOpen(true);
   };
 
-  // 이벤트 클릭
   const handleEventClick = (arg: any) => {
     const evt = events.find(e => e.id === arg.event.id);
     if (!evt) return;
@@ -92,10 +106,12 @@ const SchedulePage = () => {
     setModalOpen(true);
   };
 
+
   // 이벤트 저장
   const saveEvent = async () => {
-    if (!selectedDate) return;
+    if (!selectedDate || !API_BASE_URL) return; // API_BASE_URL 없으면 저장 막기
     setLoading(true);
+    setAlertMessage(null);
 
     const newEvent: ScheduleEvent = {
       id: editId || uuidv4(),
@@ -114,13 +130,14 @@ const SchedulePage = () => {
     }
 
     try {
-      const res = await axios.post<{ success: boolean; data: ScheduleEvent[] }>("/api/schedule", newEvent);
+      // ⭐️ 절대 경로 사용
+      const res = await axios.post<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule`, newEvent);
       setEvents(res.data.data);
       setModalOpen(false);
-      setAlert("Event saved successfully!");
+      setAlertMessage({ message: "일정이 성공적으로 저장되었습니다!", severity: "success" });
     } catch (err) {
       console.error(err);
-      setAlert("Failed to save event");
+      setAlertMessage({ message: "일정 저장에 실패했습니다. 백엔드 로그를 확인하세요.", severity: "error" });
     } finally {
       setLoading(false);
     }
@@ -128,20 +145,24 @@ const SchedulePage = () => {
 
   // 이벤트 삭제
   const deleteEvent = async () => {
-    if (!editId) return;
+    if (!editId || !API_BASE_URL) return; // API_BASE_URL 없으면 삭제 막기
     setLoading(true);
+    setAlertMessage(null);
     try {
-      const res = await axios.delete<{ success: boolean; data: ScheduleEvent[] }>(`/api/schedule/${editId}`);
+      // ⭐️ 절대 경로 사용
+      const res = await axios.delete<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule/${editId}`);
       setEvents(res.data.data);
       setModalOpen(false);
-      setAlert("Event deleted successfully!");
+      setAlertMessage({ message: "일정이 성공적으로 삭제되었습니다!", severity: "success" });
     } catch (err) {
       console.error(err);
-      setAlert("Failed to delete event");
+      setAlertMessage({ message: "일정 삭제에 실패했습니다.", severity: "error" });
     } finally {
       setLoading(false);
     }
   };
+
+  // 캘린더 이벤트 매핑 로직은 그대로 유지
 
   return (
     <Layout>
@@ -150,8 +171,14 @@ const SchedulePage = () => {
           일정관리
         </Typography>
 
-        {alert && <Alert severity="success" sx={{ mb: 2 }}>{alert}</Alert>}
-        {loading && <CircularProgress sx={{ mb: 2 }} />}
+        {/* ⭐️ 알림 메시지 상태 사용 */}
+        {alertMessage && (
+          <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>
+            {alertMessage.message}
+          </Alert>
+        )}
+        
+        {loading && <CircularProgress size={24} sx={{ mb: 2 }} />}
 
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
@@ -169,54 +196,70 @@ const SchedulePage = () => {
 
         {/* Modal */}
         <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
-          <DialogTitle>{editId ? "Edit Event" : "Add Event"}</DialogTitle>
+          <DialogTitle>{editId ? "일정 수정" : "일정 추가"}</DialogTitle>
           <DialogContent>
             <Stack spacing={2} mt={1}>
               <TextField
-                label="Title"
+                label="제목"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 fullWidth
               />
               <FormControl fullWidth>
-                <InputLabel>Type</InputLabel>
-                <Select value={type} onChange={e => setType(e.target.value as EventType)}>
+                <InputLabel>유형</InputLabel>
+                <Select value={type} label="유형" onChange={e => setType(e.target.value as EventType)}>
                   {Object.entries(EVENT_TYPES).map(([key, val]) => (
                     <MenuItem key={key} value={key}>{val}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel>All Day</InputLabel>
-                <Select value={allDay ? "yes" : "no"} onChange={e => setAllDay(e.target.value === "yes")}>
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                <InputLabel>하루 종일</InputLabel>
+                <Select value={allDay ? "yes" : "no"} label="하루 종일" onChange={e => setAllDay(e.target.value === "yes")}>
+                  <MenuItem value="yes">예</MenuItem>
+                  <MenuItem value="no">아니오</MenuItem>
                 </Select>
               </FormControl>
               {!allDay && (
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    label="Start Time"
+                    label="시작 시간"
                     type="time"
                     value={startTime}
                     onChange={e => setStartTime(e.target.value)}
                     fullWidth
+                    InputLabelProps={{ shrink: true }}
                   />
                   <TextField
-                    label="End Time"
+                    label="종료 시간"
                     type="time"
                     value={endTime}
                     onChange={e => setEndTime(e.target.value)}
                     fullWidth
+                    InputLabelProps={{ shrink: true }}
                   />
                 </Stack>
               )}
             </Stack>
           </DialogContent>
           <DialogActions>
-            {editId && <Button color="error" onClick={deleteEvent}>삭제</Button>}
-            <Button onClick={() => setModalOpen(false)}>취소</Button>
-            <Button variant="contained" onClick={saveEvent}>{editId ? "저장" : "저장"}</Button>
+            {editId && (
+              <Button color="error" onClick={deleteEvent} disabled={loading}>
+                삭제
+              </Button>
+            )}
+            <Button onClick={() => setModalOpen(false)} disabled={loading}>
+              취소
+            </Button>
+            {/* ⭐️ 로딩 중일 때 버튼 비활성화 */}
+            <Button 
+              variant="contained" 
+              onClick={saveEvent} 
+              disabled={loading || !API_BASE_URL || !title} // API_BASE_URL 없거나 로딩 중이거나 제목 없으면 비활성화
+              startIcon={loading && <CircularProgress size={20} />}
+            >
+              {loading ? "저장 중..." : "저장"}
+            </Button>
           </DialogActions>
         </Dialog>
       </Box>

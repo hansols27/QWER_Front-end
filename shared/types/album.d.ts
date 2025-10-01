@@ -1,9 +1,13 @@
-export interface Album {
-  id: string; // URL-safe slug
+export interface AlbumItem {
+  id: string;
   title: string;
   date: string;
   image: string;
-  description?: string; // 여러 줄 가능 (pre-line으로 렌더링)
+  description?: string;
   tracks?: string[];
-  videoUrl?: string; // 유튜브 영상 URL
+  videoUrl?: string;
+  
+  // ⭐️ 백엔드에서 사용하는 경우 추가
+  createdAt?: string; 
+  updatedAt?: string;
 }
