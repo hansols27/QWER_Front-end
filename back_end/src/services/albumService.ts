@@ -1,23 +1,23 @@
 import { db, bucket } from "../firebaseConfig";
-import type { Album } from "@shared/types/album";
+import type { AlbumItem } from "@shared/types/album";
 import { v4 as uuidv4 } from "uuid";
 
-export async function getAlbums(): Promise<Album[]> {
+export async function getAlbums(): Promise<AlbumItem[]> {
   const snapshot = await db.collection("albums").orderBy("date", "desc").get();
   return snapshot.docs.map((doc) => {
-    const data = doc.data() as Album;
+    const data = doc.data() as AlbumItem;
     return { ...data, id: doc.id }; // id는 한 번만 포함
   });
 }
 
-export async function getAlbumById(id: string): Promise<Album | null> {
+export async function getAlbumById(id: string): Promise<AlbumItem | null> {
   const doc = await db.collection("albums").doc(id).get();
   if (!doc.exists) return null;
-  const data = doc.data() as Album;
+  const data = doc.data() as AlbumItem;
   return { ...data, id: doc.id };
 }
 
-export async function createAlbum(data: Partial<Album>, file?: Express.Multer.File): Promise<Album> {
+export async function createAlbum(data: Partial<AlbumItem>, file?: Express.Multer.File): Promise<AlbumItem> {
   let imageUrl = "";
   if (file) {
     const fileRef = bucket.file(`albums/${uuidv4()}.png`);
@@ -26,7 +26,7 @@ export async function createAlbum(data: Partial<Album>, file?: Express.Multer.Fi
     imageUrl = fileRef.publicUrl();
   }
 
-  const albumData: Omit<Album, "id"> = {
+  const albumData: Omit<AlbumItem, "id"> = {
     title: data.title!,
     date: data.date!,
     description: data.description || "",
@@ -40,7 +40,7 @@ export async function createAlbum(data: Partial<Album>, file?: Express.Multer.Fi
   return { ...albumData, id: docRef.id }; // id는 여기서만 추가
 }
 
-export async function updateAlbum(id: string, data: Partial<Album>, file?: Express.Multer.File): Promise<Album | null> {
+export async function updateAlbum(id: string, data: Partial<AlbumItem>, file?: Express.Multer.File): Promise<AlbumItem | null> {
   const docRef = db.collection("albums").doc(id);
   const doc = await docRef.get();
   if (!doc.exists) return null;
@@ -57,7 +57,7 @@ export async function updateAlbum(id: string, data: Partial<Album>, file?: Expre
   await docRef.update(updateData);
 
   const updatedDoc = await docRef.get();
-  const updatedData = updatedDoc.data() as Album;
+  const updatedData = updatedDoc.data() as AlbumItem;
   return { ...updatedData, id: updatedDoc.id };
 }
 
