@@ -33,6 +33,7 @@ yarn-error.log*
 
 # .env
 .env.local
+.env.production
 
 # Firebase service account key
 back_end/src/firebase-service-key.json
