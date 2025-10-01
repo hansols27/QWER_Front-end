@@ -5,7 +5,7 @@ import galleryRoutes from "./gallery";
 import noticeRoutes from "./notice";
 import scheduleRoutes from "./schedule";
 import discographyRoutes from "./discography";
-//import videoRoutes from "./video";*/
+import videoRoutes from "./video";
 
 const router = Router();
 
@@ -15,6 +15,6 @@ router.use("/gallery", galleryRoutes);
 router.use("/notice", noticeRoutes);
 router.use("/schedule", scheduleRoutes);
 router.use("/discography", discographyRoutes);
-//router.use("/video", videoRoutes);*/
+router.use("/video", videoRoutes);
 
 export default router;

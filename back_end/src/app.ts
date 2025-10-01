@@ -6,7 +6,7 @@ import scheduleRoutes from "./routes/schedule";
 import noticeRoutes from "./routes/notice";
 import galleryRoutes from "./routes/gallery";
 import discographyRoutes from "./routes/discography";
-//import videoRoutes from "./routes/video";*/
+import videoRoutes from "./routes/video";
 
 const app = express();
 
@@ -23,6 +23,6 @@ app.use("/api/schedule", scheduleRoutes);
 app.use("/api/notice", noticeRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/discography", discographyRoutes);
-//app.use("/api/video", videoRoutes);
+app.use("/api/video", videoRoutes);
 
 export default app;
