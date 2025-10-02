@@ -37,7 +37,7 @@ export default function AlbumList() {
 
       try {
         // ⭐️ API 절대 경로 사용 수정
-        const res = await axios.get<{ success: boolean; data: AlbumItem[] }>(`${process.env.NEXT_PUBLIC_API_URL}/api/album`);
+        const res = await axios.get<{ success: boolean; data: AlbumItem[] }>(`${NEXT_PUBLIC_API_URL}/api/album`);
         setAlbums(res.data.data);
       } catch (err) {
         console.error("앨범 로드 실패:", err);

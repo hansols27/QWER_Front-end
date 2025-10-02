@@ -66,7 +66,7 @@ export default function AlbumCreate() {
         try {
             // ⭐️ 절대 경로 사용
             const res = await axios.post<{ success: boolean; data?: AlbumItem }>(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/album`, 
+                `${NEXT_PUBLIC_API_URL}/api/album`, 
                 formData, 
                 {
                     headers: { "Content-Type": "multipart/form-data" },

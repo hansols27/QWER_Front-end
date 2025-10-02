@@ -53,7 +53,7 @@ export default function AlbumDetail() {
       setLoading(true);
       setAlertMessage(null);
       try {
-        const res = await axios.get<{ success: boolean; data: AlbumItem }>(`${process.env.NEXT_PUBLIC_API_URL}/api/album/${id}`);
+        const res = await axios.get<{ success: boolean; data: AlbumItem }>(`${NEXT_PUBLIC_API_URL}/api/album/${id}`);
         setAlbum(res.data.data);
       } catch (err) {
         console.error("앨범 상세 로드 실패:", err);
@@ -125,7 +125,7 @@ export default function AlbumDetail() {
     setAlertMessage(null);
 
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/album/${id}`);
+      await axios.delete(`${NEXT_PUBLIC_API_URL}/api/album/${id}`);
       
       setAlertMessage({ message: "앨범이 성공적으로 삭제되었습니다!", severity: "success" });
       router.push("/album"); 

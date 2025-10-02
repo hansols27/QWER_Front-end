@@ -66,7 +66,7 @@ export default function GalleryCreate() {
         files.forEach((file) => formData.append("images", file)); 
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, formData, {
+            await axios.post(`${NEXT_PUBLIC_API_URL}/api/gallery`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             

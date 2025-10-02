@@ -59,7 +59,7 @@ export default function NoticeDetailPage() {
             setLoading(true);
             setAlertMessage(null);
             try {
-                const res = await axios.get<Notice>(`${process.env.NEXT_PUBLIC_API_URL}/api/notice/${id}`);
+                const res = await axios.get<Notice>(`${NEXT_PUBLIC_API_URL}/api/notice/${id}`);
                 const data = res.data;
                 
                 setNotice(data);
@@ -99,7 +99,7 @@ export default function NoticeDetailPage() {
         setIsProcessing(true);
 
         try {
-            await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/notice/${id}`, { title, type, content });
+            await axios.put(`${NEXT_PUBLIC_API_URL}/api/notice/${id}`, { title, type, content });
             
             setAlertMessage({ message: "수정 완료!", severity: "success" });
             setIsEdit(false);
@@ -124,7 +124,7 @@ export default function NoticeDetailPage() {
         setAlertMessage(null);
 
         try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/notice/${id}`);
+            await axios.delete(`${NEXT_PUBLIC_API_URL}/api/notice/${id}`);
             
             setAlertMessage({ message: "삭제 완료! 목록으로 이동합니다.", severity: "success" });
             setTimeout(() => router.push("/notice"), 1000); 

@@ -38,7 +38,7 @@ export default function VideoList() {
       setAlertMessage(null);
 
       try {
-        const res = await axios.get<{ success: boolean; data: VideoItem[] }>(`${process.env.NEXT_PUBLIC_API_URL}/api/video`);
+        const res = await axios.get<{ success: boolean; data: VideoItem[] }>(`${NEXT_PUBLIC_API_URL}/api/video`);
         setItems(res.data.data);
       } catch (err) {
         console.error("영상 목록 로드 실패:", err);
@@ -70,7 +70,7 @@ export default function VideoList() {
   };
   
   const handleItemClick = (itemId: string | number) => {
-    // ⭐️ 수정: item.id가 number일 수 있으므로 명시적으로 문자열로 변환
+    //item.id가 number일 수 있으므로 명시적으로 문자열로 변환
     router.push(`/video/${String(itemId)}`); 
   };
 
@@ -115,7 +115,7 @@ export default function VideoList() {
               xs={6} 
               sm={4} 
               md={3} 
-              // ⭐️ 수정: item.id가 number일 수 있으므로 String()으로 변환
+              // item.id가 number일 수 있으므로 String()으로 변환
               key={String(item.id)} 
               {...({} as any)} 
             >

@@ -41,7 +41,7 @@ export default function GalleryDetail() {
       setLoading(true);
       setAlertMessage(null);
       try {
-        const res = await axios.get<{ success: boolean; data: GalleryItem }>(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`);
+        const res = await axios.get<{ success: boolean; data: GalleryItem }>(`${NEXT_PUBLIC_API_URL}/api/gallery/${id}`);
         setItem(res.data.data);
       } catch (err) {
         console.error("갤러리 아이템 로드 실패:", err);
@@ -77,7 +77,7 @@ export default function GalleryDetail() {
       formData.append("image", newFile); 
       
       // ⭐️ PUT 요청으로 기존 아이템을 업데이트합니다.
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`, formData, {
+      await axios.put(`${NEXT_PUBLIC_API_URL}/api/gallery/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       
@@ -105,7 +105,7 @@ export default function GalleryDetail() {
 
     try {
       // ⭐️ DELETE 요청
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`);
+      await axios.delete(`${NEXT_PUBLIC_API_URL}/api/gallery/${id}`);
       
       setAlertMessage({ message: "이미지가 성공적으로 삭제되었습니다! 목록으로 이동합니다.", severity: "success" });
       
