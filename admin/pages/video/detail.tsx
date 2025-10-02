@@ -52,7 +52,7 @@ export default function VideoDetail() {
         setAlertMessage(null);
         try {
             // ⭐️ 절대 경로 사용
-            const res = await axios.get<{ success: boolean; data: VideoItem }>(`${NEXT_PUBLIC_API_URL}/api/video/${id}`);
+            const res = await axios.get<{ success: boolean; data: VideoItem }>(`${process.env.NEXT_PUBLIC_API_URL}/api/video/${id}`);
             const fetchedVideo = res.data.data;
 
             setVideo(fetchedVideo);
@@ -96,7 +96,7 @@ export default function VideoDetail() {
     
     try {
         // ⭐️ 절대 경로 사용 및 video.id를 string으로 변환
-        await axios.put(`${NEXT_PUBLIC_API_URL}/api/video/${String(video.id)}`, { title, src });
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/video/${String(video.id)}`, { title, src });
         
         setAlertMessage({ message: "영상이 성공적으로 수정되었습니다! 목록으로 이동합니다.", severity: "success" });
         setTimeout(() => router.push("/video"), 1000); 

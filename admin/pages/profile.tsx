@@ -116,7 +116,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
       });
 
       // ⭐️ 절대 경로 사용
-      await axios.post(`${NEXT_PUBLIC_API_URL}/api/members`, formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/members`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -131,7 +131,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
 
   return (
     <Box mb={4} p={2} border="1px solid #ccc" borderRadius={2}>
-      <Typography variant="h6">{memberId} 프로필 설정</Typography>
+      <Typography variant="h6">{memberId} </Typography>
       
       {alertMessage && (
         <Alert severity={alertMessage.severity} sx={{ mt: 2, mb: 2 }}>
@@ -140,7 +140,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
       )}
 
       {/* 텍스트 필드 */}
-      <Typography variant="subtitle1" mt={2} mb={1}>텍스트 콘텐츠</Typography>
+      <Typography variant="subtitle1" mt={2} mb={1}>텍스트</Typography>
       {member.text.map((t, idx) => (
         <Stack direction="row" spacing={1} alignItems="center" key={`text-${idx}`} mb={1}>
           <TextField
@@ -157,11 +157,11 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
         </Stack>
       ))}
       <Button onClick={addText} size="small" variant="outlined">
-        텍스트 필드 추가
+        추가
       </Button>
 
       {/* 이미지 필드 */}
-      <Typography variant="subtitle1" mt={3} mb={1}>이미지 콘텐츠</Typography>
+      <Typography variant="subtitle1" mt={3} mb={1}>이미지</Typography>
       {member.image.map((img, idx) => (
         <Stack direction="row" spacing={1} alignItems="center" key={`image-${idx}`} mb={1}>
           <input
@@ -179,7 +179,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
         </Stack>
       ))}
       <Button onClick={addImage} size="small" variant="outlined">
-        이미지 필드 추가
+        추가
       </Button>
 
       {/* SNS 필드 */}
@@ -211,7 +211,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
         </Stack>
       ))}
       <Button onClick={addSnsField} size="small" variant="outlined">
-        SNS 링크 추가
+        추가
       </Button>
 
       <Box mt={4}>

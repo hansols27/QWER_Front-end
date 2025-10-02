@@ -38,7 +38,7 @@ export default function GalleryList() {
 
       try {
         // ⭐️ 절대 경로 사용
-        const res = await axios.get<{ success: boolean; data: GalleryItem[] }>(`${NEXT_PUBLIC_API_URL}/api/gallery`);
+        const res = await axios.get<{ success: boolean; data: GalleryItem[] }>(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`);
         setItems(res.data.data);
       } catch (err) {
         console.error("갤러리 로드 실패:", err);
@@ -92,7 +92,7 @@ export default function GalleryList() {
         {/* 데이터 없음 표시 */}
         {!loading && items.length === 0 && !alertMessage && (
             <Typography variant="body1" color="textSecondary" align="center" py={4}>
-                등록된 갤러리 이미지가 없습니다.
+                등록된 이미지가 없습니다.
             </Typography>
         )}
 

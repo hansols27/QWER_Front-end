@@ -55,7 +55,7 @@ export default function VideoCreate() {
 
     try {
       // ⭐️ 절대 경로 사용
-      const res = await axios.post<VideoItem>(`${NEXT_PUBLIC_API_URL}/api/video`, { title, src });
+      const res = await axios.post<VideoItem>(`${process.env.NEXT_PUBLIC_API_URL}/api/video`, { title, src });
       
       if (res.data.id) {
         setAlertMessage({ message: "영상이 성공적으로 등록되었습니다! 목록으로 이동합니다.", severity: "success" });

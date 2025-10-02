@@ -38,7 +38,7 @@ export default function VideoList() {
       setAlertMessage(null);
 
       try {
-        const res = await axios.get<{ success: boolean; data: VideoItem[] }>(`${NEXT_PUBLIC_API_URL}/api/video`);
+        const res = await axios.get<{ success: boolean; data: VideoItem[] }>(`${process.env.NEXT_PUBLIC_API_URL}/api/video`);
         setItems(res.data.data);
       } catch (err) {
         console.error("영상 목록 로드 실패:", err);

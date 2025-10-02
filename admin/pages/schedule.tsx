@@ -64,7 +64,7 @@ const SchedulePage = () => {
       setAlertMessage(null);
       try {
         // ⭐️ 절대 경로 사용
-        const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>(`${NEXT_PUBLIC_API_URL}/api/schedule`);
+        const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>(`${process.env.NEXT_PUBLIC_API_URL}/api/schedule`);
         setEvents(res.data.data);
       } catch (err) {
         console.error(err);
@@ -131,7 +131,7 @@ const SchedulePage = () => {
 
     try {
       // ⭐️ 절대 경로 사용
-      const res = await axios.post<{ success: boolean; data: ScheduleEvent[] }>(`${NEXT_PUBLIC_API_URL}/api/schedule`, newEvent);
+      const res = await axios.post<{ success: boolean; data: ScheduleEvent[] }>(`${process.env.NEXT_PUBLIC_API_URL}/api/schedule`, newEvent);
       setEvents(res.data.data);
       setModalOpen(false);
       setAlertMessage({ message: "일정이 성공적으로 저장되었습니다!", severity: "success" });

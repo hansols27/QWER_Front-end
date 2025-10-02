@@ -38,7 +38,7 @@ const SettingsPage = () => {
       setAlertMessage(null);
       try {
         // ⭐️ 절대 경로 사용
-        const res = await axios.get<{ success: boolean; data: SettingsData }>(`${NEXT_PUBLIC_API_URL}/api/settings`);
+        const res = await axios.get<{ success: boolean; data: SettingsData }>(`${process.env.NEXT_PUBLIC_API_URL}/api/settings`);
         const data = res.data.data;
         setMainImageUrl(data.mainImage || "");
         setSnsLinks(DEFAULT_SNS_IDS.map(id => data.snsLinks.find(l => l.id === id) || { id, url: "" }));
@@ -68,7 +68,7 @@ const SettingsPage = () => {
 
       // ⭐️ 절대 경로 사용
       const res = await axios.post<{ success: boolean; data: SettingsData }>(
-        `${NEXT_PUBLIC_API_URL}/api/settings`, 
+        `${process.env.NEXT_PUBLIC_API_URL}/api/settings`, 
         formData, 
         {
           // 파일을 포함한 데이터를 전송할 때 필수 헤더
