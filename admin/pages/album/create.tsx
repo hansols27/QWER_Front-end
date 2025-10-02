@@ -16,7 +16,7 @@ import {
 import type { AlbumItem } from "@shared/types/album";
 
 // 환경 변수를 사용하여 API 기본 URL 설정 (백엔드 주소)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AlbumCreate() {
     const router = useRouter();

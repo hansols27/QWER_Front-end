@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import type { SettingsData, SnsLink } from "@shared/types/settings";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // API 경로가 설정되지 않았을 경우, 사용자에게 알려줍니다. (로컬 환경 테스트 시 유용)
 if (!API_BASE_URL) {

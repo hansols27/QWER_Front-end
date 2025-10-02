@@ -2,33 +2,38 @@ const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  outputFileTracingRoot: path.join(__dirname, "../"),
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@theme": path.resolve(__dirname, "theme"),
-      "@lib": path.resolve(__dirname, "lib"),
-      "@shared": path.resolve(__dirname, "../shared")
-    };
+  reactStrictMode: true,
+  outputFileTracingRoot: path.join(__dirname, "../"),
 
-    const externalTSPaths = [
-      path.resolve(__dirname, "../shared")
-    ];
+   env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
 
-    config.module.rules.push({
-      test: /\.tsx?$/,
-      include: externalTSPaths,
-      use: [
-        {
-          loader: "babel-loader",
-          options: { presets: ["next/babel"] }
-        }
-      ]
-    });
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@theme": path.resolve(__dirname, "theme"),
+      "@lib": path.resolve(__dirname, "lib"),
+      "@shared": path.resolve(__dirname, "../shared")
+    };
 
-    return config;
-  }
+    const externalTSPaths = [
+      path.resolve(__dirname, "../shared")
+    ];
+
+    config.module.rules.push({
+      test: /\.tsx?$/,
+      include: externalTSPaths,
+      use: [
+        {
+          loader: "babel-loader",
+          options: { presets: ["next/babel"] }
+        }
+      ]
+    });
+
+    return config;
+  }
 };
 
 module.exports = nextConfig;

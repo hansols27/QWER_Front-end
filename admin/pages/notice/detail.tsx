@@ -19,7 +19,7 @@ import {
 import axios from "axios";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
 
