@@ -19,7 +19,7 @@ import {
 import type { SmartEditorHandle } from "../../components/common/SmartEditor";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
 
@@ -36,7 +36,7 @@ export default function NoticeCreate() {
         setAlertMessage(null); // 알림 초기화
         const content = editorRef.current?.getContent() || "";
         
-        if (!API_BASE_URL) {
+        if (!NEXT_PUBLIC_API_URL) {
             setAlertMessage({ message: "API 주소가 설정되지 않아 등록할 수 없습니다.", severity: "error" });
             return;
         }
@@ -50,7 +50,7 @@ export default function NoticeCreate() {
 
         try {
             // ⭐️ 절대 경로 API 사용
-            await axios.post(`${API_BASE_URL}/api/notice`, { type, title, content });
+            await axios.post(`${NEXT_PUBLIC_API_URL}/api/notice`, { type, title, content });
             
             setAlertMessage({ message: "등록 완료! 목록으로 이동합니다.", severity: "success" });
             

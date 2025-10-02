@@ -16,7 +16,7 @@ import {
 import type { AlbumItem } from "@shared/types/album";
 
 // 환경 변수를 사용하여 API 기본 URL 설정 (백엔드 주소)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AlbumCreate() {
     const router = useRouter();
@@ -42,7 +42,7 @@ export default function AlbumCreate() {
 
     const handleSubmit = async () => {
         setAlertMessage(null);
-        if (!API_BASE_URL) {
+        if (!NEXT_PUBLIC_API_URL) {
             setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
             return;
         }
@@ -66,7 +66,7 @@ export default function AlbumCreate() {
         try {
             // ⭐️ 절대 경로 사용
             const res = await axios.post<{ success: boolean; data?: AlbumItem }>(
-                `${API_BASE_URL}/api/album`, 
+                `${NEXT_PUBLIC_API_URL}/api/album`, 
                 formData, 
                 {
                     headers: { "Content-Type": "multipart/form-data" },
@@ -167,7 +167,7 @@ export default function AlbumCreate() {
                     <Button 
                         variant="contained" 
                         onClick={handleSubmit} 
-                        disabled={loading || !title || !date || !coverFile || !API_BASE_URL}
+                        disabled={loading || !title || !date || !coverFile || !NEXT_PUBLIC_API_URL}
                         startIcon={loading && <CircularProgress size={20} color="inherit" />}
                     >
                         {loading ? "등록 중..." : "앨범 등록"}

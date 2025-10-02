@@ -17,7 +17,7 @@ import {
 import type { AlbumItem } from "@shared/types/album";
 
 // 환경 변수를 사용하여 API 기본 URL 설정 (백엔드 주소)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AlbumList() {
   const [albums, setAlbums] = useState<AlbumItem[]>([]);
@@ -27,7 +27,7 @@ export default function AlbumList() {
 
   useEffect(() => {
     const fetchAlbums = async () => {
-      if (!API_BASE_URL) {
+      if (!NEXT_PUBLIC_API_URL) {
         setAlertMessage({ message: "API 주소가 설정되지 않아 앨범을 불러올 수 없습니다.", severity: "error" });
         return;
       }
@@ -37,7 +37,7 @@ export default function AlbumList() {
 
       try {
         // ⭐️ API 절대 경로 사용 수정
-        const res = await axios.get<{ success: boolean; data: AlbumItem[] }>(`${API_BASE_URL}/api/album`);
+        const res = await axios.get<{ success: boolean; data: AlbumItem[] }>(`${NEXT_PUBLIC_API_URL}/api/album`);
         setAlbums(res.data.data);
       } catch (err) {
         console.error("앨범 로드 실패:", err);
@@ -65,7 +65,7 @@ export default function AlbumList() {
           <Button
             variant="contained"
             onClick={handleCreateClick}
-            disabled={loading || !API_BASE_URL} // 로딩 및 API 주소 체크
+            disabled={loading || !NEXT_PUBLIC_API_URL} // 로딩 및 API 주소 체크
           >
             등록
           </Button>

@@ -16,7 +16,7 @@ import {
 import type { GalleryItem } from "@shared/types/gallery"; 
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function GalleryDetail() {
   const params = useParams();
@@ -31,9 +31,9 @@ export default function GalleryDetail() {
 
   // 1. 데이터 로드 (GET)
   useEffect(() => {
-    if (!id || !API_BASE_URL) {
+    if (!id || !NEXT_PUBLIC_API_URL) {
       if (!id) setLoading(false);
-      if (!API_BASE_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
+      if (!NEXT_PUBLIC_API_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
       return;
     }
 
@@ -41,7 +41,7 @@ export default function GalleryDetail() {
       setLoading(true);
       setAlertMessage(null);
       try {
-        const res = await axios.get<{ success: boolean; data: GalleryItem }>(`${API_BASE_URL}/api/gallery/${id}`);
+        const res = await axios.get<{ success: boolean; data: GalleryItem }>(`${NEXT_PUBLIC_API_URL}/api/gallery/${id}`);
         setItem(res.data.data);
       } catch (err) {
         console.error("갤러리 아이템 로드 실패:", err);
@@ -62,7 +62,7 @@ export default function GalleryDetail() {
   
   // 3. 이미지 교체/수정 (PUT) 핸들러
   const handleReplace = async () => {
-    if (!item || !API_BASE_URL || !newFile) {
+    if (!item || !NEXT_PUBLIC_API_URL || !newFile) {
         setAlertMessage({ message: "교체할 새 이미지를 먼저 선택해주세요.", severity: "error" });
         return;
     }
@@ -77,7 +77,7 @@ export default function GalleryDetail() {
       formData.append("image", newFile); 
       
       // ⭐️ PUT 요청으로 기존 아이템을 업데이트합니다.
-      await axios.put(`${API_BASE_URL}/api/gallery/${id}`, formData, {
+      await axios.put(`${NEXT_PUBLIC_API_URL}/api/gallery/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       
@@ -96,7 +96,7 @@ export default function GalleryDetail() {
   
   // 4. 삭제 (DELETE) 핸들러
   const handleDelete = async () => {
-    if (!id || !API_BASE_URL) return;
+    if (!id || !NEXT_PUBLIC_API_URL) return;
     
     if (!window.confirm("정말로 이 이미지를 갤러리에서 삭제하시겠습니까? (이 작업은 취소할 수 없습니다)")) return;
 
@@ -105,7 +105,7 @@ export default function GalleryDetail() {
 
     try {
       // ⭐️ DELETE 요청
-      await axios.delete(`${API_BASE_URL}/api/gallery/${id}`);
+      await axios.delete(`${NEXT_PUBLIC_API_URL}/api/gallery/${id}`);
       
       setAlertMessage({ message: "이미지가 성공적으로 삭제되었습니다! 목록으로 이동합니다.", severity: "success" });
       
@@ -174,7 +174,7 @@ export default function GalleryDetail() {
                 variant="contained" 
                 color="primary" 
                 onClick={handleReplace} 
-                disabled={isProcessing || !newFile || !API_BASE_URL}
+                disabled={isProcessing || !newFile || !NEXT_PUBLIC_API_URL}
                 sx={{ mt: 2 }}
                 startIcon={isProcessing && <CircularProgress size={20} color="inherit" />}
             >
@@ -189,7 +189,7 @@ export default function GalleryDetail() {
               variant="contained" 
               color="error" 
               onClick={handleDelete} 
-              disabled={isProcessing || !API_BASE_URL}
+              disabled={isProcessing || !NEXT_PUBLIC_API_URL}
               startIcon={isProcessing && !newFile && <CircularProgress size={20} color="inherit" />}
             >
               {isProcessing && !newFile ? "삭제 중..." : "이미지 삭제"}

@@ -19,7 +19,7 @@ import {
 import axios from "axios";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
 
@@ -49,9 +49,9 @@ export default function NoticeDetailPage() {
 
     // 1. 데이터 로드 (GET)
     useEffect(() => {
-        if (!id || !API_BASE_URL) {
+        if (!id || !NEXT_PUBLIC_API_URL) {
             setLoading(false);
-            if (!API_BASE_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
+            if (!NEXT_PUBLIC_API_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
             return;
         }
         
@@ -59,7 +59,7 @@ export default function NoticeDetailPage() {
             setLoading(true);
             setAlertMessage(null);
             try {
-                const res = await axios.get<Notice>(`${API_BASE_URL}/api/notice/${id}`);
+                const res = await axios.get<Notice>(`${NEXT_PUBLIC_API_URL}/api/notice/${id}`);
                 const data = res.data;
                 
                 setNotice(data);
@@ -87,7 +87,7 @@ export default function NoticeDetailPage() {
 
     // 3. 저장 핸들러 (PUT)
     const handleSave = async () => {
-        if (!notice || !API_BASE_URL) return;
+        if (!notice || !NEXT_PUBLIC_API_URL) return;
         const content = editorRef.current?.getContent() || "";
 
         setAlertMessage(null);
@@ -99,7 +99,7 @@ export default function NoticeDetailPage() {
         setIsProcessing(true);
 
         try {
-            await axios.put(`${API_BASE_URL}/api/notices/${id}`, { title, type, content });
+            await axios.put(`${NEXT_PUBLIC_API_URL}/api/notices/${id}`, { title, type, content });
             
             setAlertMessage({ message: "수정 완료!", severity: "success" });
             setIsEdit(false);
@@ -117,14 +117,14 @@ export default function NoticeDetailPage() {
     
     // 4. 삭제 핸들러 (DELETE)
     const handleDelete = async () => {
-        if (!notice || !API_BASE_URL) return;
+        if (!notice || !NEXT_PUBLIC_API_URL) return;
         if (!window.confirm("정말로 삭제하시겠습니까?")) return;
 
         setIsProcessing(true);
         setAlertMessage(null);
 
         try {
-            await axios.delete(`${API_BASE_URL}/api/notices/${id}`);
+            await axios.delete(`${NEXT_PUBLIC_API_URL}/api/notices/${id}`);
             
             setAlertMessage({ message: "삭제 완료! 목록으로 이동합니다.", severity: "success" });
             setTimeout(() => router.push("/notice"), 1000); 

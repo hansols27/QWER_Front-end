@@ -17,7 +17,7 @@ import {
 import type { AlbumItem } from "@shared/types/album";
 
 // 환경 변수를 사용하여 API 기본 URL 설정 (백엔드 주소)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Album 타입의 기본값 (로딩 전 초기화용)
 const INITIAL_ALBUM_STATE: AlbumItem = {
@@ -43,9 +43,9 @@ export default function AlbumDetail() {
 
   // 1. 데이터 로드 (GET)
   useEffect(() => {
-    if (!id || !API_BASE_URL) {
+    if (!id || !NEXT_PUBLIC_API_URL) {
       if (!id) setLoading(false);
-      if (!API_BASE_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
+      if (!NEXT_PUBLIC_API_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
       return;
     }
 
@@ -53,7 +53,7 @@ export default function AlbumDetail() {
       setLoading(true);
       setAlertMessage(null);
       try {
-        const res = await axios.get<{ success: boolean; data: AlbumItem }>(`${API_BASE_URL}/api/album/${id}`);
+        const res = await axios.get<{ success: boolean; data: AlbumItem }>(`${NEXT_PUBLIC_API_URL}/api/album/${id}`);
         setAlbum(res.data.data);
       } catch (err) {
         console.error("앨범 상세 로드 실패:", err);
@@ -67,7 +67,7 @@ export default function AlbumDetail() {
 
   // 2. 수정 (PUT) 핸들러
   const handleUpdate = async () => {
-    if (!album || !API_BASE_URL) return;
+    if (!album || !NEXT_PUBLIC_API_URL) return;
     
     setIsSaving(true);
     setAlertMessage(null);
@@ -91,7 +91,7 @@ export default function AlbumDetail() {
       filteredTracks.forEach((track, idx) => formData.append(`tracks[${idx}]`, track ?? '')); 
 
       const res = await axios.put<{ success: boolean; data?: AlbumItem }>(
-        `${API_BASE_URL}/api/album/${id}`, 
+        `${NEXT_PUBLIC_API_URL}/api/album/${id}`, 
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -117,7 +117,7 @@ export default function AlbumDetail() {
   // 3. 삭제 (DELETE) 핸들러
   const handleDelete = async () => {
     // ... (삭제 로직은 트랙 관련 없으므로 동일)
-    if (!id || !API_BASE_URL) return;
+    if (!id || !NEXT_PUBLIC_API_URL) return;
     
     if (!window.confirm("정말로 이 앨범을 삭제하시겠습니까?")) return;
 
@@ -125,7 +125,7 @@ export default function AlbumDetail() {
     setAlertMessage(null);
 
     try {
-      await axios.delete(`${API_BASE_URL}/api/album/${id}`);
+      await axios.delete(`${NEXT_PUBLIC_API_URL}/api/album/${id}`);
       
       setAlertMessage({ message: "앨범이 성공적으로 삭제되었습니다!", severity: "success" });
       router.push("/album"); 
@@ -268,7 +268,7 @@ export default function AlbumDetail() {
               variant="contained" 
               color="primary" 
               onClick={handleUpdate} 
-              disabled={isSaving || !API_BASE_URL || !album.title || !album.date}
+              disabled={isSaving || !NEXT_PUBLIC_API_URL || !album.title || !album.date}
               startIcon={isSaving && <CircularProgress size={20} color="inherit" />}
             >
               {isSaving ? "저장 중..." : "수정 내용 저장"}
@@ -278,7 +278,7 @@ export default function AlbumDetail() {
               variant="outlined" 
               color="error" 
               onClick={handleDelete} 
-              disabled={isSaving || !API_BASE_URL}
+              disabled={isSaving || !NEXT_PUBLIC_API_URL}
             >
               삭제
             </Button>

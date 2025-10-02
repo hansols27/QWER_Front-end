@@ -19,7 +19,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function GalleryCreate() {
     const [files, setFiles] = useState<File[]>([]);
@@ -51,7 +51,7 @@ export default function GalleryCreate() {
     // 업로드
     const handleUpload = async () => {
         setAlertMessage(null);
-        if (!API_BASE_URL) {
+        if (!NEXT_PUBLIC_API_URL) {
             setAlertMessage({ message: "API 주소가 설정되지 않아 업로드할 수 없습니다.", severity: "error" });
             return;
         }
@@ -66,7 +66,7 @@ export default function GalleryCreate() {
         files.forEach((file) => formData.append("images", file)); 
 
         try {
-            await axios.post(`${API_BASE_URL}/api/gallery`, formData, {
+            await axios.post(`${NEXT_PUBLIC_API_URL}/api/gallery`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             
@@ -169,7 +169,7 @@ export default function GalleryCreate() {
                         <Button
                             variant="contained"
                             onClick={handleUpload}
-                            disabled={files.length === 0 || loading || !API_BASE_URL}
+                            disabled={files.length === 0 || loading || !NEXT_PUBLIC_API_URL}
                             startIcon={loading && <CircularProgress size={20} color="inherit" />}
                         >
                             {loading ? "업로드 중..." : `이미지 ${files.length}개 업로드`}

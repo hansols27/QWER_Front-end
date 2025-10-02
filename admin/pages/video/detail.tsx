@@ -16,7 +16,7 @@ import {
 import { VideoItem } from "@shared/types/video";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // VideoItem의 id가 number일 경우를 대비하여 초기 상태를 설정합니다.
 const INITIAL_VIDEO_STATE: VideoItem = {
@@ -41,9 +41,9 @@ export default function VideoDetail() {
 
   // 1. 데이터 로드 (GET)
   useEffect(() => {
-    if (!id || !API_BASE_URL) {
+    if (!id || !NEXT_PUBLIC_API_URL) {
         if (!id) setLoading(false);
-        if (!API_BASE_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
+        if (!NEXT_PUBLIC_API_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
         return;
     }
 
@@ -52,7 +52,7 @@ export default function VideoDetail() {
         setAlertMessage(null);
         try {
             // ⭐️ 절대 경로 사용
-            const res = await axios.get<{ success: boolean; data: VideoItem }>(`${API_BASE_URL}/api/video/${id}`);
+            const res = await axios.get<{ success: boolean; data: VideoItem }>(`${NEXT_PUBLIC_API_URL}/api/video/${id}`);
             const fetchedVideo = res.data.data;
 
             setVideo(fetchedVideo);
@@ -85,7 +85,7 @@ export default function VideoDetail() {
 
   // 2. 수정 (PUT) 핸들러
   const handleUpdate = async () => {
-    if (!video || !API_BASE_URL) return;
+    if (!video || !NEXT_PUBLIC_API_URL) return;
     if (!title || !src) {
         setAlertMessage({ message: "제목과 유튜브 링크를 모두 입력해주세요.", severity: "error" });
         return;
@@ -96,7 +96,7 @@ export default function VideoDetail() {
     
     try {
         // ⭐️ 절대 경로 사용 및 video.id를 string으로 변환
-        await axios.put(`${API_BASE_URL}/api/video/${String(video.id)}`, { title, src });
+        await axios.put(`${NEXT_PUBLIC_API_URL}/api/video/${String(video.id)}`, { title, src });
         
         setAlertMessage({ message: "영상이 성공적으로 수정되었습니다! 목록으로 이동합니다.", severity: "success" });
         setTimeout(() => router.push("/video"), 1000); 
@@ -109,7 +109,7 @@ export default function VideoDetail() {
 
   // 3. 삭제 (DELETE) 핸들러
   const handleDelete = async () => {
-    if (!video || !API_BASE_URL) return;
+    if (!video || !NEXT_PUBLIC_API_URL) return;
     if (!window.confirm(`"${video.title}" 영상을 정말로 삭제하시겠습니까?`)) return;
 
     setIsProcessing(true);
@@ -117,7 +117,7 @@ export default function VideoDetail() {
 
     try {
         // ⭐️ 절대 경로 사용 및 video.id를 string으로 변환
-        await axios.delete(`${API_BASE_URL}/api/video/${String(video.id)}`);
+        await axios.delete(`${NEXT_PUBLIC_API_URL}/api/video/${String(video.id)}`);
         
         setAlertMessage({ message: "영상이 성공적으로 삭제되었습니다! 목록으로 이동합니다.", severity: "success" });
         setTimeout(() => router.push("/video"), 1000);

@@ -17,7 +17,7 @@ import {
 import { VideoItem } from "@shared/types/video";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function VideoList() {
   const [items, setItems] = useState<VideoItem[]>([]);
@@ -28,7 +28,7 @@ export default function VideoList() {
   // 1. 데이터 로드 (GET)
   useEffect(() => {
     const fetchVideoItems = async () => {
-      if (!API_BASE_URL) {
+      if (!NEXT_PUBLIC_API_URL) {
         setLoading(false);
         setAlertMessage({ message: "API 주소가 설정되지 않아 영상을 불러올 수 없습니다.", severity: "error" });
         return;
@@ -38,7 +38,7 @@ export default function VideoList() {
       setAlertMessage(null);
 
       try {
-        const res = await axios.get<{ success: boolean; data: VideoItem[] }>(`${API_BASE_URL}/api/video`);
+        const res = await axios.get<{ success: boolean; data: VideoItem[] }>(`${NEXT_PUBLIC_API_URL}/api/video`);
         setItems(res.data.data);
       } catch (err) {
         console.error("영상 목록 로드 실패:", err);
@@ -82,7 +82,7 @@ export default function VideoList() {
           <Button 
             variant="contained" 
             onClick={handleCreateClick}
-            disabled={loading || !API_BASE_URL}
+            disabled={loading || !NEXT_PUBLIC_API_URL}
           >
             등록
           </Button>

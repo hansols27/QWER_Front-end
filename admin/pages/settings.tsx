@@ -14,10 +14,10 @@ import {
 import axios from "axios";
 import type { SettingsData, SnsLink } from "@shared/types/settings";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // API 경로가 설정되지 않았을 경우, 사용자에게 알려줍니다. (로컬 환경 테스트 시 유용)
-if (!API_BASE_URL) {
+if (!NEXT_PUBLIC_API_URL) {
   console.error("API_BASE_URL 환경 변수가 설정되지 않았습니다. API 호출이 실패할 수 있습니다.");
 }
 
@@ -38,7 +38,7 @@ const SettingsPage = () => {
       setAlertMessage(null);
       try {
         // ⭐️ 절대 경로 사용
-        const res = await axios.get<{ success: boolean; data: SettingsData }>(`${API_BASE_URL}/api/settings`);
+        const res = await axios.get<{ success: boolean; data: SettingsData }>(`${NEXT_PUBLIC_API_URL}/api/settings`);
         const data = res.data.data;
         setMainImageUrl(data.mainImage || "");
         setSnsLinks(DEFAULT_SNS_IDS.map(id => data.snsLinks.find(l => l.id === id) || { id, url: "" }));
@@ -68,7 +68,7 @@ const SettingsPage = () => {
 
       // ⭐️ 절대 경로 사용
       const res = await axios.post<{ success: boolean; data: SettingsData }>(
-        `${API_BASE_URL}/api/settings`, 
+        `${NEXT_PUBLIC_API_URL}/api/settings`, 
         formData, 
         {
           // 파일을 포함한 데이터를 전송할 때 필수 헤더
@@ -156,7 +156,7 @@ const SettingsPage = () => {
         <Button 
           variant="contained" 
           onClick={saveSettings} 
-          disabled={loading || !API_BASE_URL} // API URL이 없거나 로딩 중일 때 비활성화
+          disabled={loading || !NEXT_PUBLIC_API_URL} // API URL이 없거나 로딩 중일 때 비활성화
           startIcon={loading && <CircularProgress size={20} />}
         >
           {loading ? "저장 중..." : "저장"}

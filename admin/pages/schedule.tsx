@@ -27,9 +27,9 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
 // ⭐️ 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-if (!API_BASE_URL) {
+if (!NEXT_PUBLIC_API_URL) {
   console.error("API_BASE_URL 환경 변수가 설정되지 않았습니다. API 호출이 실패할 수 있습니다.");
 }
 
@@ -56,7 +56,7 @@ const SchedulePage = () => {
   // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!API_BASE_URL) {
+      if (!NEXT_PUBLIC_API_URL) {
         setAlertMessage({ message: "API 주소가 설정되지 않아 일정을 불러올 수 없습니다.", severity: "error" });
         return;
       }
@@ -64,7 +64,7 @@ const SchedulePage = () => {
       setAlertMessage(null);
       try {
         // ⭐️ 절대 경로 사용
-        const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule`);
+        const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>(`${NEXT_PUBLIC_API_URL}/api/schedule`);
         setEvents(res.data.data);
       } catch (err) {
         console.error(err);
@@ -109,7 +109,7 @@ const SchedulePage = () => {
 
   // 이벤트 저장
   const saveEvent = async () => {
-    if (!selectedDate || !API_BASE_URL) return; // API_BASE_URL 없으면 저장 막기
+    if (!selectedDate || !NEXT_PUBLIC_API_URL) return; // API_BASE_URL 없으면 저장 막기
     setLoading(true);
     setAlertMessage(null);
 
@@ -131,7 +131,7 @@ const SchedulePage = () => {
 
     try {
       // ⭐️ 절대 경로 사용
-      const res = await axios.post<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule`, newEvent);
+      const res = await axios.post<{ success: boolean; data: ScheduleEvent[] }>(`${NEXT_PUBLIC_API_URL}/api/schedule`, newEvent);
       setEvents(res.data.data);
       setModalOpen(false);
       setAlertMessage({ message: "일정이 성공적으로 저장되었습니다!", severity: "success" });
@@ -145,12 +145,12 @@ const SchedulePage = () => {
 
   // 이벤트 삭제
   const deleteEvent = async () => {
-    if (!editId || !API_BASE_URL) return; // API_BASE_URL 없으면 삭제 막기
+    if (!editId || !NEXT_PUBLIC_API_URL) return; // API_BASE_URL 없으면 삭제 막기
     setLoading(true);
     setAlertMessage(null);
     try {
       // ⭐️ 절대 경로 사용
-      const res = await axios.delete<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule/${editId}`);
+      const res = await axios.delete<{ success: boolean; data: ScheduleEvent[] }>(`${NEXT_PUBLIC_API_URL}/api/schedule/${editId}`);
       setEvents(res.data.data);
       setModalOpen(false);
       setAlertMessage({ message: "일정이 성공적으로 삭제되었습니다!", severity: "success" });
@@ -255,7 +255,7 @@ const SchedulePage = () => {
             <Button 
               variant="contained" 
               onClick={saveEvent} 
-              disabled={loading || !API_BASE_URL || !title} // API_BASE_URL 없거나 로딩 중이거나 제목 없으면 비활성화
+              disabled={loading || !NEXT_PUBLIC_API_URL || !title} // API_BASE_URL 없거나 로딩 중이거나 제목 없으면 비활성화
               startIcon={loading && <CircularProgress size={20} />}
             >
               {loading ? "저장 중..." : "저장"}

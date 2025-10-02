@@ -15,7 +15,7 @@ import {
 import { VideoItem } from "@shared/types/video";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function VideoCreate() {
   const [title, setTitle] = useState("");
@@ -42,7 +42,7 @@ export default function VideoCreate() {
 
   const handleSubmit = async () => {
     setAlertMessage(null);
-    if (!API_BASE_URL) {
+    if (!NEXT_PUBLIC_API_URL) {
       setAlertMessage({ message: "API 주소가 설정되지 않아 등록할 수 없습니다.", severity: "error" });
       return;
     }
@@ -55,7 +55,7 @@ export default function VideoCreate() {
 
     try {
       // ⭐️ 절대 경로 사용
-      const res = await axios.post<VideoItem>(`${API_BASE_URL}/api/video`, { title, src });
+      const res = await axios.post<VideoItem>(`${NEXT_PUBLIC_API_URL}/api/video`, { title, src });
       
       if (res.data.id) {
         setAlertMessage({ message: "영상이 성공적으로 등록되었습니다! 목록으로 이동합니다.", severity: "success" });
@@ -119,7 +119,7 @@ export default function VideoCreate() {
           <Button 
             variant="contained" 
             onClick={handleSubmit}
-            disabled={loading || !title || !src || !API_BASE_URL} // ⭐️ 필수값 체크 및 API 경로 체크
+            disabled={loading || !title || !src || !NEXT_PUBLIC_API_URL} // ⭐️ 필수값 체크 및 API 경로 체크
             startIcon={loading && <CircularProgress size={20} color="inherit" />}
             sx={{ mt: 2 }}
           >

@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
 export default function GalleryList() {
@@ -28,7 +28,7 @@ export default function GalleryList() {
 
   useEffect(() => {
     const fetchGalleryItems = async () => {
-      if (!API_BASE_URL) {
+      if (!NEXT_PUBLIC_API_URL) {
         setAlertMessage({ message: "API 주소가 설정되지 않아 갤러리 아이템을 불러올 수 없습니다.", severity: "error" });
         return;
       }
@@ -38,7 +38,7 @@ export default function GalleryList() {
 
       try {
         // ⭐️ 절대 경로 사용
-        const res = await axios.get<{ success: boolean; data: GalleryItem[] }>(`${API_BASE_URL}/api/gallery`);
+        const res = await axios.get<{ success: boolean; data: GalleryItem[] }>(`${NEXT_PUBLIC_API_URL}/api/gallery`);
         setItems(res.data.data);
       } catch (err) {
         console.error("갤러리 로드 실패:", err);
@@ -68,7 +68,7 @@ export default function GalleryList() {
           <Button
             variant="contained"
             onClick={handleCreateClick}
-            disabled={loading || !API_BASE_URL}
+            disabled={loading || !NEXT_PUBLIC_API_URL}
           >
             등록
           </Button>

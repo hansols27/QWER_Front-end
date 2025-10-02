@@ -16,9 +16,9 @@ import {
 } from "@mui/material";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-if (!API_BASE_URL) {
+if (!NEXT_PUBLIC_API_URL) {
   console.error("API_BASE_URL 환경 변수가 설정되지 않았습니다. API 호출이 실패할 수 있습니다.");
 }
 
@@ -86,7 +86,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
 
   // 저장
   const handleSave = async () => {
-    if (!API_BASE_URL) {
+    if (!NEXT_PUBLIC_API_URL) {
       setAlertMessage({ message: "API 주소가 설정되지 않아 저장할 수 없습니다.", severity: "error" });
       return;
     }
@@ -116,7 +116,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
       });
 
       // ⭐️ 절대 경로 사용
-      await axios.post(`${API_BASE_URL}/api/members`, formData, {
+      await axios.post(`${NEXT_PUBLIC_API_URL}/api/members`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -219,7 +219,7 @@ const MemberForm = ({ memberId }: { memberId: string }) => {
           variant="contained" 
           color="primary" 
           onClick={handleSave} 
-          disabled={loading || !API_BASE_URL}
+          disabled={loading || !NEXT_PUBLIC_API_URL}
           startIcon={loading && <CircularProgress size={20} color="inherit" />}
         >
           {loading ? "저장 중..." : "저장"}

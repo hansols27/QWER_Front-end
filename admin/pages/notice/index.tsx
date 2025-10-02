@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 
 // 환경 변수를 사용하여 API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Notice {
     id: number;
@@ -35,7 +35,7 @@ export default function NoticeList() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!API_BASE_URL) {
+        if (!NEXT_PUBLIC_API_URL) {
             setLoading(false);
             setAlertMessage({ message: "API 주소가 설정되지 않아 공지사항을 불러올 수 없습니다.", severity: "error" });
             return;
@@ -46,7 +46,7 @@ export default function NoticeList() {
             setAlertMessage(null);
             try {
                 // ⭐️ 절대 경로 API 사용
-                const res = await axios.get<Notice[]>(`${API_BASE_URL}/api/notice`);
+                const res = await axios.get<Notice[]>(`${NEXT_PUBLIC_API_URL}/api/notice`);
                 setNotices(res.data);
             } catch (err) {
                 console.error("공지사항 목록 로드 실패:", err);
@@ -71,7 +71,7 @@ export default function NoticeList() {
                     <Button 
                         variant="contained" 
                         onClick={() => router.push("/notice/create")}
-                        disabled={loading || !API_BASE_URL}
+                        disabled={loading || !NEXT_PUBLIC_API_URL}
                     >
                         등록
                     </Button>
