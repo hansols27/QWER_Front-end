@@ -1,6 +1,6 @@
 // vite.config.ts
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react'; // SWC 플러그인 대신 일반 플러그인
+import react from '@vitejs/plugin-react'; 
 import svgr from 'vite-plugin-svgr';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,11 +16,18 @@ export default defineConfig({
       '@app': path.resolve(__dirname, 'src/app'),
       '@components': path.resolve(__dirname, 'src/components'),
       '@utils': path.resolve(__dirname, 'src/utils'),
-      '@shared': path.resolve(__dirname, '../shared')
+      '@shared': path.resolve(__dirname, '../shared') 
     },
     extensions: ['.ts', '.tsx', '.js']
   },
-  server: { fs: { allow: ['../shared'] } },
+  server: { 
+    fs: { 
+      allow: [
+        '..', 
+        '../shared' 
+      ] 
+    } 
+  },
   optimizeDeps: { include: ['react-router-dom', 'yet-another-react-lightbox', 'axios'] },
   build: {
     target: 'esnext',

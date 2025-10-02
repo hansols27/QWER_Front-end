@@ -11,56 +11,80 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import axios from "axios";
-import type { SettingsData, SnsLink } from "@shared/types/settings";
+import axios from "axios"; 
+import type { SettingsData, SnsLink } from "@shared/types/settings"; 
 
-// 환경 변수에서 API URL을 가져옵니다. (Next.js 빌드 환경에서 자동으로 주입됨)
-const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Next.js 환경 변수 접근
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-if (!NEXT_PUBLIC_API_URL) {
-  console.error("API_BASE_URL 환경 변수가 설정되지 않았습니다. API 호출이 실패할 수 있습니다.");
-}
-
+// SNS 링크의 기본 ID 목록
 const DEFAULT_SNS_IDS: SnsLink["id"][] = ["instagram", "youtube", "twitter", "cafe", "shop"];
 
+
+// 오류 객체 구조를 런타임에 직접 체크하는 함수
+// TypeScript 오류를 일으키지 않도록 'any'를 사용하여 안전하게 속성에 접근합니다.
+const getErrorMessage = (error: any): string => {
+    // 1. Axios Error 객체인지 런타임 속성으로 확인
+    if (error && error.response && error.response.data) {
+        // 백엔드에서 보낸 상세 오류 메시지가 있다면 반환
+        if (error.response.data.message) {
+            return error.response.data.message;
+        }
+    }
+    // 2. 일반적인 Error 객체의 메시지 반환
+    if (error && error.message) {
+        return error.message;
+    }
+    // 3. 알 수 없는 오류 메시지
+    return "요청 처리 중 알 수 없는 오류가 발생했습니다. 네트워크 상태를 확인하세요.";
+};
+
+
 const SettingsPage = () => {
+  // API URL이 설정되지 않았다면 에러 메시지 출력
+  if (!API_BASE_URL) {
+    return (
+      <Layout>
+        <Box p={4}><Alert severity="error">
+          <Typography fontWeight="bold">환경 설정 오류:</Typography> .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않습니다.
+        </Alert></Box>
+      </Layout>
+    );
+  }
+
   const [snsLinks, setSnsLinks] = useState<SnsLink[]>(DEFAULT_SNS_IDS.map(id => ({ id, url: "" })));
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [mainImageUrl, setMainImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  // 성공 메시지 또는 실패 메시지를 담을 상태
   const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error" } | null>(null);
 
   /**
-   * 컴포넌트 로드 시 현재 설정을 백엔드에서 불러옵니다.
+   * 컴포넌트 로드 시 현재 설정을 백엔드에서 불러옵니다. (읽기 기능)
    */
   useEffect(() => {
     const fetchSettings = async () => {
-      // API URL이 설정되지 않았다면 로드 시도 중지
-      if (!NEXT_PUBLIC_API_URL) {
-        setAlertMessage({ message: "API URL이 없어 설정을 로드할 수 없습니다.", severity: "error" });
-        return;
-      }
-      
       setLoading(true);
       setAlertMessage(null);
       try {
-        // 백엔드에서 GET 요청으로 현재 설정 데이터를 불러옵니다.
-        const res = await axios.get<{ success: boolean; data: SettingsData }>(`${NEXT_PUBLIC_API_URL}/api/settings`);
+        // 응답 데이터 타입은 SettingsData를 포함하는 구조로 가정합니다.
+        const res = await axios.get<{ success: boolean; data: SettingsData }>(`${API_BASE_URL}/api/settings`);
         const data = res.data.data;
         
-        // 메인 이미지 URL과 SNS 링크를 상태에 저장합니다.
         setMainImageUrl(data.mainImage || "");
         setSnsLinks(DEFAULT_SNS_IDS.map(id => data.snsLinks.find(l => l.id === id) || { id, url: "" }));
       } catch (err) {
         console.error("Failed to load settings:", err);
-        setAlertMessage({ message: "설정 로드에 실패했습니다.", severity: "error" });
+        
+        // isAxiosError나 AxiosError 타입 없이 안전하게 메시지 추출
+        const errorMsg = getErrorMessage(err);
+        
+        setAlertMessage({ message: errorMsg, severity: "error" });
       } finally {
         setLoading(false);
       }
     };
     fetchSettings();
-  }, []);
+  }, []); 
 
   /**
    * SNS 링크 입력 필드가 변경될 때 상태를 업데이트합니다.
@@ -70,50 +94,47 @@ const SettingsPage = () => {
   };
 
   /**
-   * 설정을 백엔드에 저장하는 함수 (POST 요청).
+   * 설정을 백엔드에 저장하는 함수 (쓰기 기능).
    */
   const saveSettings = async () => {
-    if (!NEXT_PUBLIC_API_URL) {
-      setAlertMessage({ message: "API 설정이 없어 저장할 수 없습니다.", severity: "error" });
-      return;
-    }
-
     setLoading(true);
     setAlertMessage(null);
     try {
       const formData = new FormData();
-      // 1. 이미지 파일 추가 (선택 사항)
+      
       if (imageFile) {
         formData.append("image", imageFile);
       }
-      // 2. SNS 링크 데이터 추가 (JSON 문자열로 변환하여 전송)
-      // 백엔드는 이 문자열을 파싱하여 데이터베이스에 저장해야 합니다.
-      formData.append("snsLinks", JSON.stringify(snsLinks.filter(l => l.url))); // URL이 있는 링크만 저장
+      
+      formData.append("snsLinks", JSON.stringify(snsLinks.filter(l => l.url.trim()))); 
 
-      // 백엔드 API에 POST 요청으로 설정 데이터를 저장합니다.
       const res = await axios.post<{ success: boolean; data: SettingsData }>(
-        `${NEXT_PUBLIC_API_URL}/api/settings`, 
+        `${API_BASE_URL}/api/settings`, 
         formData, 
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "multipart/form-data" }, 
         }
       );
 
       const data = res.data.data;
       setMainImageUrl(data.mainImage || "");
-      // 저장 후 최신 데이터로 SNS 링크 상태를 업데이트합니다.
       setSnsLinks(DEFAULT_SNS_IDS.map(id => data.snsLinks.find(l => l.id === id) || { id, url: "" }));
-      setImageFile(null); // 파일 전송 완료 후 초기화
+      setImageFile(null);
       setAlertMessage({ message: "설정이 성공적으로 저장되었습니다!", severity: "success" });
 
     } catch (err) {
       console.error("Failed to save settings:", err);
-      setAlertMessage({ message: "설정 저장에 실패했습니다. 백엔드 또는 네트워크 상태를 확인하세요.", severity: "error" });
+      
+      // isAxiosError나 AxiosError 타입 없이 안전하게 메시지 추출
+      const errorMsg = getErrorMessage(err);
+      
+      setAlertMessage({ message: errorMsg, severity: "error" });
     } finally {
       setLoading(false);
     }
   };
 
+  // --- UI 부분은 이전과 동일합니다 ---
   return (
     <Layout>
       <Box p={4} maxWidth="800px" margin="0 auto">
@@ -144,12 +165,11 @@ const SettingsPage = () => {
                 </Button>
                 {imageFile && (
                     <Typography variant="body2" color="text.secondary" mt={1}>
-                        저장 버튼을 눌러야 업로드됩니다.
+                      저장 버튼을 눌러야 업로드됩니다.
                     </Typography>
                 )}
               </Box>
               
-              {/* 현재 서버에 저장된 이미지 미리보기 */}
               {(mainImageUrl || imageFile) && (
                 <Box>
                   <Typography variant="caption" display="block" mb={1}>미리보기</Typography>
@@ -178,7 +198,7 @@ const SettingsPage = () => {
               {snsLinks.map(link => (
                 <TextField
                   key={link.id}
-                  label={link.id.charAt(0).toUpperCase() + link.id.slice(1)} // Instagram, Youtube 등
+                  label={link.id.charAt(0).toUpperCase() + link.id.slice(1)} 
                   value={link.url}
                   onChange={e => updateSnsLink(link.id, e.target.value)}
                   fullWidth
@@ -196,7 +216,7 @@ const SettingsPage = () => {
           color="success"
           size="large"
           onClick={saveSettings} 
-          disabled={loading || !NEXT_PUBLIC_API_URL}
+          disabled={loading}
           startIcon={loading && <CircularProgress size={20} color="inherit" />}
           sx={{ py: 1.5, px: 4, borderRadius: 2 }}
         >

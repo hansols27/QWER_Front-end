@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent } from "react";
+import { useEffect, useState, ChangeEvent, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import Layout from "../../components/common/layout";
@@ -17,7 +17,23 @@ import {
 import type { AlbumItem } from "@shared/types/album";
 
 // 환경 변수를 사용하여 API 기본 URL 설정 (백엔드 주소)
-const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL; // ⭐️ 변수명 통일
+
+// ===========================
+// 유틸리티 함수 (오류 메시지 추출)
+// ===========================
+
+const extractErrorMessage = (error: any, defaultMsg: string): string => {
+    // Axios 응답 오류 (response.data.message) 확인
+    if (error && error.response && error.response.data && typeof error.response.data === 'object' && error.response.data.message) {
+        return error.response.data.message;
+    }
+    // 일반적인 Error 객체의 메시지 확인
+    if (error && typeof error === 'object' && error.message) {
+        return error.message;
+    }
+    return defaultMsg;
+};
 
 // Album 타입의 기본값 (로딩 전 초기화용)
 const INITIAL_ALBUM_STATE: AlbumItem = {
@@ -25,14 +41,15 @@ const INITIAL_ALBUM_STATE: AlbumItem = {
     title: "",
     date: "",
     description: "",
-    tracks: [""], // ⭐️ 초기값에 빈 문자열 배열을 넣어 undefined 가능성 줄임
+    tracks: [""], 
     videoUrl: "",
     image: "", 
 };
 
 export default function AlbumDetail() {
   const params = useParams();
-  const id = params?.id as string;
+  // ⭐️ id가 string이 아닐 경우 undefined 처리 (타입스크립트 경고 최소화)
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id; 
   const router = useRouter();
 
   const [album, setAlbum] = useState<AlbumItem | null>(null);
@@ -41,33 +58,44 @@ export default function AlbumDetail() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error" } | null>(null);
 
-  // 1. 데이터 로드 (GET)
-  useEffect(() => {
-    if (!id || !NEXT_PUBLIC_API_URL) {
-      if (!id) setLoading(false);
-      if (!NEXT_PUBLIC_API_URL) setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
-      return;
-    }
+  /**
+   * 1. 데이터 로드 (GET)
+   */
+  const fetchAlbum = useCallback(async () => {
+    if (!id || !API_BASE_URL) return;
 
-    const fetchAlbum = async () => {
-      setLoading(true);
-      setAlertMessage(null);
-      try {
-        const res = await axios.get<{ success: boolean; data: AlbumItem }>(`${NEXT_PUBLIC_API_URL}/api/album/${id}`);
-        setAlbum(res.data.data);
-      } catch (err) {
-        console.error("앨범 상세 로드 실패:", err);
-        setAlertMessage({ message: "앨범 정보를 불러오는 데 실패했습니다.", severity: "error" });
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    setAlertMessage(null);
+    try {
+      const res = await axios.get<{ success: boolean; data: AlbumItem }>(`${API_BASE_URL}/api/album/${id}`);
+      // ⭐️ tracks가 undefined일 경우, UI의 트랙 추가/수정 로직이 즉시 작동하도록 빈 배열로 초기화
+      const fetchedAlbum = res.data.data;
+      if (!fetchedAlbum.tracks) {
+        fetchedAlbum.tracks = [""];
       }
-    };
-    fetchAlbum();
+      setAlbum(fetchedAlbum);
+    } catch (err: any) { // ⭐️ err: any 명시
+      console.error("앨범 상세 로드 실패:", err);
+      const errorMsg = extractErrorMessage(err, "앨범 정보를 불러오는 데 실패했습니다.");
+      setAlertMessage({ message: errorMsg, severity: "error" });
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  // 2. 수정 (PUT) 핸들러
+  useEffect(() => {
+    if (id && API_BASE_URL) {
+      fetchAlbum();
+    } else if (!id) {
+      setLoading(false);
+    }
+  }, [id, fetchAlbum]);
+
+  /**
+   * 2. 수정 (PUT) 핸들러
+   */
   const handleUpdate = async () => {
-    if (!album || !NEXT_PUBLIC_API_URL) return;
+    if (!album || !API_BASE_URL) return;
     
     setIsSaving(true);
     setAlertMessage(null);
@@ -75,23 +103,28 @@ export default function AlbumDetail() {
     try {
       const formData = new FormData();
       
-      // ?? '' 를 사용하여 undefined 방지
-      formData.append("title", album.title ?? '');
-      formData.append("date", album.date ?? '');
-      formData.append("description", album.description ?? '');
+      // ⭐️ AlbumItem에 정의된 필수/선택 속성들을 널 체크하여 안전하게 추가
+      formData.append("title", album.title); // title, date는 필수 가정
+      formData.append("date", album.date); 
+      formData.append("description", album.description ?? ''); 
       formData.append("videoUrl", album.videoUrl ?? '');
+      // existingImage는 기존 이미지를 유지할 때 필요합니다.
       formData.append("existingImage", album.image ?? ''); 
       
       if (coverFile) {
+        // 새 파일이 있으면 File 객체를 직접 추가
         formData.append("coverFile", coverFile);
       }
       
-      // ⭐️ album.tracks가 undefined일 경우 빈 배열([])로 대체
+      // 트랙 목록 처리 (비어있지 않은 트랙만 필터링)
       const filteredTracks = (album.tracks ?? []).filter(t => t && t.trim() !== "");
-      filteredTracks.forEach((track, idx) => formData.append(`tracks[${idx}]`, track ?? '')); 
+      filteredTracks.forEach((track, idx) => {
+          // 트랙도 안전하게 널 체크 후 추가
+          formData.append(`tracks[${idx}]`, track ?? ''); 
+      });
 
       const res = await axios.put<{ success: boolean; data?: AlbumItem }>(
-        `${NEXT_PUBLIC_API_URL}/api/album/${id}`, 
+        `${API_BASE_URL}/api/album/${id}`, 
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -106,18 +139,20 @@ export default function AlbumDetail() {
         setAlertMessage({ message: "수정 실패: 백엔드에서 오류가 발생했습니다.", severity: "error" });
       }
 
-    } catch (err) {
+    } catch (err: any) { // ⭐️ err: any 명시
       console.error("앨범 수정 요청 실패:", err);
-      setAlertMessage({ message: "앨범 수정 요청에 실패했습니다.", severity: "error" });
+      const errorMsg = extractErrorMessage(err, "앨범 수정 요청에 실패했습니다.");
+      setAlertMessage({ message: errorMsg, severity: "error" });
     } finally {
       setIsSaving(false);
     }
   };
   
-  // 3. 삭제 (DELETE) 핸들러
+  /**
+   * 3. 삭제 (DELETE) 핸들러
+   */
   const handleDelete = async () => {
-    // ... (삭제 로직은 트랙 관련 없으므로 동일)
-    if (!id || !NEXT_PUBLIC_API_URL) return;
+    if (!id || !API_BASE_URL) return;
     
     if (!window.confirm("정말로 이 앨범을 삭제하시겠습니까?")) return;
 
@@ -125,14 +160,15 @@ export default function AlbumDetail() {
     setAlertMessage(null);
 
     try {
-      await axios.delete(`${NEXT_PUBLIC_API_URL}/api/album/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/album/${id}`);
       
       setAlertMessage({ message: "앨범이 성공적으로 삭제되었습니다!", severity: "success" });
       router.push("/album"); 
 
-    } catch (err) {
+    } catch (err: any) { // ⭐️ err: any 명시
       console.error("앨범 삭제 요청 실패:", err);
-      setAlertMessage({ message: "앨범 삭제에 실패했습니다.", severity: "error" });
+      const errorMsg = extractErrorMessage(err, "앨범 삭제에 실패했습니다.");
+      setAlertMessage({ message: errorMsg, severity: "error" });
     } finally {
       setIsSaving(false);
     }
@@ -141,7 +177,7 @@ export default function AlbumDetail() {
   // 4. 트랙 수정 핸들러
   const handleTrackChange = (index: number, value: string) => {
     if (!album) return;
-    // ⭐️ album.tracks가 undefined일 경우 빈 배열로 대체 후 복사
+    // ⭐️ 널 병합 연산자를 사용하여 안전하게 트랙 상태 업데이트
     const newTracks = [...(album.tracks ?? [])]; 
     newTracks[index] = value;
     setAlbum({ ...album, tracks: newTracks });
@@ -149,13 +185,11 @@ export default function AlbumDetail() {
   
   const addTrack = () => {
     if (!album) return;
-    // ⭐️ album.tracks가 undefined일 경우 빈 배열로 대체
     setAlbum({ ...album, tracks: [...(album.tracks ?? []), ""] });
   };
   
   const removeTrack = (index: number) => {
     if (!album) return;
-    // ⭐️ album.tracks가 undefined일 경우 빈 배열로 대체
     setAlbum({ ...album, tracks: (album.tracks ?? []).filter((_, i) => i !== index) });
   };
   
@@ -167,9 +201,19 @@ export default function AlbumDetail() {
 
   if (!id) return <Layout><Box p={4}><Typography color="error">잘못된 접근입니다. 앨범 ID가 필요합니다.</Typography></Box></Layout>;
   
+  if (!API_BASE_URL) {
+    return (
+      <Layout>
+        <Box p={4}><Alert severity="error">
+          <Typography fontWeight="bold">환경 설정 오류:</Typography> .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않습니다.
+        </Alert></Box>
+      </Layout>
+    );
+  }
+
   if (loading || !album) return (
     <Layout>
-      <Box display="flex" justifyContent="center" py={8}><CircularProgress /><Typography ml={2}>앨범 로딩 중...</Typography></Box>
+      <Box display="flex" justifyContent="center" py={8}><CircularProgress /><Typography ml={2} sx={{ alignSelf: 'center' }}>앨범 로딩 중...</Typography></Box>
     </Layout>
   );
 
@@ -177,7 +221,7 @@ export default function AlbumDetail() {
   return (
     <Layout>
       <Box p={4}>
-        <Typography variant="h4" mb={2}>앨범 "{album.title}" 수정</Typography>
+        <Typography variant="h4" mb={2} fontWeight="bold">앨범 "{album.title}" 수정</Typography>
         
         {alertMessage && (
           <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>
@@ -185,13 +229,14 @@ export default function AlbumDetail() {
           </Alert>
         )}
         
-        <Stack spacing={2}>
-          {/* ... (기타 입력 필드) ... */}
+        <Stack spacing={3}>
+          {/* 기타 입력 필드 */}
           <TextField
             label="타이틀"
             value={album.title}
             onChange={(e) => setAlbum({ ...album, title: e.target.value })}
             disabled={isSaving}
+            required
           />
           <TextField
             label="발매일"
@@ -200,39 +245,40 @@ export default function AlbumDetail() {
             onChange={(e) => setAlbum({ ...album, date: e.target.value })}
             InputLabelProps={{ shrink: true }}
             disabled={isSaving}
+            required
           />
           <TextField 
             label="설명" 
             multiline minRows={3} 
-            value={album.description} 
+            value={album.description ?? ''} // 널값 처리
             onChange={e => setAlbum({ ...album, description: e.target.value })} 
             disabled={isSaving}
           />
           <TextField 
             label="유튜브 링크" 
-            value={album.videoUrl} 
+            value={album.videoUrl ?? ''} // 널값 처리
             onChange={e => setAlbum({ ...album, videoUrl: e.target.value })} 
             disabled={isSaving}
           />
 
-          {/* 현재 커버 이미지 미리보기 */}
-          <Typography variant="h6" mt={2}>현재 커버 이미지</Typography>
+          {/* 현재 커버 이미지 미리보기 및 파일 선택 */}
+          <Typography variant="h6" mt={2} fontWeight="bold">커버 이미지</Typography>
           {(coverFile || album.image) && (
             <Box mb={2}>
                 <CardMedia
                     component="img"
                     height="150"
-                    image={coverFile ? URL.createObjectURL(coverFile) : album.image}
+                    // ⭐️ 이미지 URL이 없을 경우 대비
+                    image={coverFile ? URL.createObjectURL(coverFile) : album.image || 'https://via.placeholder.com/150?text=No+Image'}
                     alt={`${album.title} Cover`}
                     sx={{ width: 150, objectFit: 'cover', borderRadius: 1 }}
                 />
-                <Typography variant="caption" color="textSecondary">
-                    {coverFile ? `새 파일: ${coverFile.name}` : `기존 파일 사용 중`}
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1 }}>
+                    {coverFile ? `새 파일: ${coverFile.name}` : album.image ? `기존 파일 사용 중` : `이미지 없음`}
                 </Typography>
             </Box>
           )}
 
-          {/* 이미지 파일 선택 */}
           <input 
             type="file" 
             accept="image/*" 
@@ -242,18 +288,17 @@ export default function AlbumDetail() {
           <Typography variant="body2" color="primary">새 이미지를 선택하면 기존 이미지를 대체합니다.</Typography>
           
           {/* 트랙 목록 */}
-          <Typography variant="h6" mt={2}>트랙 목록</Typography>
-          {/* ⭐️ album.tracks가 undefined일 경우 빈 배열([])로 대체하여 map 오류(2488) 방지 */}
+          <Typography variant="h6" mt={2} fontWeight="bold">트랙 목록</Typography>
           {(album.tracks ?? []).map((track, idx) => (
             <Stack direction="row" spacing={1} alignItems="center" key={idx}>
               <TextField
                 label={`트랙 ${idx + 1}`}
-                value={track}
+                value={track ?? ''} // ⭐️ 트랙 항목도 널값 처리
                 onChange={e => handleTrackChange(idx, e.target.value)}
                 fullWidth
                 disabled={isSaving}
               />
-              {/* ⭐️ length 체크 시 Optional Chaining과 ?? 0 사용 */}
+              {/* length 체크 */}
               {(album.tracks?.length ?? 0) > 1 && (
                 <Button onClick={() => removeTrack(idx)} color="error" disabled={isSaving}>삭제</Button>
               )}
@@ -268,7 +313,8 @@ export default function AlbumDetail() {
               variant="contained" 
               color="primary" 
               onClick={handleUpdate} 
-              disabled={isSaving || !NEXT_PUBLIC_API_URL || !album.title || !album.date}
+              // ⭐️ 저장 버튼 비활성화 조건 강화: 필수 필드(title, date)가 비어있는지 확인
+              disabled={isSaving || !API_BASE_URL || !album.title || !album.date}
               startIcon={isSaving && <CircularProgress size={20} color="inherit" />}
             >
               {isSaving ? "저장 중..." : "수정 내용 저장"}
@@ -278,7 +324,7 @@ export default function AlbumDetail() {
               variant="outlined" 
               color="error" 
               onClick={handleDelete} 
-              disabled={isSaving || !NEXT_PUBLIC_API_URL}
+              disabled={isSaving || !API_BASE_URL}
             >
               삭제
             </Button>
