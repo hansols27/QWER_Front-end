@@ -1,13 +1,19 @@
-# dependencies
+# ----------------------------------------
+# 1. Dependencies & Build Artifacts (빌드 결과물)
+# ----------------------------------------
 node_modules
 .vercel
-
-# production build
 .next/
 out/
 build/
+# 백엔드 빌드 결과물 (가장 중요)
+back_end/dist/
+back_end/tsconfig.tsbuildinfo
 
-# environment variables
+# ----------------------------------------
+# 2. Environment Variables & Logs (환경 변수 및 로그)
+# ----------------------------------------
+# 환경 변수 파일 (보안을 위해 반드시 제외)
 .env
 .env.local
 .env.development.local
@@ -15,25 +21,27 @@ build/
 .env.production.local
 .env.production
 
-# logs
+# 로그 파일
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
-# macOS 시스템 파일
+# ----------------------------------------
+# 3. OS and IDE Files (시스템 및 IDE 파일)
+# ----------------------------------------
 .DS_Store
-
-# IDE 관련
 .vscode/
 .idea/
 
-# Optional: npm cache
+# ----------------------------------------
+# 4. Cache & Optional Files (캐시 및 기타)
+# ----------------------------------------
 .npm/
-
-# Optional: yarn cache
 .yarn/
 
-# Firebase service account key
+# ----------------------------------------
+# 5. Secret Key Files (보안 키 파일)
+# ----------------------------------------
+# Firebase 서비스 계정 키 (보안을 위해 반드시 제외)
 back_end/src/firebase-service-key.json
-
-back_end/tsconfig.tsbuildinfo
