@@ -1,5 +1,5 @@
 {
-  "name": "@myorg/front_end",
+  "name": "@myorg/user",
   "version": "1.0.0",
   "private": true,
   "dependencies": {

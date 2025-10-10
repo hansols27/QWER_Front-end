@@ -3,8 +3,7 @@
   "private": true,
   "workspaces": [
     "admin",
-    "front_end",
-    "back_end",
+    "user",
     "shared"
   ],
   "devDependencies": {
