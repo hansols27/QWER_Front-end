@@ -19,7 +19,7 @@
     }
   },
   "include": [
-    "front_end/src/**/*",
+    "user/src/**/*",
     "back_end/src/**/*",
     "shared/**/*"
   ],
