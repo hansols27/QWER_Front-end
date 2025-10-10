@@ -3,6 +3,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Box, Paper, TextField, Button, Typography } from '@mui/material';
+import axios from 'axios';
+
+interface LoginResponse {
+  token: string;
+}
+
+// 안전하게 에러 메시지 추출
+const getErrorMessage = (err: unknown): string => {
+  const e = err as { response?: { data?: { message?: string } }; message?: string };
+  return e.response?.data?.message ?? e.message ?? '로그인 실패';
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,28 +22,25 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch('/api/login', { 
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await axios.post<LoginResponse>(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`, 
+        { email, password }
+      );
 
-      if (!res.ok) return alert('로그인 실패');
-
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-
-      router.replace('/settings'); // 로그인 성공 후 메인 페이지로 이동
-    } catch (error) {
-      console.error('로그인 에러:', error);
-      alert('로그인 중 오류가 발생했습니다.');
+      localStorage.setItem('token', res.data.token);
+      router.replace('/settings'); // 로그인 성공 시 이동
+    } catch (err: unknown) {
+      console.error('로그인 에러:', err);
+      alert(getErrorMessage(err));
     }
   };
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
       <Paper sx={{ p: 6, width: '100%', maxWidth: 400 }}>
-        <Typography variant="h5" align="center" gutterBottom>로그인</Typography>
+        <Typography variant="h5" align="center" gutterBottom>
+          로그인
+        </Typography>
         <TextField
           fullWidth
           margin="normal"
