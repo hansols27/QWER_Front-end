@@ -6,9 +6,6 @@ node_modules
 .next/
 out/
 build/
-# 백엔드 빌드 결과물 (가장 중요)
-back_end/dist/
-back_end/tsconfig.tsbuildinfo
 
 # ----------------------------------------
 # 2. Environment Variables & Logs (환경 변수 및 로그)
@@ -39,9 +36,4 @@ yarn-error.log*
 # ----------------------------------------
 .npm/
 .yarn/
-
-# ----------------------------------------
-# 5. Secret Key Files (보안 키 파일)
-# ----------------------------------------
-# Firebase 서비스 계정 키 (보안을 위해 반드시 제외)
-back_end/src/firebase-service-key.json
+.cache/
