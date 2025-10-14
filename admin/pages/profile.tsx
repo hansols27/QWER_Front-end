@@ -224,7 +224,7 @@ const MemberForm = ({ memberId }: { memberId: typeof memberIds[number] }) => {
         </Stack>
       ))}
       <Button onClick={addText} size="small" variant="outlined">
-        텍스트 추가
+        추가
       </Button>
 
       {/* 이미지 필드 */}
@@ -286,7 +286,7 @@ const MemberForm = ({ memberId }: { memberId: typeof memberIds[number] }) => {
         </Stack>
       ))}
       <Button onClick={addSnsField} size="small" variant="outlined">
-        SNS 필드 추가
+        추가
       </Button>
 
       <Box mt={4}>
@@ -321,7 +321,7 @@ export default function Profile() {
   return (
     <Layout>
       <Box p={4}>
-        <Typography variant="h3" mb={4} fontWeight="bold">멤버 프로필 관리</Typography>
+        <Typography variant="h3" mb={4} fontWeight="bold">프로필</Typography>
         {memberIds.map((id) => (
           <MemberForm key={id} memberId={id} />
         ))}

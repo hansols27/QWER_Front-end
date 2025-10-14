@@ -17,6 +17,7 @@ import axios from "axios";
 import type { SettingsData, SnsLink } from "@shared/types/settings"; 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+console.log("🔧 API_BASE_URL:", process.env.NEXT_PUBLIC_API_URL);
 const DEFAULT_SNS_IDS: SnsLink["id"][] = ["instagram", "youtube", "twitter", "cafe", "shop"];
 
 // 안전하게 에러 메시지 추출
@@ -107,7 +108,7 @@ const SettingsPage = () => {
 
   return (
     <Layout>
-      <Box p={4} maxWidth="800px" margin="0 auto">
+      <Box p={4} width="100%" marginLeft={0}>
         <Typography variant="h4" mb={2} fontWeight="bold">기본 설정</Typography>
 
         {alertMessage && (
@@ -119,7 +120,7 @@ const SettingsPage = () => {
         {/* Main Image */}
         <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3 }}>
           <CardContent>
-            <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>메인 이미지 설정</Typography>
+            <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>메인 이미지</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="flex-start">
               <Box>
                 <Button variant="contained" component="label" color="primary">
@@ -186,7 +187,7 @@ const SettingsPage = () => {
           startIcon={loading && <CircularProgress size={20} color="inherit" />}
           sx={{ py: 1.5, px: 4, borderRadius: 2 }}
         >
-          {loading ? "설정 저장 중..." : "모든 설정 저장"}
+          {loading ? "저장 중..." : "저장"}
         </Button>
 
       </Box>
