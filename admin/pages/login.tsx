@@ -6,14 +6,9 @@ import { Box, Paper, TextField, Button, Typography } from '@mui/material';
 import axios from 'axios';
 
 interface LoginResponse {
-  token: string;
+  success: boolean;
+  message: string;
 }
-
-// 안전하게 에러 메시지 추출
-const getErrorMessage = (err: unknown): string => {
-  const e = err as { response?: { data?: { message?: string } }; message?: string };
-  return e.response?.data?.message ?? e.message ?? '로그인 실패';
-};
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,16 +17,17 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post<LoginResponse>(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`, 
-        { email, password }
-      );
+      // Next.js 내부 API 호출
+      const res = await axios.post<LoginResponse>('/api/login', { email, password });
 
-      localStorage.setItem('token', res.data.token);
-      router.replace('/settings'); // 로그인 성공 시 이동
-    } catch (err: unknown) {
+      if (res.data.success) {
+        router.replace('/settings'); // 로그인 성공 시 이동
+      } else {
+        alert(res.data.message || '로그인 실패');
+      }
+    } catch (err: any) {
       console.error('로그인 에러:', err);
-      alert(getErrorMessage(err));
+      alert(err.response?.data?.message || '로그인 실패');
     }
   };
 
