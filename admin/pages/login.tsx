@@ -3,12 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Box, Paper, TextField, Button, Typography } from '@mui/material';
-import axios from 'axios';
-
-interface LoginResponse {
-  success: boolean;
-  message: string;
-}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -17,17 +11,24 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      // Next.js 내부 API 호출
-      const res = await axios.post<LoginResponse>('/api/login', { email, password });
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (res.data.success) {
-        router.replace('/settings'); // 로그인 성공 시 이동
-      } else {
-        alert(res.data.message || '로그인 실패');
+      if (!res.ok) {
+        alert('로그인 실패');
+        return;
       }
-    } catch (err: any) {
-      console.error('로그인 에러:', err);
-      alert(err.response?.data?.message || '로그인 실패');
+
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+
+      router.replace('/settings'); // 로그인 성공 후 이동
+    } catch (error) {
+      console.error('로그인 에러:', error);
+      alert('로그인 중 오류가 발생했습니다.');
     }
   };
 
