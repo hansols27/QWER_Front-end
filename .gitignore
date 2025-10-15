@@ -3,10 +3,10 @@
 # ----------------------------------------
 node_modules
 .vercel
-admin/.next/
+.next/
 out/
 build/
-user/dist/
+dist/
 
 # ----------------------------------------
 # 2. Environment Variables & Logs (환경 변수 및 로그)
