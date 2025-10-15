@@ -112,7 +112,7 @@ const SettingsPage = () => {
                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="flex-start">
                             <Box>
                                 <Button variant="contained" component="label" color="primary">
-                                    이미지({imageFile ? imageFile.name : ''})
+                                    이미지
                                     <input 
                                         type="file" 
                                         hidden 
