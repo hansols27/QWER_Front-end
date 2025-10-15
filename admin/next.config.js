@@ -11,6 +11,8 @@ const nextConfig = {
 
     // ⭐️ CORS 오류 우회를 위한 Rewrites 설정 ⭐️
     async rewrites() {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        console.log(`[DEV REWRITE DEBUG] Using API URL: ${apiUrl}`);
         return [
             {
                 // 프론트엔드에서 /api/ 로 시작하는 모든 요청을 가로챕니다.
