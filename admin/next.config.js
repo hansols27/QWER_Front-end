@@ -5,23 +5,20 @@ const nextConfig = {
     reactStrictMode: true,
     outputFileTracingRoot: path.join(__dirname, "../"),
 
+    // env 속성은 그대로 유지하여 다른 코드에서 NEXT_PUBLIC_API_URL을 사용할 수 있도록 합니다.
     env: {
         NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     },
 
-    // ⭐️ CORS 오류 우회를 위한 Rewrites 설정 ⭐️
-    async rewrites() {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        console.log(`[DEV REWRITE DEBUG] Using API URL: ${apiUrl}`);
-        return [
-            {
-                // 프론트엔드에서 /api/ 로 시작하는 모든 요청을 가로챕니다.
-                source: "/api/:path*", 
-                // 환경 변수에 설정된 백엔드 URL로 요청을 전달합니다.
-                destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`, 
-            },
-        ];
-    },
+    // ⭐️ Rewrites 설정을 제거합니다. ⭐️
+    // async rewrites() {
+    //     return [
+    //         {
+    //             source: "/api/:path*", 
+    //             destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`, 
+    //         },
+    //     ];
+    // },
 
     webpack: (config) => {
         config.resolve.alias = {
