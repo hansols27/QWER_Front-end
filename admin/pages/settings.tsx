@@ -13,7 +13,7 @@ import {
     Alert,
     CircularProgress,
 } from "@mui/material";
-import axios from "axios"; 
+import { api } from "./api/axios";
 import type { SettingsData, SnsLink } from "@shared/types/settings"; 
 
 const DEFAULT_SNS_IDS: SnsLink["id"][] = ["instagram", "youtube", "twitter", "cafe", "shop"];
@@ -47,7 +47,7 @@ const SettingsPage = () => {
             setAlertMessage(null);
             try {
                 // ⭐️ 변경: 상대 경로 '/api/settings' 사용
-                const res = await axios.get<GetSettingsResponse>(`/api/settings`); 
+                const res = await api.get<GetSettingsResponse>(`/api/settings`); 
                 const data = res.data.data;
                 setMainImageUrl(data.mainImage || "");
                 setSnsLinks(DEFAULT_SNS_IDS.map(id => data.snsLinks.find(l => l.id === id) || { id, url: "" }));
@@ -75,7 +75,7 @@ const SettingsPage = () => {
             formData.append("snsLinks", JSON.stringify(snsLinks.filter(l => l.url.trim())));
 
             // ⭐️ 변경: 상대 경로 '/api/settings' 사용
-            const res = await axios.post<SaveSettingsResponse>(
+            const res = await api.post<SaveSettingsResponse>(
                 `/api/settings`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }

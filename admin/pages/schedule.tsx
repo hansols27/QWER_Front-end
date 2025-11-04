@@ -23,7 +23,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 import type { ScheduleEvent, EventType } from "@shared/types/schedule";
-import axios from "axios";
+import { api } from "./api/axios"; // ✅ 통일된 axios instance 사용
 import { v4 as uuidv4 } from "uuid";
 
 // 환경 변수에서 API 기본 URL을 가져와 상수로 저장합니다.
@@ -36,31 +36,26 @@ const EVENT_TYPES: { [key in EventType]: string } = {
 };
 
 const getErrorMessage = (error: any, defaultMessage: string = "요청 처리 중 오류가 발생했습니다."): string => {
-    // 1. Axios Error 객체에서 상세 메시지 추출 시도
-    if (error && error.response && error.response.data && typeof error.response.data === 'object' && error.response.data.message) {
-        return error.response.data.message;
-    }
-    // 2. 일반적인 Error 객체의 메시지 반환
-    if (error && typeof error === 'object' && error.message) {
-        return error.message;
-    }
-    // 3. 기본 메시지 반환
-    return defaultMessage;
+  if (error?.response?.data?.message) return error.response.data.message;
+  if (error?.message) return error.message;
+  return defaultMessage;
 };
 
-
 const SchedulePage = () => {
-  // ⭐️ API URL이 설정되지 않았다면 에러 메시지 출력 후 조기 종료
+  // ⭐️ API URL 미설정 시 조기 종료
   if (!API_BASE_URL) {
     return (
       <Layout>
-        <Box p={4}><Alert severity="error">
-          <Typography fontWeight="bold">환경 설정 오류:</Typography> .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않아 일정을 관리할 수 없습니다.
-        </Alert></Box>
+        <Box p={4}>
+          <Alert severity="error">
+            <Typography fontWeight="bold">환경 설정 오류:</Typography>
+            .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않아 일정을 관리할 수 없습니다.
+          </Alert>
+        </Box>
       </Layout>
     );
   }
-    
+
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error" } | null>(null);
@@ -73,18 +68,21 @@ const SchedulePage = () => {
   const [endTime, setEndTime] = useState("13:00");
   const [editId, setEditId] = useState<string | null>(null);
 
-  // Fetch events (읽기 기능)
+  // ===========================
+  // 일정 목록 불러오기 (Read)
+  // ===========================
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
       setAlertMessage(null);
+
       try {
-        // API_BASE_URL 상수를 사용하여 호출합니다.
-        const res = await axios.get<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule`);
+        const res = await api.get<{ success: boolean; data: ScheduleEvent[] }>(
+          `/schedule`, {} as any
+        );
         setEvents(res.data.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load schedule:", err);
-        // ⭐️ 안전한 오류 처리 로직 적용
         const errorMsg = getErrorMessage(err, "일정 로드에 실패했습니다. 백엔드 서버 상태를 확인하세요.");
         setAlertMessage({ message: errorMsg, severity: "error" });
       } finally {
@@ -94,7 +92,7 @@ const SchedulePage = () => {
     fetchEvents();
   }, []);
 
-  // 날짜 클릭 핸들러 (API 호출과 관련 없음)
+  // 날짜 클릭 시 모달 열기
   const handleDateClick = (arg: any) => {
     setSelectedDate(arg.date || new Date());
     setTitle("");
@@ -106,38 +104,35 @@ const SchedulePage = () => {
     setModalOpen(true);
   };
 
-  // 이벤트 클릭 핸들러 (API 호출과 관련 없음)
+  // 이벤트 클릭 시 수정 모달 열기
   const handleEventClick = (arg: any) => {
     const evt = events.find(e => e.id === arg.event.id);
     if (!evt) return;
 
-    // 날짜/시간 파싱 로직은 그대로 유지
-    const start = evt.start ? new Date(evt.start) : new Date();
+    const start = new Date(evt.start);
     const end = evt.end ? new Date(evt.end) : start;
 
     setSelectedDate(start);
     setTitle(evt.title);
     setType(evt.type);
     setAllDay(evt.allDay || false);
-    
-    // 시간 형식 (hh:mm)으로 변환
-    const formatTime = (date: Date) => date.toTimeString().slice(0, 5);
 
+    const formatTime = (date: Date) => date.toTimeString().slice(0, 5);
     setStartTime(formatTime(start));
     setEndTime(formatTime(end));
     setEditId(evt.id);
     setModalOpen(true);
   };
 
-
-  // 이벤트 저장 (생성/수정 기능)
+  // ===========================
+  // 일정 저장 (Create / Update)
+  // ===========================
   const saveEvent = async () => {
-    if (!selectedDate) return; 
-    
+    if (!selectedDate) return;
+
     setLoading(true);
     setAlertMessage(null);
 
-    // 날짜/시간 결합 로직은 그대로 유지
     const newEvent: ScheduleEvent = {
       id: editId || uuidv4(),
       title,
@@ -153,27 +148,27 @@ const SchedulePage = () => {
       newEvent.start.setHours(sh, sm);
       newEvent.end.setHours(eh, em);
     } else {
-        // All Day인 경우 시간 정보를 제거하고 UTC 자정으로 설정
-        newEvent.start.setHours(0, 0, 0, 0);
-        newEvent.end.setHours(0, 0, 0, 0);
+      newEvent.start.setHours(0, 0, 0, 0);
+      newEvent.end.setHours(0, 0, 0, 0);
     }
-    
-    // ISO 문자열로 변환하여 백엔드 전송
+
     const eventToSend = {
-        ...newEvent,
-        start: newEvent.start.toISOString(),
-        end: newEvent.end.toISOString(),
+      ...newEvent,
+      start: newEvent.start.toISOString(),
+      end: newEvent.end.toISOString(),
     };
 
     try {
-      // API_BASE_URL 상수를 사용하여 POST/PUT (백엔드에서 Upsert 처리 가정)
-      const res = await axios.post<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule`, eventToSend);
+      const res = await api.post<{ success: boolean; data: ScheduleEvent[] }>(
+        `/schedule`,
+        eventToSend,
+        {} as any
+      );
       setEvents(res.data.data);
       setModalOpen(false);
       setAlertMessage({ message: "일정이 성공적으로 저장되었습니다!", severity: "success" });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save schedule:", err);
-      // ⭐️ 안전한 오류 처리 로직 적용
       const errorMsg = getErrorMessage(err, "일정 저장에 실패했습니다. 백엔드 로그를 확인하세요.");
       setAlertMessage({ message: errorMsg, severity: "error" });
     } finally {
@@ -181,21 +176,24 @@ const SchedulePage = () => {
     }
   };
 
-  // 이벤트 삭제 (삭제 기능)
+  // ===========================
+  // 일정 삭제
+  // ===========================
   const deleteEvent = async () => {
     if (!editId) return;
-    
     setLoading(true);
     setAlertMessage(null);
+
     try {
-      // API_BASE_URL 상수를 사용하여 DELETE 호출
-      const res = await axios.delete<{ success: boolean; data: ScheduleEvent[] }>(`${API_BASE_URL}/api/schedule/${editId}`);
+      const res = await api.delete<{ success: boolean; data: ScheduleEvent[] }>(
+        `/schedule/${editId}`,
+        {} as any
+      );
       setEvents(res.data.data);
       setModalOpen(false);
       setAlertMessage({ message: "일정이 성공적으로 삭제되었습니다!", severity: "success" });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to delete schedule:", err);
-      // ⭐️ 안전한 오류 처리 로직 적용
       const errorMsg = getErrorMessage(err, "일정 삭제에 실패했습니다.");
       setAlertMessage({ message: errorMsg, severity: "error" });
     } finally {
@@ -206,7 +204,7 @@ const SchedulePage = () => {
   return (
     <Layout>
       <Box p={4}>
-        <Typography variant="h4" mb={2}>
+        <Typography variant="h4" mb={2} fontWeight="bold">
           일정관리
         </Typography>
 
@@ -215,33 +213,33 @@ const SchedulePage = () => {
             {alertMessage.message}
           </Alert>
         )}
-        
+
         {loading && <CircularProgress size={24} sx={{ mb: 2 }} />}
 
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
-          // FullCalendar 이벤트 데이터 매핑 (날짜 객체를 string으로 변환하는 처리가 필요할 수 있음)
           events={events.map(e => ({
             id: e.id,
-            title: `${EVENT_TYPES[e.type]}: ${e.title}`, // 제목을 유형과 함께 표시
+            title: `${EVENT_TYPES[e.type]}: ${e.title}`,
             start: e.start,
             end: e.end,
             allDay: e.allDay,
-            color: e.type === 'B' ? '#ff9800' : e.type === 'C' ? '#2196f3' : '#4caf50', // 색상 지정 예시
+            color:
+              e.type === "B" ? "#ff9800" : e.type === "C" ? "#2196f3" : "#4caf50",
           }))}
-          dateClick={(arg: any) => handleDateClick(arg)}
-          eventClick={(arg: any) => handleEventClick(arg)}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
           headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,dayGridWeek,dayGridDay'
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,dayGridWeek,dayGridDay",
           }}
-          locale="ko" // 한글 로케일 추가
+          locale="ko"
           height="auto"
         />
 
-        {/* Modal */}
+        {/* 일정 추가/수정 모달 */}
         <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
           <DialogTitle>{editId ? "일정 수정" : "일정 추가"}</DialogTitle>
           <DialogContent>
@@ -262,7 +260,11 @@ const SchedulePage = () => {
               </FormControl>
               <FormControl fullWidth>
                 <InputLabel>종일</InputLabel>
-                <Select value={allDay ? "yes" : "no"} label="종일" onChange={e => setAllDay(e.target.value === "yes")}>
+                <Select
+                  value={allDay ? "yes" : "no"}
+                  label="종일"
+                  onChange={e => setAllDay(e.target.value === "yes")}
+                >
                   <MenuItem value="yes">예</MenuItem>
                   <MenuItem value="no">아니오</MenuItem>
                 </Select>
@@ -298,10 +300,10 @@ const SchedulePage = () => {
             <Button onClick={() => setModalOpen(false)} disabled={loading}>
               취소
             </Button>
-            <Button 
-              variant="contained" 
-              onClick={saveEvent} 
-              disabled={loading || !title} 
+            <Button
+              variant="contained"
+              onClick={saveEvent}
+              disabled={loading || !title}
               startIcon={loading && <CircularProgress size={20} />}
             >
               {loading ? (editId ? "수정 중..." : "저장 중...") : "저장"}

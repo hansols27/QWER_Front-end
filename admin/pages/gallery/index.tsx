@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { api } from "../api/axios";
 import Layout from "../../components/common/layout";
 import type { GalleryItem } from "@shared/types/gallery"; 
 import { 
@@ -24,11 +24,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // ===========================
 
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
-    // Axios 응답 오류 (response.data.message) 확인
     if (error && error.response && error.response.data && typeof error.response.data === 'object' && error.response.data.message) {
         return error.response.data.message;
     }
-    // 일반적인 Error 객체의 메시지 확인
     if (error && typeof error === 'object' && error.message) {
         return error.message;
     }
@@ -51,7 +49,7 @@ export default function GalleryList() {
         setAlertMessage(null);
 
         try {
-            const res = await axios.get<{ success: boolean; data: GalleryItem[] }>(`${API_BASE_URL}/api/gallery`);
+            const res = await api.get<{ success: boolean; data: GalleryItem[] }>(`${API_BASE_URL}/api/gallery`);
             setItems(res.data.data);
         } catch (err: any) { 
             console.error("갤러리 로드 실패:", err);
@@ -67,22 +65,22 @@ export default function GalleryList() {
     }, [fetchGalleryItems]);
 
     const handleItemClick = (itemId: string) => {
-        // 상세/수정 페이지로 이동
-        // 갤러리는 '이미지만 업로드'한다고 하셨으므로, 상세 페이지에서 수정/삭제 기능이 있을 수 있습니다.
         router.push(`/gallery/${itemId}`); 
     };
     
     const handleCreateClick = () => {
-        // 등록 페이지로 이동
         router.push("/gallery/create");
     };
 
     if (!API_BASE_URL) {
         return (
             <Layout>
-                <Box p={4}><Alert severity="error">
-                    <Typography fontWeight="bold">환경 설정 오류:</Typography> .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않습니다.
-                </Alert></Box>
+                <Box p={4}>
+                    <Alert severity="error">
+                        <Typography fontWeight="bold">환경 설정 오류:</Typography> 
+                        .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않습니다.
+                    </Alert>
+                </Box>
             </Layout>
         );
     }
@@ -124,15 +122,15 @@ export default function GalleryList() {
                     </Typography>
                 )}
 
-                <Grid container spacing={4} {...({} as any)}> 
+                {/* ✅ MUI v5 호환 Grid 버전 */}
+                <Grid container spacing={4}{...({} as any)}>
                     {items.map((item) => (
                         <Grid 
                             item 
                             xs={6} 
                             sm={4} 
                             md={3} 
-                            key={item.id} 
-                            {...({} as any)} 
+                            key={item.id}{...({} as any)}
                         >
                             <Card
                                 onClick={() => handleItemClick(item.id)}
@@ -146,12 +144,10 @@ export default function GalleryList() {
                                 <CardMedia
                                     component="img"
                                     height="200"
-                                    // URL이 없거나 유효하지 않을 경우 대비
                                     image={item.url || 'https://via.placeholder.com/300x300?text=No+Image'} 
                                     alt={`Gallery item ${item.id}`}
                                     sx={{ objectFit: 'cover' }}
                                 />
-                                
                             </Card>
                         </Grid>
                     ))}
