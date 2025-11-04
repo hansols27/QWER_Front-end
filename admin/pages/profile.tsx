@@ -53,7 +53,7 @@ type LocalSnsLink = {
 // 초기 상태
 // ===========================
 const initialMemberState: MemberState = {
-  text: ["프로필 텍스트를 입력하세요."],
+  text: ["텍스트를 입력하세요."],
   image: [""],
   sns: {},
 };
@@ -209,7 +209,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
       sx={{ opacity: loading ? 0.6 : 1, pointerEvents: loading ? "none" : "auto" }}
     >
       <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-        {memberId} 프로필
+        {memberId} 
       </Typography>
 
       {loading && <CircularProgress size={24} sx={{ my: 2 }} />}
@@ -222,7 +222,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
 
       {/* 텍스트 필드 */}
       <Typography variant="subtitle1" mt={2} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
-        텍스트 (설명)
+        내용
       </Typography>
       {member.text.map((t, idx) => (
         <Stack direction="row" spacing={1} alignItems="center" key={`text-${idx}`} mb={1}>
@@ -240,7 +240,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
 
       {/* 이미지 필드 */}
       <Typography variant="subtitle1" mt={3} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
-        이미지 (파일)
+        이미지 
       </Typography>
       {member.image.map((img, idx) => (
         <Stack direction="row" spacing={1} alignItems="center" key={`image-${idx}`} mb={1}>
@@ -256,7 +256,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         </Stack>
       ))}
       <Button onClick={addImage} size="small" variant="outlined">
-        이미지 추가
+        추가
       </Button>
 
       {/* SNS 필드 */}
@@ -274,7 +274,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
               ))}
             </Select>
           </FormControl>
-          <TextField label="URL (전체 주소)" value={field.url} onChange={(e) => updateSnsField(idx, "url", e.target.value)} fullWidth />
+          <TextField label="URL" value={field.url} onChange={(e) => updateSnsField(idx, "url", e.target.value)} fullWidth />
           {snsFields.length > 1 && (
             <Button onClick={() => removeSnsField(idx)} color="error" size="small" variant="outlined">
               삭제
@@ -294,7 +294,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
           disabled={loading || loadError}
           startIcon={loading && <CircularProgress size={20} color="inherit" />}
         >
-          {loading ? "저장 중..." : `${memberId} 프로필 저장`}
+          {loading ? "저장 중..." : `저장`}
         </Button>
       </Box>
     </Box>
@@ -321,7 +321,7 @@ export default function Profile() {
     <Layout>
       <Box p={4}>
         <Typography variant="h3" mb={4} fontWeight="bold">
-          프로필
+          프로필 관리
         </Typography>
         {memberIds.map((id) => (
           <MemberForm key={id} memberId={id} />
