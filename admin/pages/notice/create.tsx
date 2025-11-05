@@ -2,106 +2,105 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../api/axios";
-import Layout from "../../components/common/layout";
 import dynamic from "next/dynamic";
-import { 
-    Box, 
-    Button, 
-    MenuItem, 
-    Select, 
-    TextField, 
-    Typography, 
+import { api } from "@shared/services/axios";
+import Layout from "@components/common/layout";
+import type { SmartEditorHandle } from "@components/common/SmartEditor";
+import {
+    Box,
+    Button,
+    Select,
+    MenuItem,
+    TextField,
+    Typography,
     Stack,
-    Alert, 
-    CircularProgress 
+    Alert,
+    CircularProgress
 } from "@mui/material";
-import type { SmartEditorHandle } from "../../components/common/SmartEditor";
 
-const SmartEditor = dynamic(() => import("../../components/common/SmartEditor"), { ssr: false });
+const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
 
-// 환경 변수
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+type AlertSeverity = "success" | "error" | "info";
 
-// 오류 메시지 유틸
+// API 응답 구조를 명확히 정의
+interface NoticeCreateResponse {
+    success: boolean;
+    data: { id: string }; // 등록 후 최소한 id가 반환된다고 가정
+}
+
+// 헬퍼: 에러 메시지 추출 (일관성 유지)
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
     if (error?.response?.data?.message) return error.response.data.message;
     if (error?.message) return error.message;
     return defaultMsg;
 };
 
-// Alert 타입
-type AlertSeverity = "success" | "error" | "info";
-
 export default function NoticeCreate() {
     const [type, setType] = useState<"공지" | "이벤트">("공지");
     const [title, setTitle] = useState("");
-    const [isProcessing, setIsProcessing] = useState(false); 
-    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null); 
-    
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
+
     const editorRef = useRef<SmartEditorHandle>(null);
     const router = useRouter();
 
     const handleSubmit = async () => {
         setAlertMessage(null);
+        
+        // trim을 사용하여 제목 유효성 검사 강화
+        const trimmedTitle = title.trim();
         const content = editorRef.current?.getContent() || "";
+        // HTML 태그 제거 후 내용 공백 여부 검사
+        const trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
 
-        if (!API_BASE_URL) {
-            setAlertMessage({ message: "API 주소가 설정되지 않아 등록할 수 없습니다.", severity: "error" });
+        if (!trimmedTitle) {
+            setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" });
             return;
         }
-
-        if (!title.trim()) {
-            setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" });
+        
+        // 내용 유효성 검사
+        if (!trimmedContentText) {
+            setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" });
             return;
         }
 
         setIsProcessing(true);
 
         try {
-            // ✅ axios 대신 api 인스턴스 사용 + 타입 오류 방지용 ({ } as any)
-            await api.post(`${API_BASE_URL}/api/notice`, { type, title, content } as any);
+            // trim된 제목 사용 및 응답 타입 명시
+            const res = await api.post<NoticeCreateResponse>("/api/notice", { type, title: trimmedTitle, content });
             
-            setAlertMessage({ message: "등록 완료! 목록으로 이동합니다.", severity: "success" });
-            
-            setTimeout(() => router.push("/notice"), 1000);
+            if (res.data.success) {
+                setAlertMessage({ message: "등록 완료! 목록으로 이동합니다.", severity: "success" });
+                setTimeout(() => router.push("/notice"), 1000);
+            } else {
+                 // 백엔드가 success: false를 반환했지만 에러가 throw되지 않은 경우
+                setAlertMessage({ message: "등록에 실패했습니다. 응답을 확인하세요.", severity: "error" });
+                setIsProcessing(false);
+            }
         } catch (err: any) {
-            console.error("등록 실패:", err);
-            const errorMsg = extractErrorMessage(err, "등록 중 오류가 발생했습니다. 서버 연결을 확인하세요.");
-            setAlertMessage({ message: errorMsg, severity: "error" });
+            console.error("공지사항 등록 실패:", err);
+            // 에러 메시지 추출 헬퍼 사용
+            setAlertMessage({ message: extractErrorMessage(err, "등록 중 오류가 발생했습니다."), severity: "error" }); 
             setIsProcessing(false);
         }
     };
     
-    if (!API_BASE_URL) {
-        return (
-            <Layout>
-                <Box p={4}>
-                    <Alert severity="error">
-                        <Typography fontWeight="bold">환경 설정 오류:</Typography>
-                        .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않습니다.
-                    </Alert>
-                </Box>
-            </Layout>
-        );
-    }
+    // 등록 버튼 비활성화 조건에 내용 체크 로직 포함
+    const isFormInValid = !title.trim() || !editorRef.current?.getContent()?.replace(/<[^>]*>?/gm, '')?.trim();
 
     return (
         <Layout>
             <Box p={4}>
                 <Typography variant="h4" mb={2} fontWeight="bold">공지사항 등록</Typography>
-                
-                {alertMessage && (
-                    <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>
-                        {alertMessage.message}
-                    </Alert>
-                )}
+
+                {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
 
                 <Stack spacing={2}>
                     <Select 
                         value={type} 
-                        onChange={(e) => setType(e.target.value as "공지" | "이벤트")}
-                        disabled={isProcessing}
+                        onChange={(e) => setType(e.target.value as "공지" | "이벤트")} 
+                        disabled={isProcessing} 
                         sx={{ maxWidth: 150 }}
                     >
                         <MenuItem value="공지">공지</MenuItem>
@@ -112,31 +111,29 @@ export default function NoticeCreate() {
                         label="제목" 
                         value={title} 
                         onChange={(e) => setTitle(e.target.value)} 
-                        disabled={isProcessing}
+                        disabled={isProcessing} 
                         fullWidth
+                        // 제목이 비어 있을 경우 시각적 오류 표시
+                        error={!title.trim() && !isProcessing}
+                        helperText={!title.trim() && !isProcessing ? "제목은 필수입니다." : ""}
                     />
 
-                    <Box>
+                    <Box sx={{ minHeight: '400px' }}>
                         <SmartEditor ref={editorRef} height="400px" />
                     </Box>
 
-                    <Box sx={{ mt: 3 }}> 
+                    <Box sx={{ mt: 3 }}>
                         <Stack direction="row" spacing={1} justifyContent="flex-end">
                             <Button 
                                 variant="contained" 
-                                onClick={handleSubmit}
-                                disabled={isProcessing || !title.trim()}
-                                startIcon={isProcessing && <CircularProgress size={20} color="inherit" />} 
+                                onClick={handleSubmit} 
+                                // isFormInValid 사용 (로딩 중이거나 제목/내용이 비었을 때)
+                                disabled={isProcessing || isFormInValid} 
+                                startIcon={isProcessing && <CircularProgress size={20} color="inherit" />}
                             >
                                 {isProcessing ? "저장 중..." : "등록"}
                             </Button>
-                            <Button 
-                                variant="outlined" 
-                                onClick={() => router.push("/notice")}
-                                disabled={isProcessing}
-                            >
-                                목록
-                            </Button>
+                            <Button variant="outlined" onClick={() => router.push("/notice")} disabled={isProcessing}>목록</Button>
                         </Stack>
                     </Box>
                 </Stack>

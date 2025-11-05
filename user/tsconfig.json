@@ -18,7 +18,8 @@
       "@shared/*": ["../shared/*"],
       "@front/*": ["src/*"],
       "@components/*": ["src/components/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@services/*": ["../shared/services/*"],
     }
   },
   "include": ["src/**/*"],

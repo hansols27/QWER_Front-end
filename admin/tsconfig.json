@@ -6,7 +6,10 @@
     "paths": {
       "@theme/*": ["theme/*"],
       "@lib/*": ["lib/*"],
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../shared/*"],       
+      "@components/*": ["components/*"],
+      "@hooks/*": ["hooks/*"],
+      "@services/*": ["../shared/services/*"] 
     },
     "incremental": true,
     "jsx": "preserve",

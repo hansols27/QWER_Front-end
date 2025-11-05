@@ -2,20 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { api } from "../api/axios";
-import Layout from "../../components/common/layout";
-import {
-    Box,
-    Button,
-    TextField,
-    Typography,
-    Alert,
-    CircularProgress,
-    Stack,
-} from "@mui/material";
+import { api } from "@shared/services/axios";
+import Layout from "@components/common/layout";
+import { Box, Button, TextField, Typography, Alert, CircularProgress, Stack, Paper } from "@mui/material"; // Paper 추가
 import { VideoItem } from "@shared/types/video";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
     if (error?.response?.data?.message) return error.response.data.message;
@@ -23,22 +13,13 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
     return defaultMsg;
 };
 
-type AlertSeverity = "success" | "error" | "info";
-
 const getThumbnail = (url: string) => {
     let videoId = "";
-    const regExp =
-        /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+    const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
     const match = url.match(regExp);
-
-    if (match) {
-        videoId = match[1];
-    } else if (url.includes("v=")) {
-        videoId = url.split("v=")[1]?.split("&")[0] ?? "";
-    } else if (url.includes("youtu.be/")) {
-        videoId = url.split("youtu.be/")[1]?.split("?")[0] ?? "";
-    }
-
+    if (match) videoId = match[1];
+    else if (url.includes("v=")) videoId = url.split("v=")[1]?.split("&")[0] ?? "";
+    else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1]?.split("?")[0] ?? "";
     return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : "";
 };
 
@@ -52,261 +33,152 @@ export default function VideoDetail() {
     const [src, setSrc] = useState("");
     const [loading, setLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [alertMessage, setAlertMessage] = useState<{
-        message: string;
-        severity: AlertSeverity;
-    } | null>(null);
+    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error"; } | null>(null);
 
-    // =========================
-    // 1. 데이터 로드 (GET)
-    // =========================
     const fetchVideo = useCallback(async () => {
-        if (!id) {
-            setLoading(false);
-            return;
-        }
-
-        if (!API_BASE_URL) {
-            setAlertMessage({
-                message: "환경 설정 오류: API 주소가 설정되지 않았습니다.",
-                severity: "error",
-            });
-            setLoading(false);
-            return;
-        }
-
+        if (!id) { setLoading(false); return; }
         setLoading(true);
         setAlertMessage(null);
 
         try {
-            const res = await api.get<{ success: boolean; data: VideoItem }>(
-                `${API_BASE_URL}/api/video/${id}`,
-                {} as any
-            );
-
-            const fetchedVideo = res.data.data;
-            setVideo(fetchedVideo);
-            setTitle(fetchedVideo.title);
-            setSrc(fetchedVideo.src);
+            // API_BASE_URL 제거 및 상대 경로 사용
+            const res = await api.get<{ success: boolean; data: VideoItem }>(`/api/video/${id}`); 
+            setVideo(res.data.data);
+            setTitle(res.data.data.title);
+            setSrc(res.data.data.src);
         } catch (err: any) {
-            console.error("영상 상세 로드 실패:", err);
-            const errorMsg = extractErrorMessage(
-                err,
-                "영상 정보를 불러오는 데 실패했습니다."
-            );
-            setAlertMessage({ message: errorMsg, severity: "error" });
-        } finally {
-            setLoading(false);
-        }
+            console.error(err);
+            setAlertMessage({ message: extractErrorMessage(err, "영상 로드 실패"), severity: "error" });
+        } finally { setLoading(false); }
     }, [id]);
 
-    useEffect(() => {
-        fetchVideo();
+    useEffect(() => { 
+        // 환경 변수 검사 로직을 제거하고, fetchVideo 호출 전에 API_BASE_URL 여부를 확인하여 API 호출을 제어합니다.
+        if (process.env.NEXT_PUBLIC_API_URL) {
+            fetchVideo(); 
+        } else {
+            setLoading(false);
+            setAlertMessage({ message: "API 주소가 설정되지 않았습니다.", severity: "error" });
+        }
     }, [fetchVideo]);
 
-    // =========================
-    // 2. 수정 (PUT)
-    // =========================
     const handleUpdate = async () => {
+        if (!video) return;
+        setIsProcessing(true);
         setAlertMessage(null);
-        if (!video || !API_BASE_URL) return;
-        if (!title || !src) {
-            setAlertMessage({
-                message: "제목과 유튜브 링크를 모두 입력해주세요.",
-                severity: "error",
-            });
+
+        // 제목 및 링크 유효성 검증
+        const trimmedTitle = title.trim();
+        const trimmedSrc = src.trim();
+
+        if (!trimmedTitle || !trimmedSrc) {
+            setAlertMessage({ message: "제목과 유튜브 링크를 모두 입력해야 합니다.", severity: "error" });
+            setIsProcessing(false);
             return;
         }
 
-        setIsProcessing(true);
-
         try {
-            await api.put(
-                `${API_BASE_URL}/api/video/${String(video.id)}`,
-                { title, src },
-                {} as any
-            );
-
-            setAlertMessage({
-                message: "영상이 성공적으로 수정되었습니다! 목록으로 이동합니다.",
-                severity: "success",
-            });
-            setTimeout(() => router.push("/video"), 1000);
+            // API_BASE_URL 제거 및 트리밍된 데이터 전송
+            await api.put(`/api/video/${video.id}`, { title: trimmedTitle, src: trimmedSrc }); 
+            
+            // 성공 시 로컬 상태 업데이트
+            setVideo(prev => prev ? {...prev, title: trimmedTitle, src: trimmedSrc} : null);
+            setTitle(trimmedTitle);
+            setSrc(trimmedSrc);
+            
+            setAlertMessage({ message: "영상이 성공적으로 수정되었습니다.", severity: "success" });
         } catch (err: any) {
-            console.error("영상 수정 실패:", err);
-            const errorMsg = extractErrorMessage(err, "영상 수정에 실패했습니다.");
-            setAlertMessage({ message: errorMsg, severity: "error" });
-            setIsProcessing(false);
-        }
+            setAlertMessage({ message: extractErrorMessage(err, "영상 수정 실패"), severity: "error" });
+        } finally { setIsProcessing(false); }
     };
 
-    // =========================
-    // 3. 삭제 (DELETE)
-    // =========================
     const handleDelete = async () => {
-        setAlertMessage(null);
-        if (!video || !API_BASE_URL) return;
-        if (!window.confirm(`"${video.title}" 영상을 정말로 삭제하시겠습니까?`)) return;
-
+        if (!video) return;
+        if (!window.confirm(`"${video.title}"을 삭제하시겠습니까?`)) return;
         setIsProcessing(true);
-
+        setAlertMessage(null);
         try {
-            await api.delete(
-                `${API_BASE_URL}/api/video/${String(video.id)}`,
-                {} as any
-            );
-
-            setAlertMessage({
-                message: "영상이 성공적으로 삭제되었습니다! 목록으로 이동합니다.",
-                severity: "success",
-            });
-            setTimeout(() => router.push("/video"), 1000);
+            // API_BASE_URL 제거
+            await api.delete(`/api/video/${video.id}`);
+            
+            setAlertMessage({ message: "삭제 완료. 목록으로 이동합니다.", severity: "success" });
+            // UX: 성공 메시지를 사용자가 볼 수 있도록 잠시 지연
+            setTimeout(() => router.push("/video"), 1000); 
         } catch (err: any) {
-            console.error("영상 삭제 실패:", err);
-            const errorMsg = extractErrorMessage(err, "영상 삭제에 실패했습니다.");
-            setAlertMessage({ message: errorMsg, severity: "error" });
-            setIsProcessing(false);
-        }
+            setAlertMessage({ message: extractErrorMessage(err, "삭제 실패"), severity: "error" });
+        } finally { setIsProcessing(false); }
     };
 
-    // =========================
-    // 4. 환경 설정 오류 처리
-    // =========================
-    if (!API_BASE_URL) {
-        return (
-            <Layout>
-                <Box p={4}>
-                    <Alert severity="error">
-                        <Typography fontWeight="bold">환경 설정 오류:</Typography>{" "}
-                        .env 파일에 NEXT_PUBLIC_API_URL이 설정되어 있지 않습니다.
-                    </Alert>
-                </Box>
-            </Layout>
-        );
-    }
+    // 로딩 상태
+    if (loading) return (
+        <Layout>
+            <Box display="flex" justifyContent="center" alignItems="center" py={8} flexDirection="column">
+                <CircularProgress /><Typography mt={2}>로딩 중...</Typography>
+            </Box>
+        </Layout>
+    );
 
-    // =========================
-    // 5. 렌더링
-    // =========================
-    if (loading)
-        return (
-            <Layout>
-                <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    py={8}
-                    flexDirection="column"
-                >
-                    <CircularProgress />
-                    <Typography mt={2}>영상 정보를 로딩 중...</Typography>
-                </Box>
-            </Layout>
-        );
-
-    if (!video)
-        return (
-            <Layout>
-                <Box p={4}>
-                    <Alert severity="warning">
-                        요청한 ID의 영상을 찾을 수 없습니다.
-                    </Alert>
-                    <Button onClick={() => router.push("/video")} sx={{ mt: 2 }}>
-                        목록으로
-                    </Button>
-                </Box>
-            </Layout>
-        );
+    // 데이터를 찾지 못한 경우
+    if (!video) return (
+        <Layout>
+            <Box p={4}>
+                <Alert severity="warning">영상을 찾을 수 없거나 로드에 실패했습니다.</Alert>
+                <Button onClick={() => router.push("/video")} sx={{ mt: 2 }}>목록</Button>
+            </Box>
+        </Layout>
+    );
 
     const thumbnailUrl = getThumbnail(src);
 
     return (
         <Layout>
             <Box p={4}>
-                <Typography variant="h4" mb={2} fontWeight="bold">
-                    영상 상세/수정
-                </Typography>
-
-                {alertMessage && (
-                    <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>
-                        {alertMessage.message}
-                    </Alert>
-                )}
-
+                <Typography variant="h4" mb={2} fontWeight="bold">영상 상세</Typography>
+                {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
                 <Stack spacing={3}>
-                    <TextField
-                        label="제목"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        disabled={isProcessing}
+                    <TextField 
+                        label="제목" 
+                        value={title} 
+                        onChange={e => setTitle(e.target.value)} 
+                        disabled={isProcessing} 
+                        error={!title.trim() && !isProcessing} // UX: 제목이 비어 있을 경우 시각적 오류 표시
+                        helperText={!title.trim() && !isProcessing ? "제목은 필수입니다." : ""}
                     />
-                    <TextField
-                        label="유튜브 링크 (URL)"
-                        value={src}
-                        onChange={(e) => setSrc(e.target.value)}
-                        disabled={isProcessing}
+                    <TextField 
+                        label="유튜브 링크" 
+                        value={src} 
+                        onChange={e => setSrc(e.target.value)} 
+                        disabled={isProcessing} 
+                        error={!src.trim() && !isProcessing} // UX: 링크가 비어 있을 경우 시각적 오류 표시
+                        helperText={!src.trim() && !isProcessing ? "유튜브 링크는 필수입니다." : ""}
                     />
-
                     {thumbnailUrl ? (
-                        <Box mt={1}>
-                            <Typography variant="subtitle1" mb={1} fontWeight="bold">
-                                미리보기
-                            </Typography>
-                            <img
-                                src={thumbnailUrl}
-                                alt="썸네일 미리보기"
-                                width="320"
-                                style={{
-                                    borderRadius: 4,
-                                    display: "block",
-                                    maxWidth: "100%",
-                                    height: "auto",
-                                }}
+                        <Paper elevation={3} sx={{ p: 2, display: 'inline-block', maxWidth: 400 }}>
+                            <Typography variant="subtitle2" mb={1}>현재 썸네일 미리보기</Typography>
+                            <img 
+                                src={thumbnailUrl} 
+                                alt="썸네일" 
+                                style={{ borderRadius: 4, width: '100%', height: 'auto', display: 'block' }} 
                             />
-                        </Box>
+                        </Paper>
                     ) : (
-                        src && (
-                            <Alert severity="warning" sx={{ mt: 1 }}>
-                                유효한 유튜브 링크가 아닌 것 같습니다. 썸네일을 불러올 수 없습니다.
-                            </Alert>
-                        )
+                        <Alert severity="info">유효한 유튜브 링크가 아닙니다. 썸네일을 표시할 수 없습니다.</Alert>
                     )}
-
                     <Box display="flex" gap={2} mt={3}>
-                        <Button
-                            variant="contained"
-                            onClick={handleUpdate}
-                            disabled={isProcessing || !title || !src}
-                            startIcon={
-                                isProcessing ? (
-                                    <CircularProgress size={20} color="inherit" />
-                                ) : undefined
-                            }
+                        <Button 
+                            variant="contained" 
+                            onClick={handleUpdate} 
+                            disabled={isProcessing || !title.trim() || !src.trim()} // 버튼 활성화 조건 강화
                         >
-                            {isProcessing ? "수정 처리 중..." : "수정"}
+                            {isProcessing ? <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} /> : null}
+                            {isProcessing ? "수정 중..." : "수정"}
                         </Button>
-                        <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={handleDelete}
-                            disabled={isProcessing}
-                            startIcon={
-                                isProcessing ? (
-                                    <CircularProgress size={20} color="inherit" />
-                                ) : undefined
-                            }
-                        >
-                            {isProcessing ? "삭제 처리 중..." : "삭제"}
+                        <Button variant="outlined" color="error" onClick={handleDelete} disabled={isProcessing}>
+                            {isProcessing ? <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} /> : null}
+                            {isProcessing ? "삭제 중..." : "삭제"}
                         </Button>
                     </Box>
-
-                    <Button
-                        variant="text"
-                        onClick={() => router.push("/video")}
-                        disabled={isProcessing}
-                    >
-                        목록
-                    </Button>
+                    <Button variant="text" onClick={() => router.push("/video")} disabled={isProcessing}>목록</Button>
                 </Stack>
             </Box>
         </Layout>

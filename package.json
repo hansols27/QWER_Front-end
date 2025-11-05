@@ -8,5 +8,9 @@
   ],
   "devDependencies": {
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@types/axios": "^0.14.4",
+    "axios": "^1.13.2"
   }
 }
