@@ -26,7 +26,9 @@ const memberIds = ["All", "Chodan", "Majenta", "Hina", "Siyeon"] as const;
 const snsOptions = ["instagram", "youtube", "twitter", "cafe", "tiktok", "weverse"] as const;
 
 // --- 상수 및 타입 ---
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB 제한 (백엔드와 일치하도록 설정)
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB 제한
+const MAX_TEXT_FIELDS = 3; // 텍스트 최대 3개
+const MAX_IMAGE_FIELDS = 4; // 이미지 최대 4개
 
 type LocalSnsLink = {
     key: string; // 고유 key
@@ -69,7 +71,7 @@ const TextFields = ({
 }) => (
     <>
         <Typography variant="subtitle1" mt={2} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
-            내용
+            내용 (최대 {MAX_TEXT_FIELDS}개)
         </Typography>
         {texts.map((t, idx) => (
             <Stack direction="row" spacing={1} alignItems="center" key={`text-${idx}`} mb={1}>
@@ -88,7 +90,8 @@ const TextFields = ({
                 )}
             </Stack>
         ))}
-        <Button onClick={onAdd} size="small" variant="outlined">
+        {/* 텍스트 필드 개수 제한 로직 추가 */}
+        <Button onClick={onAdd} size="small" variant="outlined" disabled={texts.length >= MAX_TEXT_FIELDS}>
             추가
         </Button>
     </>
@@ -134,7 +137,7 @@ const ImageFields = ({
     return (
         <>
             <Typography variant="subtitle1" mt={3} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
-                이미지
+                이미지 (최대 {MAX_IMAGE_FIELDS}개)
             </Typography>
             {images.map((img, idx) => (
                 <Stack direction="row" spacing={1} alignItems="center" key={`image-${idx}`} mb={1}>
@@ -142,11 +145,19 @@ const ImageFields = ({
                         component="img"
                         src={previews[idx] || undefined}
                         alt={`preview-${idx}`}
-                        sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 1, border: "1px solid #ccc" }}
+                        sx={{ 
+                            width: 80, 
+                            height: 80, 
+                            objectFit: "cover", 
+                            borderRadius: 1, 
+                            border: "1px solid #ccc",
+                            // 이미지가 없으면 배경색만 표시
+                            bgcolor: !previews[idx] ? '#f0f0f0' : 'transparent', 
+                        }}
                     />
                     <Button variant="outlined" component="label">
                         {/* 이미 파일이 선택된 경우와 아닌 경우 텍스트 구분 */}
-                        {img instanceof File ? "파일 변경" : "파일 선택"} 
+                        {img instanceof File || (img as string)?.length > 0 ? "파일 변경" : "파일 선택"} 
                         <input
                             type="file"
                             accept="image/*"
@@ -171,7 +182,8 @@ const ImageFields = ({
                     )}
                 </Stack>
             ))}
-            <Button onClick={onAdd} size="small" variant="outlined">
+            {/* 이미지 필드 개수 제한 로직 추가 */}
+            <Button onClick={onAdd} size="small" variant="outlined" disabled={images.length >= MAX_IMAGE_FIELDS}>
                 추가
             </Button>
             <Typography variant="caption" display="block" color="text.secondary" mt={1}>
@@ -197,7 +209,7 @@ const SNSFields = ({
 }) => (
     <>
         <Typography variant="subtitle1" mt={3} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
-            SNS 링크
+            SNS 링크 (최대 {snsOptions.length}개)
         </Typography>
         {fields.map((field, idx) => (
             <Stack direction="row" spacing={1} alignItems="center" key={field.key} mb={1}>
@@ -230,6 +242,7 @@ const SNSFields = ({
                 )}
             </Stack>
         ))}
+        {/* SNS 필드 개수 제한 로직 추가 */}
         <Button onClick={onAdd} size="small" variant="outlined" disabled={fields.length >= snsOptions.length}>
             추가
         </Button>
@@ -266,16 +279,26 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
             }));
 
             setMember({
+                // 데이터가 있을 경우 사용, 없을 경우 최대 개수 제한에 맞게 조정된 초기값 사용
                 text: texts.length > 0 ? texts : initialMemberState.text,
                 image: images.length > 0 ? images : initialMemberState.image,
                 sns: data.sns,
             });
             setSnsFields(fetchedSnsFields.length > 0 ? fetchedSnsFields : initialSnsFields);
         } catch (err: any) {
-            console.error(`Failed to load ${memberId} profile:`, err);
-            setLoadError(true);
-            const errorMsg = extractErrorMessage(err, `${memberId} 프로필 로드에 실패했습니다.`);
-            setAlertMessage({ message: errorMsg, severity: "error" });
+            // 데이터가 없는 경우 (404) 초기 상태로 로드
+            if (err?.response?.status === 404) {
+                 console.log(`Profile for ${memberId} not found, loading initial state.`);
+                 setMember({ ...initialMemberState });
+                 setSnsFields([...initialSnsFields]);
+                 setLoadError(false);
+                 setAlertMessage(null);
+            } else {
+                console.error(`Failed to load ${memberId} profile:`, err);
+                setLoadError(true);
+                const errorMsg = extractErrorMessage(err, `${memberId} 프로필 로드에 실패했습니다.`);
+                setAlertMessage({ message: errorMsg, severity: "error" });
+            }
         } finally {
             setLoading(false);
         }
@@ -286,7 +309,11 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
     }, [fetchMemberData]);
 
     // Field 업데이트
-    const addText = () => setMember({ ...member, text: [...member.text, ""] });
+    const addText = () => {
+        if (member.text.length < MAX_TEXT_FIELDS) { // 텍스트 개수 제한
+            setMember({ ...member, text: [...member.text, ""] });
+        }
+    };
     const removeText = (idx: number) => setMember({ ...member, text: member.text.filter((_, i) => i !== idx) });
     const updateText = (idx: number, value: string) => {
         const newText = [...member.text];
@@ -294,9 +321,13 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         setMember({ ...member, text: newText });
     };
 
-    const addImage = () => setMember({ ...member, image: [...member.image, ""] });
+    const addImage = () => {
+        if (member.image.length < MAX_IMAGE_FIELDS) { // 이미지 개수 제한
+            setMember({ ...member, image: [...member.image, ""] });
+        }
+    };
     const removeImage = (idx: number) => {
-        // 제거 시 혹시 모를 메모리 해제 처리 (ImageFields의 useEffect에서 이미 처리되지만 안전을 위해)
+        // 제거 시 혹시 모를 메모리 해제 처리
         const imageToRemove = member.image[idx];
         if (imageToRemove instanceof File) {
             const url = URL.createObjectURL(imageToRemove);
@@ -305,7 +336,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         setMember({ ...member, image: member.image.filter((_, i) => i !== idx) });
     };
     
-    // --- 🚨 개선: 파일 유효성 검사 추가 ---
+    // 파일 유효성 검사 및 업데이트
     const updateImage = (idx: number, file: File) => {
         // 1. 파일 크기 검사
         if (file.size > MAX_IMAGE_SIZE) {
@@ -335,6 +366,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
     };
 
     const addSnsField = () => {
+        // 사용 가능한 SNS 옵션을 찾아 새로운 필드를 추가
         const available = snsOptions.find((opt) => !snsFields.some((f) => f.id === opt));
         if (available) setSnsFields([...snsFields, { key: uuidv4(), id: available, url: "" }]);
     };
@@ -352,7 +384,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         setLoading(true);
         setAlertMessage(null);
 
-        // --- 🚨 개선: SNS URL 유효성 검사 ---
+        // SNS URL 유효성 검사
         const invalidLink = snsFields.find(
             (field) => field.url.trim() && !/^https?:\/\/.*/i.test(field.url.trim())
         );
@@ -371,23 +403,26 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
             const imageContentsPayload: { type: "image"; content: string }[] = [];
             const newImages: File[] = [];
 
+            // 이미지 필드 처리 (기존 이미지 URL과 새로 업로드된 파일 분리)
             member.image.forEach((img) => {
                 if (img instanceof File) {
                     newImages.push(img);
-                    // 파일은 'images' 필드로 별도 전송하고, content는 빈 문자열로 대체
+                    // 새 파일의 경우 서버에서 처리할 위치를 알려주기 위해 빈 문자열 사용
                     imageContentsPayload.push({ type: "image", content: "" }); 
                 } else if (img) imageContentsPayload.push({ type: "image", content: img });
             });
 
             const contentsPayload: MemberPayload["contents"] = [
-                ...member.text.filter(t => t.trim()).map((t) => ({ type: "text" as const, content: t })), // 빈 텍스트 필드 제외
+                // 빈 텍스트 필드 제외
+                ...member.text.filter(t => t.trim()).map((t) => ({ type: "text" as const, content: t })), 
                 ...imageContentsPayload,
             ];
 
             const payload: MemberPayload = {
-                id: memberId,
+                id: memberId, // 고유 키
                 name: memberId,
                 contents: contentsPayload,
+                // 유효한 URL만 포함
                 sns: snsFields
                     .filter((f) => f.url.trim())
                     .reduce((acc, cur) => ({ ...acc, [cur.id]: cur.url }), {} as MemberSNS),
@@ -396,7 +431,8 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
             formData.append("payload", JSON.stringify(payload));
             newImages.forEach((img) => formData.append("images", img, img.name));
 
-            await api.post(`/api/members`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+            // 🌟 POST URL 수정 (라우팅 문제 해결)
+            await api.post(`/api/members/${memberId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
 
             // 저장 성공 후, 최신 데이터 다시 로드
             await fetchMemberData(); 
