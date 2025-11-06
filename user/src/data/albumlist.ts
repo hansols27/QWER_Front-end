@@ -1,11 +1,11 @@
-import type { Album } from '@shared/types/album';
+import type { AlbumItem } from '@shared/types/album';
 
 import Discord from '@front/assets/images/albums/discord.jpg';
 import Manito from '@front/assets/images/albums/manito.jpg';
 import Algorithm from '@front/assets/images/albums/algorithm.jpg';
 import Dear from '@front/assets/images/albums/dear.jpg';
 
-export const albums: Album[] = [
+export const albums: AlbumItem[] = [
   {
     id: 'dear',
     title: '난 네 편이야, 온 세상이 불협일지라도',
