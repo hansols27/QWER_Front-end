@@ -2,7 +2,13 @@
 
 import { useState, useEffect, useCallback, ChangeEvent } from "react";
 import { api } from "@shared/services/axios";
-import type { MemberState, MemberPayload, MemberSNS } from "@shared/types/member";
+import type { 
+    TextItem, 
+    ImageItem as APIImageItem, 
+    SNSLinkItem, 
+    MemberProfileState, 
+    MemberProfilePayload 
+} from "@shared/types/member/admin"; 
 import Layout from "@components/common/layout";
 import {
     Box,
@@ -22,30 +28,38 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const memberIds = ["All", "Chodan", "Majenta", "Hina", "Siyeon"] as const;
+const memberIds = ["All", "Q", "W", "E", "R"] as const; 
+const memberNames = ["QWER", "Chodan", "Majenta", "Hina", "Siyeon"] as const;
 const snsOptions = ["instagram", "youtube", "twitter", "cafe", "tiktok", "weverse"] as const;
 
 // --- 상수 및 타입 ---
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB 제한
-const MAX_TEXT_FIELDS = 3; // 텍스트 최대 3개
-const MAX_IMAGE_FIELDS = 4; // 이미지 최대 4개
+const MAX_TEXT_FIELDS = 3; 
+const MAX_IMAGE_FIELDS = 4; 
 
-type LocalSnsLink = {
-    key: string; // 고유 key
-    id: (typeof snsOptions)[number];
-    url: string;
+// 로컬 상태에서 File 객체를 포함하는 타입 정의
+type LocalImageItem = {
+    id: string;
+    url: string; 
+    file?: File; 
 };
 
-const initialMemberState: MemberState = {
-    text: ["텍스트를 입력하세요."],
-    image: [""],
-    sns: {},
+// LocalMemberProfileState 타입 정의: MemberProfileState를 확장하고 images 속성만 LocalImageItem[]으로 덮어씁니다.
+type LocalMemberProfileState = MemberProfileState & {
+    images: LocalImageItem[];
 };
 
-const initialSnsFields: LocalSnsLink[] = [{ key: uuidv4(), id: "instagram", url: "" }];
+
+// MemberProfileState의 컨텐츠 필드 초기값
+const initialContentState = {
+    texts: [{ id: uuidv4(), content: "텍스트를 입력하세요." }] as TextItem[],
+    images: [{ id: uuidv4(), url: "", file: undefined }] as LocalImageItem[], 
+    snslinks: [{ id: uuidv4(), type: "instagram", url: "" }] as SNSLinkItem[],
+};
+
 
 // ----------------------------
-// 유틸
+// 유틸 (생략)
 // ----------------------------
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
     if (error?.response?.data?.message) return error.response.data.message;
@@ -55,81 +69,65 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-// ----------------------------
-// TextFields
-// ----------------------------
-const TextFields = ({
-    texts,
-    onAdd,
-    onRemove,
-    onUpdate,
-}: {
-    texts: string[];
-    onAdd: () => void;
-    onRemove: (idx: number) => void;
-    onUpdate: (idx: number, value: string) => void;
-}) => (
+// TextFields 컴포넌트 정의 (생략됨)
+const TextFields = ({ texts, onAdd, onRemove, onUpdate }: { texts: TextItem[]; onAdd: () => void; onRemove: (id: string) => void; onUpdate: (id: string, value: string) => void; }) => (
     <>
         <Typography variant="subtitle1" mt={2} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
             내용 (최대 {MAX_TEXT_FIELDS}개)
         </Typography>
-        {texts.map((t, idx) => (
-            <Stack direction="row" spacing={1} alignItems="center" key={`text-${idx}`} mb={1}>
+        {texts.map((item, idx) => (
+            <Stack direction="row" spacing={1} alignItems="center" key={item.id} mb={1}>
                 <TextField
                     label={`텍스트 ${idx + 1}`}
-                    value={t}
-                    onChange={(e) => onUpdate(idx, e.target.value)}
+                    value={item.content}
+                    onChange={(e) => onUpdate(item.id, e.target.value)}
                     fullWidth
                     multiline
                     rows={2}
                 />
                 {texts.length > 1 && (
-                    <IconButton onClick={() => onRemove(idx)} color="error">
+                    <IconButton onClick={() => onRemove(item.id)} color="error">
                         <DeleteIcon />
                     </IconButton>
                 )}
             </Stack>
         ))}
-        {/* 텍스트 필드 개수 제한 로직 추가 */}
         <Button onClick={onAdd} size="small" variant="outlined" disabled={texts.length >= MAX_TEXT_FIELDS}>
             추가
         </Button>
     </>
 );
 
-// ----------------------------
-// ImageFields with preview + memory cleanup
-// ----------------------------
-const ImageFields = ({
-    images,
-    onAdd,
-    onRemove,
-    onUpdate,
-}: {
-    images: (string | File)[];
-    onAdd: () => void;
-    onRemove: (idx: number) => void;
-    // onUpdate는 File 객체를 받도록 명시
-    onUpdate: (idx: number, file: File) => void; 
-}) => {
-    const [previews, setPreviews] = useState<(string | null)[]>([]);
+
+// ImageFields 컴포넌트 정의 (생략됨)
+const ImageFields = ({ images, onAdd, onRemove, onUpdate, }: { images: LocalImageItem[]; onAdd: () => void; onRemove: (id: string) => void; onUpdate: (id: string, file: File) => void; }) => {
+    const [previews, setPreviews] = useState<Record<string, string | null>>({});
 
     useEffect(() => {
-        const newPreviews = images.map((img) => (img instanceof File ? URL.createObjectURL(img) : img || null));
+        const newPreviews: Record<string, string | null> = {};
+        images.forEach((item) => {
+            if (item.file) {
+                newPreviews[item.id] = URL.createObjectURL(item.file);
+            } else if (item.url) {
+                newPreviews[item.id] = item.url;
+            } else {
+                newPreviews[item.id] = null;
+            }
+        });
         setPreviews(newPreviews);
-
-        // 메모리 해제
         return () => {
-            newPreviews.forEach((url, idx) => {
-                if (images[idx] instanceof File && url) URL.revokeObjectURL(url);
+            images.forEach((item) => {
+                const url = newPreviews[item.id];
+                if (item.file && url) {
+                    URL.revokeObjectURL(url);
+                }
             });
         };
     }, [images]);
 
-    const handleFileChange = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (id: string, e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            onUpdate(idx, e.target.files[0]);
-            // 파일 선택 후 input 값 초기화 (같은 파일 재선택 가능하도록)
+            onUpdate(id, e.target.files[0]);
             e.target.value = ''; 
         }
     };
@@ -139,11 +137,11 @@ const ImageFields = ({
             <Typography variant="subtitle1" mt={3} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
                 이미지 (최대 {MAX_IMAGE_FIELDS}개)
             </Typography>
-            {images.map((img, idx) => (
-                <Stack direction="row" spacing={1} alignItems="center" key={`image-${idx}`} mb={1}>
+            {images.map((item, idx) => (
+                <Stack direction="row" spacing={1} alignItems="center" key={item.id} mb={1}>
                     <Box
                         component="img"
-                        src={previews[idx] || undefined}
+                        src={previews[item.id] || undefined}
                         alt={`preview-${idx}`}
                         sx={{ 
                             width: 80, 
@@ -151,38 +149,35 @@ const ImageFields = ({
                             objectFit: "cover", 
                             borderRadius: 1, 
                             border: "1px solid #ccc",
-                            // 이미지가 없으면 배경색만 표시
-                            bgcolor: !previews[idx] ? '#f0f0f0' : 'transparent', 
+                            bgcolor: !previews[item.id] ? '#f0f0f0' : 'transparent', 
                         }}
                     />
                     <Button variant="outlined" component="label">
-                        {/* 이미 파일이 선택된 경우와 아닌 경우 텍스트 구분 */}
-                        {img instanceof File || (img as string)?.length > 0 ? "파일 변경" : "파일 선택"} 
+                        {item.file || item.url.length > 0 ? "파일 변경" : "파일 선택"} 
                         <input
                             type="file"
                             accept="image/*"
                             hidden
-                            onChange={(e) => handleFileChange(idx, e)}
+                            onChange={(e) => handleFileChange(item.id, e)}
                         />
                     </Button>
                     <Typography
                         variant="body2"
                         sx={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                     >
-                        {img instanceof File 
-                            ? `선택됨: ${img.name}` 
-                            : img 
-                            ? `기존: ${img.substring(img.lastIndexOf("/") + 1)}` 
+                        {item.file 
+                            ? `선택됨: ${item.file.name}` 
+                            : item.url
+                            ? `기존: ${item.url.substring(item.url.lastIndexOf("/") + 1)}` 
                             : "선택된 파일 없음"}
                     </Typography>
                     {images.length > 1 && (
-                        <IconButton onClick={() => onRemove(idx)} color="error">
+                        <IconButton onClick={() => onRemove(item.id)} color="error">
                             <DeleteIcon />
                         </IconButton>
                     )}
                 </Stack>
             ))}
-            {/* 이미지 필드 개수 제한 로직 추가 */}
             <Button onClick={onAdd} size="small" variant="outlined" disabled={images.length >= MAX_IMAGE_FIELDS}>
                 추가
             </Button>
@@ -193,34 +188,25 @@ const ImageFields = ({
     );
 };
 
-// ----------------------------
-// SNSFields
-// ----------------------------
-const SNSFields = ({
-    fields,
-    onAdd,
-    onRemove,
-    onUpdate,
-}: {
-    fields: LocalSnsLink[];
-    onAdd: () => void;
-    onRemove: (idx: number) => void;
-    onUpdate: (idx: number, key: "id" | "url", value: string) => void;
-}) => (
+// SNSFields 컴포넌트 정의 (생략됨)
+const SNSFields = ({ fields, onAdd, onRemove, onUpdate, }: { fields: SNSLinkItem[]; onAdd: () => void; onRemove: (id: string) => void; onUpdate: (id: string, key: "type" | "url", value: string) => void; }) => (
     <>
         <Typography variant="subtitle1" mt={3} mb={1} sx={{ color: "primary.main", fontWeight: "bold" }}>
             SNS 링크 (최대 {snsOptions.length}개)
         </Typography>
-        {fields.map((field, idx) => (
-            <Stack direction="row" spacing={1} alignItems="center" key={field.key} mb={1}>
+        {fields.map((item, idx) => (
+            <Stack direction="row" spacing={1} alignItems="center" key={item.id} mb={1}>
                 <FormControl sx={{ minWidth: 120 }}>
-                    <Select value={field.id} onChange={(e) => onUpdate(idx, "id", e.target.value)} displayEmpty>
+                    <Select 
+                        value={item.type} 
+                        onChange={(e) => onUpdate(item.id, "type", e.target.value)} 
+                        displayEmpty
+                    >
                         {snsOptions.map((opt) => (
                             <MenuItem 
                                 key={opt} 
                                 value={opt}
-                                // 이미 사용 중인 SNS 옵션은 비활성화 (단, 현재 필드의 ID는 제외)
-                                disabled={fields.some((f, i) => i !== idx && f.id === opt)} 
+                                disabled={fields.some((f) => f.id !== item.id && f.type === opt)} 
                             >
                                 {capitalize(opt)}
                             </MenuItem>
@@ -229,20 +215,19 @@ const SNSFields = ({
                 </FormControl>
                 <TextField 
                     label="URL" 
-                    value={field.url} 
-                    onChange={(e) => onUpdate(idx, "url", e.target.value)} 
+                    value={item.url} 
+                    onChange={(e) => onUpdate(item.id, "url", e.target.value)} 
                     fullWidth 
                     placeholder="https://를 포함한 전체 URL"
                     type="url"
                 />
                 {fields.length > 1 && (
-                    <IconButton onClick={() => onRemove(idx)} color="error">
+                    <IconButton onClick={() => onRemove(item.id)} color="error">
                         <DeleteIcon />
                     </IconButton>
                 )}
             </Stack>
         ))}
-        {/* SNS 필드 개수 제한 로직 추가 */}
         <Button onClick={onAdd} size="small" variant="outlined" disabled={fields.length >= snsOptions.length}>
             추가
         </Button>
@@ -253,8 +238,19 @@ const SNSFields = ({
 // MemberForm
 // ----------------------------
 const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
-    const [member, setMember] = useState<MemberState>({ ...initialMemberState });
-    const [snsFields, setSnsFields] = useState<LocalSnsLink[]>(initialSnsFields);
+    
+    const memberName = memberNames[memberIds.indexOf(memberId as (typeof memberIds)[number])] || memberId;
+    
+    const initialLocalState: LocalMemberProfileState = {
+        id: memberId, 
+        name: memberName,
+        type: memberId,
+        texts: initialContentState.texts,
+        images: initialContentState.images,
+        snslinks: initialContentState.snslinks,
+    };
+    
+    const [member, setMember] = useState<LocalMemberProfileState>({ ...initialLocalState });
     const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error" } | null>(null);
@@ -266,79 +262,81 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         setAlertMessage(null);
 
         try {
-            const res = await api.get<{ success: boolean; data: MemberPayload }>(`/api/members/${memberId}`);
+            const res = await api.get<{ success: boolean; data: MemberProfileState }>(`/api/members/${memberId}`);
             const data = res.data.data;
-
-            const texts = data.contents.filter((c) => c.type === "text").map((c) => c.content);
-            const images = data.contents.filter((c) => c.type === "image").map((c) => c.content);
-
-            const fetchedSnsFields: LocalSnsLink[] = Object.entries(data.sns).map(([id, url]) => ({
-                key: uuidv4(),
-                id: id as (typeof snsOptions)[number],
-                url: url || "",
+            
+            const loadedImages: LocalImageItem[] = data.images.map(img => ({ 
+                id: img.id, 
+                url: img.url, 
+                file: undefined 
             }));
 
             setMember({
-                // 데이터가 있을 경우 사용, 없을 경우 최대 개수 제한에 맞게 조정된 초기값 사용
-                text: texts.length > 0 ? texts : initialMemberState.text,
-                image: images.length > 0 ? images : initialMemberState.image,
-                sns: data.sns,
+                id: data.id as (typeof memberIds)[number],
+                name: data.name,
+                type: data.type,
+                texts: data.texts.length > 0 ? data.texts : initialContentState.texts,
+                images: loadedImages.length > 0 ? loadedImages : initialContentState.images,
+                snslinks: data.snslinks.length > 0 ? data.snslinks : initialContentState.snslinks,
             });
-            setSnsFields(fetchedSnsFields.length > 0 ? fetchedSnsFields : initialSnsFields);
+
         } catch (err: any) {
-            // 데이터가 없는 경우 (404) 초기 상태로 로드
             if (err?.response?.status === 404) {
-                 console.log(`Profile for ${memberId} not found, loading initial state.`);
-                 setMember({ ...initialMemberState });
-                 setSnsFields([...initialSnsFields]);
-                 setLoadError(false);
-                 setAlertMessage(null);
+                console.log(`Profile for ${memberId} not found, loading initial state.`);
+                setMember({ ...initialLocalState }); 
+                setLoadError(false);
+                setAlertMessage(null);
             } else {
                 console.error(`Failed to load ${memberId} profile:`, err);
                 setLoadError(true);
-                const errorMsg = extractErrorMessage(err, `${memberId} 프로필 로드에 실패했습니다.`);
+                const errorMsg = extractErrorMessage(err, `${memberName} 프로필 로드에 실패했습니다.`);
                 setAlertMessage({ message: errorMsg, severity: "error" });
             }
         } finally {
             setLoading(false);
         }
-    }, [memberId]);
+    }, [memberId, memberName]);
 
     useEffect(() => {
         fetchMemberData();
     }, [fetchMemberData]);
 
-    // Field 업데이트
+    // Field 업데이트 
+    // --- Text ---
     const addText = () => {
-        if (member.text.length < MAX_TEXT_FIELDS) { // 텍스트 개수 제한
-            setMember({ ...member, text: [...member.text, ""] });
+        if (member.texts.length < MAX_TEXT_FIELDS) {
+            setMember(prev => ({ ...prev, texts: [...prev.texts, { id: uuidv4(), content: "" }] }));
         }
     };
-    const removeText = (idx: number) => setMember({ ...member, text: member.text.filter((_, i) => i !== idx) });
-    const updateText = (idx: number, value: string) => {
-        const newText = [...member.text];
-        newText[idx] = value;
-        setMember({ ...member, text: newText });
+    const removeText = (id: string) => setMember(prev => ({ ...prev, texts: prev.texts.filter((t) => t.id !== id) }));
+    const updateText = (id: string, value: string) => {
+        setMember(prev => ({ 
+            ...prev, 
+            texts: prev.texts.map((t) => t.id === id ? { ...t, content: value } : t) 
+        }));
     };
 
+    // --- Image ---
     const addImage = () => {
-        if (member.image.length < MAX_IMAGE_FIELDS) { // 이미지 개수 제한
-            setMember({ ...member, image: [...member.image, ""] });
+        if (member.images.length < MAX_IMAGE_FIELDS) {
+            setMember(prev => ({ ...prev, images: [...prev.images, { id: uuidv4(), url: "", file: undefined }] }));
         }
     };
-    const removeImage = (idx: number) => {
-        // 제거 시 혹시 모를 메모리 해제 처리
-        const imageToRemove = member.image[idx];
-        if (imageToRemove instanceof File) {
-            const url = URL.createObjectURL(imageToRemove);
-            URL.revokeObjectURL(url);
+
+    const removeImage = (id: string) => {
+        // 🌟 [수정] find 결과에 명시적인 타입 캐스팅을 적용하여 file 속성 접근 허용 (373행 오류 해결)
+        const imageToRemove = member.images.find(img => img.id === id) as LocalImageItem | undefined;
+
+        if (imageToRemove?.file) { // 👈 373행으로 추정되는 지점
+             try {
+                const url = URL.createObjectURL(imageToRemove.file);
+                URL.revokeObjectURL(url);
+             } catch(e) { /* ignore */ }
         }
-        setMember({ ...member, image: member.image.filter((_, i) => i !== idx) });
+        setMember(prev => ({ ...prev, images: prev.images.filter((i) => i.id !== id) }));
     };
     
-    // 파일 유효성 검사 및 업데이트
-    const updateImage = (idx: number, file: File) => {
-        // 1. 파일 크기 검사
+    const updateImage = (id: string, file: File) => {
         if (file.size > MAX_IMAGE_SIZE) {
             setAlertMessage({ 
                 message: `파일 크기가 ${MAX_IMAGE_SIZE / 1024 / 1024}MB를 초과합니다.`, 
@@ -346,36 +344,45 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
             });
             return; 
         }
-        // 2. 파일 타입 검사
         if (!file.type.startsWith('image/')) {
             setAlertMessage({ message: "이미지 파일만 업로드할 수 있습니다.", severity: "error" });
             return; 
         }
         
-        // 유효성 통과 시
         setAlertMessage(null);
-        const newImages = [...member.image];
-        // 기존에 File 객체가 있었다면 메모리 해제
-        const oldImage = newImages[idx];
-        if (oldImage instanceof File) {
-             const url = URL.createObjectURL(oldImage);
-             URL.revokeObjectURL(url);
-        }
-        newImages[idx] = file; // 새 File 객체 저장
-        setMember({ ...member, image: newImages });
+        setMember(prev => ({ 
+            ...prev, 
+            images: prev.images.map((i) => {
+                if (i.id === id) {
+                    return { ...i, file: file, url: "" }; 
+                }
+                return i;
+            }) 
+        }));
     };
 
+    // --- SNS ---
     const addSnsField = () => {
-        // 사용 가능한 SNS 옵션을 찾아 새로운 필드를 추가
-        const available = snsOptions.find((opt) => !snsFields.some((f) => f.id === opt));
-        if (available) setSnsFields([...snsFields, { key: uuidv4(), id: available, url: "" }]);
+        const usedTypes = member.snslinks.map(f => f.type);
+        const available = snsOptions.find((opt) => !usedTypes.includes(opt));
+        if (available) {
+            setMember(prev => ({ 
+                ...prev, 
+                snslinks: [...prev.snslinks, { id: uuidv4(), type: available as (typeof snsOptions)[number], url: "" }] 
+            }));
+        }
     };
-    const removeSnsField = (idx: number) => setSnsFields(snsFields.filter((_, i) => i !== idx));
-    const updateSnsField = (idx: number, key: "id" | "url", value: string) => {
-        const newFields = [...snsFields];
-        if (key === "id") newFields[idx].id = value as (typeof snsOptions)[number];
-        else newFields[idx].url = value;
-        setSnsFields(newFields);
+    const removeSnsField = (id: string) => setMember(prev => ({ ...prev, snslinks: prev.snslinks.filter((f) => f.id !== id) }));
+    const updateSnsField = (id: string, key: "type" | "url", value: string) => {
+        setMember(prev => ({
+            ...prev,
+            snslinks: prev.snslinks.map((f) => {
+                if (f.id === id) {
+                    return { ...f, [key]: key === "type" ? value as (typeof snsOptions)[number] : value };
+                }
+                return f;
+            }),
+        }));
     };
 
     // 저장
@@ -384,14 +391,13 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         setLoading(true);
         setAlertMessage(null);
 
-        // SNS URL 유효성 검사
-        const invalidLink = snsFields.find(
+        const invalidLink = member.snslinks.find(
             (field) => field.url.trim() && !/^https?:\/\/.*/i.test(field.url.trim())
         );
 
         if (invalidLink) {
             setAlertMessage({ 
-                message: `${capitalize(invalidLink.id)} 링크의 형식이 올바르지 않습니다. URL은 'http://' 또는 'https://'로 시작해야 합니다.`, 
+                message: `${capitalize(invalidLink.type)} 링크의 형식이 올바르지 않습니다. URL은 'http://' 또는 'https://'로 시작해야 합니다.`, 
                 severity: "error" 
             });
             setLoading(false);
@@ -400,46 +406,40 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
 
         try {
             const formData = new FormData();
-            const imageContentsPayload: { type: "image"; content: string }[] = [];
-            const newImages: File[] = [];
+            const payloadImages: APIImageItem[] = []; 
+            const newImageFiles: File[] = [];
 
-            // 이미지 필드 처리 (기존 이미지 URL과 새로 업로드된 파일 분리)
-            member.image.forEach((img) => {
-                if (img instanceof File) {
-                    newImages.push(img);
-                    // 새 파일의 경우 서버에서 처리할 위치를 알려주기 위해 빈 문자열 사용
-                    imageContentsPayload.push({ type: "image", content: "" }); 
-                } else if (img) imageContentsPayload.push({ type: "image", content: img });
+            (member.images as LocalImageItem[]).forEach((item: LocalImageItem) => {
+                const apiItem: APIImageItem = { id: item.id, url: item.url };
+
+                if (item.file) {
+                    newImageFiles.push(item.file);
+                    payloadImages.push({ ...apiItem, url: "file_placeholder" }); 
+                } else if (item.url) {
+                    payloadImages.push(apiItem);
+                }
             });
 
-            const contentsPayload: MemberPayload["contents"] = [
-                // 빈 텍스트 필드 제외
-                ...member.text.filter(t => t.trim()).map((t) => ({ type: "text" as const, content: t })), 
-                ...imageContentsPayload,
-            ];
-
-            const payload: MemberPayload = {
-                id: memberId, // 고유 키
-                name: memberId,
-                contents: contentsPayload,
-                // 유효한 URL만 포함
-                sns: snsFields
-                    .filter((f) => f.url.trim())
-                    .reduce((acc, cur) => ({ ...acc, [cur.id]: cur.url }), {} as MemberSNS),
+            const payload: MemberProfilePayload = {
+                id: member.id as (typeof memberIds)[number], 
+                name: member.name, 
+                type: member.type, 
+                
+                texts: member.texts.filter(t => t.content.trim()),
+                images: payloadImages,
+                snslinks: member.snslinks.filter(f => f.url.trim()), 
             };
 
             formData.append("payload", JSON.stringify(payload));
-            newImages.forEach((img) => formData.append("images", img, img.name));
+            newImageFiles.forEach((file) => formData.append("images", file, file.name));
 
-            // 🌟 POST URL 수정 (라우팅 문제 해결)
             await api.post(`/api/members/${memberId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
 
-            // 저장 성공 후, 최신 데이터 다시 로드
             await fetchMemberData(); 
-            setAlertMessage({ message: `${memberId} 데이터가 성공적으로 저장되었습니다!`, severity: "success" });
+            setAlertMessage({ message: `${memberName} 데이터가 성공적으로 저장되었습니다!`, severity: "success" });
         } catch (err: any) {
             console.error("Save failed:", err);
-            const errorMsg = extractErrorMessage(err, `${memberId} 데이터 저장에 실패했습니다.`);
+            const errorMsg = extractErrorMessage(err, `${memberName} 데이터 저장에 실패했습니다.`);
             setAlertMessage({ message: errorMsg, severity: "error" });
         } finally {
             setLoading(false);
@@ -455,15 +455,15 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
             sx={{ opacity: loading ? 0.6 : 1, pointerEvents: loading ? "none" : "auto" }}
         >
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                {memberId}
+                {memberName} (ID: {memberId})
             </Typography>
 
             {loading && <CircularProgress size={24} sx={{ my: 2 }} />}
             {alertMessage && <Alert severity={alertMessage.severity} sx={{ mt: 2, mb: 2 }}>{alertMessage.message}</Alert>}
 
-            <TextFields texts={member.text} onAdd={addText} onRemove={removeText} onUpdate={updateText} />
-            <ImageFields images={member.image} onAdd={addImage} onRemove={removeImage} onUpdate={updateImage} />
-            <SNSFields fields={snsFields} onAdd={addSnsField} onRemove={removeSnsField} onUpdate={updateSnsField} />
+            <TextFields texts={member.texts} onAdd={addText} onRemove={removeText} onUpdate={updateText} />
+            <ImageFields images={member.images} onAdd={addImage} onRemove={removeImage} onUpdate={updateImage} />
+            <SNSFields fields={member.snslinks} onAdd={addSnsField} onRemove={removeSnsField} onUpdate={updateSnsField} />
 
             <Box mt={4}>
                 <Button

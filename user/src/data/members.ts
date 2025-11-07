@@ -1,4 +1,4 @@
-import type { Member } from '@shared/types/member';
+import type { Member } from '@shared/types/member/user';
 
 import qwerImg from '@front/assets/images/members/QWER.jpg';
 
