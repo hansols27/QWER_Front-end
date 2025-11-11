@@ -465,7 +465,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         >
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
                 {/* ID 표시 제거 */}
-                **{memberName}**
+                {memberName}
             </Typography>
 
             {loading && <CircularProgress size={24} sx={{ my: 2 }} />}
