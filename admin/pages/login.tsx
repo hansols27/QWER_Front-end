@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Box, Paper, TextField, Button, Typography } from '@mui/material';
+import Head from 'next/head';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -33,6 +34,10 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+    <Head>
+        <title>QWER 관리자</title>
+      </Head>
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
       <Paper sx={{ p: 6, width: '100%', maxWidth: 400 }}>
         <Typography variant="h5" align="center" gutterBottom>
@@ -58,5 +63,6 @@ export default function LoginPage() {
         </Button>
       </Paper>
     </Box>
+    </>
   );
 }
