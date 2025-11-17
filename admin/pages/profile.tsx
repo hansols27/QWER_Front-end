@@ -33,7 +33,7 @@ const memberNames = ["QWER", "Chodan", "Majenta", "Hina", "Siyeon"] as const;
 const snsOptions = ["instagram", "youtube", "twitter", "cafe", "tiktok", "weverse"] as const;
 
 // --- 상수 및 타입 ---
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB 제한
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB 제한
 const MAX_TEXT_FIELDS = 3; 
 const MAX_IMAGE_FIELDS = 4; 
 

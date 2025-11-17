@@ -42,7 +42,7 @@ export default function GalleryCreate() {
 
         const selected = Array.from(e.target.files);
         const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-        const maxSize = 10 * 1024 * 1024; // 10MB
+        const maxSize = 30 * 1024 * 1024; // 30MB
 
         const filtered: File[] = [];
         const errorMessages: string[] = [];

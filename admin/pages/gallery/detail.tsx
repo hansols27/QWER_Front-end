@@ -90,7 +90,7 @@ export default function GalleryDetail() {
         }
 
         const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-        const maxSize = 10 * 1024 * 1024; // 10MB
+        const maxSize = 30 * 1024 * 1024; // 30MB
         
         if (!validTypes.includes(file.type)) {
             setAlertMessage({ message: "jpg, jpeg, png 파일만 업로드 가능합니다.", severity: "error" });

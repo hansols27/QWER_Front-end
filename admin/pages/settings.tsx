@@ -18,7 +18,7 @@ import type { SettingsData, SnsLink } from "@shared/types/settings";
 
 // --- 유효성 검사를 위한 상수 ---
 const DEFAULT_SNS_IDS: SnsLink["id"][] = ["instagram", "youtube", "twitter", "cafe", "shop"];
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB 제한 (운영 환경에 맞게 조정 필요)
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB 제한 (운영 환경에 맞게 조정 필요)
 
 /**
  * 에러 객체에서 메시지를 추출하고 타입 안전성을 높인 함수

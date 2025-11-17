@@ -2,6 +2,7 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { CssBaseline, Box, CircularProgress } from "@mui/material";
 import Sidebar from "./Sidebar";
+import Head from "next/head";
 
 type LayoutProps = {
   children: ReactNode;
@@ -35,7 +36,11 @@ const Layout: FC<LayoutProps> = ({ children }) => {
     );
   }
 
-  return (
+  return (    
+    <>
+    <Head>
+        <title>QWER 관리자</title>
+      </Head>
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       <Sidebar />
@@ -43,6 +48,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
         {children}
       </Box>
     </Box>
+    </>
   );
 };
 

@@ -17,7 +17,7 @@ import {
 import type { AlbumItem } from "@shared/types/album";
 
 // 상수
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 const NO_IMAGE_URL = "https://via.placeholder.com/150x150?text=No+Image";
 
