@@ -64,7 +64,7 @@ export default function AlbumList() {
     fetchAlbums();
   }, [fetchAlbums]);
 
-  // 앨범 생성 페이지로 이동
+  // 앨범 등록 페이지로 이동
   const handleCreateClick = () => {
     router.push('/album/create');
   };
@@ -119,14 +119,10 @@ export default function AlbumList() {
           </Typography>
         )}
 
-        {/* ⭐️ 수정: Grid container를 CSS Grid 스타일이 적용된 Box로 대체
-                  - Grid item의 반응형 설정을 제거하고 320px 아이템을 자동으로 컨텐츠 영역에 채웁니다. 
-                */}
         <Box
           sx={{
             display: 'grid',
-            gap: '24px', // 아이템 간의 간격 (spacing={3}과 유사)
-            // 컨텐츠 영역 너비에 따라 320px 크기의 아이템을 최대한 많이 채우고 나머지는 자동으로 분배
+            gap: '24px',
             gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', // 최소 320px 너비 보장
             justifyContent: 'flex-start', // 앨범이 왼쪽부터 시작하도록 정렬
           }}
