@@ -6,4 +6,5 @@ export interface AlbumItem {
   description?: string;
   tracks?: string[];
   videoUrl?: string;
+  coverImageUrl: string | undefined;
 }
