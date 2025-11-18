@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, ChangeEvent, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // useSearchParams 추가
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@shared/services/axios";
 import Layout from "@components/common/layout";
 import { 
@@ -12,15 +12,15 @@ import {
     Stack, 
     Alert, 
     CircularProgress, 
-    Card,           
-    Divider,        
+    Card, 
+    Divider, 
 } from "@mui/material";
 import type { AlbumItem } from "@shared/types/album";
 
 // 상수 (등록 페이지와 동일)
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
-const NO_IMAGE_URL = "https://via.placeholder.com/150x150?text=Cover+Image";
+const NO_IMAGE_URL = "https://placehold.co/150x150?text=Cover+Image"; 
 
 type AlertSeverity = "success" | "error";
 
@@ -36,11 +36,10 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
 export default function AlbumEdit() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const albumId = searchParams.get('id'); // URL에서 앨범 ID를 가져옵니다.
+    const albumId = searchParams.get('id'); 
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     
-    // 💡 초기 데이터 로딩 상태
     const [initialLoading, setInitialLoading] = useState(true); 
     const [albumData, setAlbumData] = useState<AlbumItem | null>(null);
 
@@ -51,22 +50,22 @@ export default function AlbumEdit() {
     const [tracks, setTracks] = useState<string[]>([""]);
     const [videoUrl, setVideoUrl] = useState("");
     
-    // 💡 이미지 상태: coverFile (새 파일) 또는 coverImageUrl (기존 S3 URL)
+    // 이미지 상태
     const [coverFile, setCoverFile] = useState<File | null>(null);
-    const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null); // 기존 S3 URL
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null); // 현재 미리보기 URL (로컬 또는 S3)
+    const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null); 
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null); 
 
     const [isSaving, setIsSaving] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
     // ---------------------------
-    // 0. 초기 데이터 로딩
+    // 0. 초기 데이터 로딩 및 ID 체크
     // ---------------------------
     useEffect(() => {
-        if (!albumId) {
+        if (!albumId || albumId === "") {
             setAlertMessage({ message: "앨범 ID가 없습니다. 목록으로 돌아갑니다.", severity: "error" });
             setInitialLoading(false);
-            setTimeout(() => router.push("/album"), 1500);
+            router.push("/album"); 
             return;
         }
 
@@ -74,16 +73,14 @@ export default function AlbumEdit() {
             try {
                 const res = await api.get<{ data: AlbumItem }>(`/api/album/${albumId}`);
                 const data = res.data.data;
-                setAlbumData(data); // 원본 데이터 저장
+                setAlbumData(data); 
 
-                // 💡 초기 상태 설정
                 setTitle(data.title || "");
                 setDate(data.date || "");
                 setDescription(data.description || "");
                 setTracks(data.tracks && data.tracks.length > 0 ? data.tracks : [""]);
                 setVideoUrl(data.videoUrl || "");
                 
-                // 💡 기존 이미지 URL 설정
                 if (data.coverImageUrl) {
                     setCoverImageUrl(data.coverImageUrl);
                 }
@@ -102,20 +99,17 @@ export default function AlbumEdit() {
     // 1. 파일 미리보기 URL 생성 및 해제
     // ---------------------------
     useEffect(() => {
-        // 1. 새 파일이 있으면 로컬 URL 사용
         if (coverFile) {
             const url = URL.createObjectURL(coverFile);
             setPreviewUrl(url);
             return () => URL.revokeObjectURL(url);
         }
-        
-        // 2. 새 파일이 없으면 기존 S3 URL 사용
         setPreviewUrl(coverImageUrl); 
     }, [coverFile, coverImageUrl]);
 
 
     // ---------------------------
-    // 2. 파일 변경 핸들러 및 유효성 검사 (로직 변경 없음)
+    // 2. 파일 변경 핸들러 및 유효성 검사
     // ---------------------------
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         setAlertMessage(null);
@@ -123,7 +117,6 @@ export default function AlbumEdit() {
         
         if (!file) {
             setCoverFile(null);
-            // 파일 선택 취소 시 기존 S3 URL로 복원
             setPreviewUrl(coverImageUrl); 
             return;
         }
@@ -143,7 +136,7 @@ export default function AlbumEdit() {
         setAlertMessage(null); 
     };
 
-    // 3. 트랙 관리 핸들러 (로직 변경 없음)
+    // 3. 트랙 관리 핸들러 (생략: 변경 없음)
     const handleTrackChange = (idx: number, value: string) => {
         const newTracks = [...tracks];
         newTracks[idx] = value;
@@ -158,12 +151,11 @@ export default function AlbumEdit() {
     };
 
     // ---------------------------
-    // 4. 앨범 수정 (PUT)
+    // 4. 앨범 수정 (PUT) (생략: 변경 없음)
     // ---------------------------
     const handleUpdate = async () => {
         setAlertMessage(null);
         
-        // 커버 파일이 없으면서, 기존 S3 URL도 없다면 필수 검사 실패
         if (!coverFile && !coverImageUrl) { 
             setAlertMessage({ message: "필수 항목: 커버 이미지를 선택해주세요.", severity: "error" });
             return;
@@ -182,27 +174,24 @@ export default function AlbumEdit() {
             formData.append("description", description);
             formData.append("videoUrl", videoUrl);
             
-            // 💡 coverFile이 변경된 경우에만 FormData에 추가
             if (coverFile) {
                 formData.append("coverFile", coverFile);
             }
             
-            // 기존 이미지를 유지할 경우 서버에서 coverFile이 없음을 인식해야 합니다.
-            // 필요에 따라 'coverImageUrl'을 FormData에 함께 보내서 서버에 힌트를 줄 수 있습니다.
             if (!coverFile && coverImageUrl) {
                  formData.append("coverImageUrl", coverImageUrl);
             }
 
             tracks.filter(t => t.trim() !== "").forEach((track, idx) => formData.append(`tracks[${idx}]`, track));
 
-            // 🚨 PUT 메소드와 앨범 ID가 포함된 엔드포인트 사용
             const res = await api.put<{ success: boolean; data?: AlbumItem }>(`/api/album/${albumId}`, formData, { 
                 headers: { "Content-Type": "multipart/form-data" } 
             });
 
             if (res.data.success) {
                 setAlertMessage({ message: "앨범이 성공적으로 수정되었습니다!", severity: "success" });
-                // 수정 완료 후, 최신 데이터로 다시 로딩할 필요 없이 상태를 업데이트하거나 목록으로 이동
+                // 💡 수정 성공 후 목록으로 이동 추가 (갤러리 상세와 동일 플로우)
+                setTimeout(() => router.push("/album"), 1500);
             } else {
                 setAlertMessage({ message: "수정 실패: 서버에서 오류가 발생했습니다.", severity: "error" });
             }
@@ -215,19 +204,21 @@ export default function AlbumEdit() {
     };
 
     // ---------------------------
-    // 5. 앨범 삭제 (DELETE)
+    // 5. 앨범 삭제 (DELETE) - 💡 삭제 알럿 플로우 수정
     // ---------------------------
     const handleDelete = async () => {
-        if (!confirm("정말로 이 앨범을 삭제하시겠습니까?")) return;
+        // 💡 "삭제하시겠습니까?" 알럿 사용
+        if (!window.confirm("삭제하시겠습니까?")) return;
         
         setIsSaving(true);
         setAlertMessage(null);
 
         try {
-            // 🚨 DELETE 메소드와 앨범 ID가 포함된 엔드포인트 사용
             await api.delete(`/api/album/${albumId}`);
             
             setAlertMessage({ message: "앨범이 성공적으로 삭제되었습니다! 목록으로 이동합니다.", severity: "success" });
+            
+            // 💡 삭제 성공 시 목록으로 이동
             setTimeout(() => router.push("/album"), 1500); 
         } catch (err: any) {
             console.error("앨범 삭제 요청 실패:", err);
@@ -238,7 +229,7 @@ export default function AlbumEdit() {
     };
     
     // ---------------------------
-    // 6. 렌더링
+    // 6. 렌더링 (생략: 변경 없음)
     // ---------------------------
     if (initialLoading) {
         return (
@@ -259,18 +250,18 @@ export default function AlbumEdit() {
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
 
                 <Stack spacing={3}>
-                    {/* 기본 정보 Card (등록 페이지 UI 유지) */}
+                    {/* 기본 정보 Card */}
                     <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                         <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>기본 정보</Typography>
                         <Stack spacing={3}>
                             <TextField label="타이틀" value={title} onChange={e => setTitle(e.target.value)} required disabled={isSaving} />
-                            <TextField label="발매일" type="date" value={date} onChange={e => setDate(e.target.value)} InputLabelProps={{ shrink: true }} required disabled={isSaving} />
+                            <TextField label="발매일" type="date" value={date.split('T')[0]} onChange={e => setDate(e.target.value)} InputLabelProps={{ shrink: true }} required disabled={isSaving} />
                             <TextField label="설명 (선택 사항)" multiline minRows={3} value={description} onChange={e => setDescription(e.target.value)} disabled={isSaving} />
                             <TextField label="유튜브 링크 (선택 사항)" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} disabled={isSaving} />
                         </Stack>
                     </Card>
 
-                    {/* 트랙 목록 Card (등록 페이지 UI 유지) */}
+                    {/* 트랙 목록 Card */}
                     <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                         <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>트랙 목록</Typography>
                         <Stack spacing={2}>
@@ -284,7 +275,7 @@ export default function AlbumEdit() {
                         </Stack>
                     </Card>
 
-                    {/* 커버 이미지 Card (등록 페이지 UI 유지) */}
+                    {/* 커버 이미지 Card */}
                     <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                         <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>커버 이미지</Typography>
                         
@@ -346,8 +337,8 @@ export default function AlbumEdit() {
                             )}
                             {(!previewUrl) && (
                                 <Box>
-                                     <Typography variant="caption" display="block" mb={1}>미리보기</Typography>
-                                     <img 
+                                    <Typography variant="caption" display="block" mb={1}>미리보기</Typography>
+                                    <img 
                                         src={NO_IMAGE_URL} 
                                         alt="No Image Placeholder" 
                                         style={{ 
@@ -380,11 +371,13 @@ export default function AlbumEdit() {
                             variant="outlined" 
                             color="error" 
                             size="large"
-                            onClick={handleDelete}
+                            onClick={handleDelete} // handleDelete 함수 사용
                             disabled={isSaving}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                         >
-                            {isSaving ? "삭제 중..." : "삭제"}
+                            {/* isSaving이 true일 때만 로딩 아이콘과 텍스트 표시 */}
+                            {isSaving && albumId && alertMessage?.message.includes("삭제 중...") ? <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} /> : null}
+                            {isSaving && albumId && alertMessage?.message.includes("삭제 중...") ? "삭제 중..." : "삭제"}
                         </Button>
                         <Button 
                             variant="contained" 
@@ -392,10 +385,11 @@ export default function AlbumEdit() {
                             size="large"
                             onClick={handleUpdate} 
                             disabled={isSaving || !title || !date || (!coverFile && !coverImageUrl)} 
-                            startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : undefined}
+                            startIcon={isSaving && !alertMessage?.message.includes("삭제 중...") ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }} 
                         >
-                            {isSaving ? "수정 중..." : "저장"}
+                            {/* 저장/수정 중일 때와 삭제 중일 때 상태 분리 */}
+                            {isSaving && !alertMessage?.message.includes("삭제 중...") ? "수정 중..." : "저장"}
                         </Button>
                     </Stack>
                 </Stack>

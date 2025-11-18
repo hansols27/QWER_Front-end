@@ -16,9 +16,10 @@ import {
     Stack,
     Alert,
     CircularProgress,
-    Card, // 👈 Card 컴포넌트 추가
-    Divider // 👈 Divider 컴포넌트 추가
+    Card, 
+    Divider 
 } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material"; // SelectChangeEvent import 추가
 
 // 클라이언트 사이드 전용 에디터 동적 로딩
 const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
@@ -39,7 +40,8 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
 };
 
 export default function NoticeCreate() {
-    const [type, setType] = useState<"공지" | "이벤트">("공지");
+    // 💡 type 상태 타입을 명확히 정의
+    const [type, setType] = useState<"공지" | "이벤트">("공지"); 
     const [title, setTitle] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
@@ -52,6 +54,7 @@ export default function NoticeCreate() {
         
         const trimmedTitle = title.trim();
         const content = editorRef.current?.getContent() || "";
+        // 💡 내용 검사 로직을 content 변수 아래에 배치
         const trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
 
         if (!trimmedTitle) {
@@ -84,7 +87,15 @@ export default function NoticeCreate() {
     };
     
     // 등록 버튼 비활성화 조건: 제목 또는 내용이 비었을 때 (HTML 태그 제거 후 검사)
-    const isFormInValid = !title.trim() || !editorRef.current?.getContent()?.replace(/<[^>]*>?/gm, '')?.trim();
+    // 💡 isFormInvalid 계산 시점을 렌더링 내로 옮기거나, useEffect를 사용하여 상태 관리하는 것이 안전하지만, 현재 구조에서는 함수 내에서 계산
+    const checkFormValidity = (): boolean => {
+        const titleValid = title.trim().length > 0;
+        const content = editorRef.current?.getContent() || "";
+        const contentValid = content.replace(/<[^>]*>?/gm, '').trim().length > 0;
+        return !titleValid || !contentValid;
+    }
+    const isFormInValid = checkFormValidity();
+
 
     return (
         <Layout>
@@ -93,7 +104,7 @@ export default function NoticeCreate() {
 
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
                 
-                {/* 앨범/갤러리 등록과 통일된 Card 레이아웃 시작 */}
+                {/* 앨범/갤러리 등록과 통일된 Card 레이아웃 적용 */}
                 <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                     <Stack spacing={3}>
                         <Typography variant="h6" borderBottom="1px solid #eee" pb={1}>공지 내용</Typography>
@@ -102,7 +113,8 @@ export default function NoticeCreate() {
                         <Stack direction="row" spacing={2} alignItems="center">
                             <Select 
                                 value={type} 
-                                onChange={(e) => setType(e.target.value as "공지" | "이벤트")} 
+                                // 💡 SelectChangeEvent 타입 사용
+                                onChange={(e: SelectChangeEvent<"공지" | "이벤트">) => setType(e.target.value as "공지" | "이벤트")} 
                                 disabled={isProcessing} 
                                 sx={{ width: 150 }} // 고정 너비 지정
                             >
@@ -118,35 +130,35 @@ export default function NoticeCreate() {
                                 fullWidth
                                 // 제목이 비어 있을 경우 시각적 오류 표시
                                 error={!title.trim() && !isProcessing}
-                                helperText={!title.trim() && !isProcessing ? "제목은 필수입니다." : ""}
+                                helperText={!title.trim() && !isProcessing ? "제목은 필수입니다." : undefined}
                             />
                         </Stack>
 
                         {/* 에디터 영역 */}
-                        <Box sx={{ minHeight: '400px', border: '1px solid #ddd', borderRadius: 1 }}>
+                        {/* 💡 에디터 영역에도 테두리 및 최소 높이 스타일 적용하여 명확하게 분리 */}
+                        <Box sx={{ minHeight: '400px', border: '1px solid #ddd', borderRadius: 1, overflow: 'hidden' }}>
                             <SmartEditor ref={editorRef} height="400px" />
                         </Box>
                     </Stack>
                 </Card>
-                {/* Card 레이아웃 끝 */}
 
                 {/* 액션 버튼 섹션 */}
                 <Divider sx={{ mt: 4, mb: 4 }}/>
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
                     <Button 
                         variant="contained" 
-                        color="success" // 👈 success color 적용
-                        size="large" // 👈 large size 적용
+                        color="success" 
+                        size="large"
                         onClick={handleSubmit} 
-                        disabled={isProcessing || isFormInValid} 
-                        startIcon={isProcessing && <CircularProgress size={20} color="inherit" />}
+                        disabled={isProcessing || checkFormValidity()} 
+                        startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
                         sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                     >
                         {isProcessing ? "저장 중..." : "등록"}
                     </Button>
                     <Button 
                         variant="contained" 
-                        color="primary" // 목록 버튼은 inherit (기본 색상) 유지
+                        color="primary" 
                         size="large"
                         onClick={() => router.push("/notice")} 
                         disabled={isProcessing}

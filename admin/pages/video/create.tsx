@@ -192,7 +192,7 @@ export default function VideoCreate() {
                         startIcon={loading && <CircularProgress size={20} color="inherit" />}
                         sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                     >
-                        {loading ? "등록 중..." : "영상 등록"}
+                        {loading ? "등록 중..." : "등록"}
                     </Button>
                 </Stack>
             </Box>
