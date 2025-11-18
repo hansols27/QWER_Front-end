@@ -367,7 +367,7 @@ export default function AlbumEdit() {
                     <Divider sx={{ mt: 4, mb: 4 }}/>
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                         <Button 
-                            variant="text" 
+                            variant="contained" 
                             color="primary" 
                             size="large"
                             onClick={() => router.push("/album")} 
