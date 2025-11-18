@@ -135,26 +135,47 @@ export default function AlbumList() {
                                     }}
                                 >
                                     {/* Next/Image를 사용하여 최적화된 이미지 로딩 적용 */}
-                                    <Box sx={{ position: 'relative', width: '100%', height: 200 }}>
+                                    <Box
+                                        sx={{
+                                            position: 'relative',
+                                            width: '100%',
+                                            // 너비에 비례하여 높이를 설정 (1:1 비율 = 정사각형)
+                                            // 이 컨테이너의 실제 높이는 0이 되지만, 자식 요소는 이 영역 안에서 'absolute'로 배치됨
+                                            paddingTop: '100%', 
+                                        }}
+                                    >
                                         <Image
                                             src={imageUrl}
                                             alt={album.title}
                                             fill
                                             sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
-                                            style={{ objectFit: 'cover' }}
+                                            style={{ 
+                                                objectFit: 'cover',
+                                                // 이 부분이 중요: 부모 Box의 'paddingTop: 100%'에 의해 생성된 영역을 채우도록 absolute 위치 설정
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                            }} 
                                             unoptimized={imageUrl === NO_IMAGE_URL}
                                             priority={false}
                                         />
                                     </Box>
                                     
                                     <Box p={1}>
-                                        <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                                            {album.title}
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            {album.date || "날짜 미정"}
-                                        </Typography>
-                                    </Box>
+                                            <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                                                {album.title}
+                                            </Typography>
+                                            <Typography 
+                                                variant="body2" 
+                                                color="textSecondary"
+                                                align="right" // 우측 정렬 적용
+                                            >
+                                                {/* 날짜 형식 변경: T 이전 부분만 사용 */}
+                                                {album.date ? album.date.split('T')[0] : "날짜 미정"}
+                                            </Typography>
+                                        </Box>
                                 </Card>
                             </Grid>
                         );
