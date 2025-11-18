@@ -128,9 +128,6 @@ export default function NoticeCreate() {
                                 onChange={(e) => setTitle(e.target.value)} 
                                 disabled={isProcessing} 
                                 fullWidth
-                                // 제목이 비어 있을 경우 시각적 오류 표시
-                                error={!title.trim() && !isProcessing}
-                                helperText={!title.trim() && !isProcessing ? "제목은 필수입니다." : undefined}
                             />
                         </Stack>
 
