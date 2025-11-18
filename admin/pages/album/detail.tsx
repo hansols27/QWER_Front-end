@@ -1,25 +1,26 @@
 'use client';
 
-import { useEffect, useState, ChangeEvent, useCallback, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Image from "next/image"; 
+import { useState, ChangeEvent, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation"; // useSearchParams 추가
 import { api } from "@shared/services/axios";
 import Layout from "@components/common/layout";
-import {
-    Box,
-    Button,
-    TextField,
-    Stack,
-    Typography,
-    Alert,
-    CircularProgress,
+import { 
+    Box, 
+    Button, 
+    TextField, 
+    Typography, 
+    Stack, 
+    Alert, 
+    CircularProgress, 
+    Card,           
+    Divider,        
 } from "@mui/material";
 import type { AlbumItem } from "@shared/types/album";
 
-// 상수
+// 상수 (등록 페이지와 동일)
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
-const NO_IMAGE_URL = "https://via.placeholder.com/150x150?text=No+Image";
+const NO_IMAGE_URL = "https://via.placeholder.com/150x150?text=Cover+Image";
 
 type AlertSeverity = "success" | "error";
 
@@ -29,69 +30,103 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
     return defaultMsg;
 };
 
-export default function AlbumDetail() {
-    const params = useParams();
-    // id를 항상 string으로 가져오도록 처리
-    const id = (Array.isArray(params?.id) ? params.id[0] : params?.id) as string | undefined;
+// ----------------------------------------------------
+// 앨범 수정 컴포넌트: AlbumEdit
+// ----------------------------------------------------
+export default function AlbumEdit() {
     const router = useRouter();
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const searchParams = useSearchParams();
+    const albumId = searchParams.get('id'); // URL에서 앨범 ID를 가져옵니다.
 
-    const [album, setAlbum] = useState<AlbumItem | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // 💡 초기 데이터 로딩 상태
+    const [initialLoading, setInitialLoading] = useState(true); 
+    const [albumData, setAlbumData] = useState<AlbumItem | null>(null);
+
+    // 앨범 필드 상태
+    const [title, setTitle] = useState("");
+    const [date, setDate] = useState("");
+    const [description, setDescription] = useState("");
+    const [tracks, setTracks] = useState<string[]>([""]);
+    const [videoUrl, setVideoUrl] = useState("");
+    
+    // 💡 이미지 상태: coverFile (새 파일) 또는 coverImageUrl (기존 S3 URL)
     const [coverFile, setCoverFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null); // 기존 S3 URL
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null); // 현재 미리보기 URL (로컬 또는 S3)
+
+    const [isSaving, setIsSaving] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
     // ---------------------------
-    // 1. 데이터 로드
-    // ---------------------------
-    const fetchAlbum = useCallback(async () => {
-        if (!id) return;
-        setLoading(true);
-        setAlertMessage(null);
-
-        try {
-            const res = await api.get<{ success: boolean; data: AlbumItem }>(`/api/album/${id}`);
-            const fetched = res.data.data;
-            // 트랙이 없으면 빈 문자열 하나를 넣어 사용자에게 입력 필드를 제공
-            setAlbum({ ...fetched, tracks: fetched.tracks?.length ? fetched.tracks : [""] });
-        } catch (err) {
-            console.error("앨범 로드 실패:", err);
-            setAlertMessage({ message: extractErrorMessage(err, "앨범 정보를 불러오는 데 실패했습니다."), severity: "error" });
-        } finally {
-            setLoading(false);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        if (id) fetchAlbum();
-    }, [id, fetchAlbum]);
-
-    // ---------------------------
-    // 2. 파일 미리보기 URL 생성 및 해제
+    // 0. 초기 데이터 로딩
     // ---------------------------
     useEffect(() => {
-        if (!coverFile) {
-            setPreviewUrl(null);
+        if (!albumId) {
+            setAlertMessage({ message: "앨범 ID가 없습니다. 목록으로 돌아갑니다.", severity: "error" });
+            setInitialLoading(false);
+            setTimeout(() => router.push("/album"), 1500);
             return;
         }
-        const url = URL.createObjectURL(coverFile);
-        setPreviewUrl(url);
-        // 메모리 누수 방지를 위해 URL 해제
-        return () => URL.revokeObjectURL(url);
-    }, [coverFile]);
+
+        const fetchAlbumData = async () => {
+            try {
+                const res = await api.get<{ data: AlbumItem }>(`/api/album/${albumId}`);
+                const data = res.data.data;
+                setAlbumData(data); // 원본 데이터 저장
+
+                // 💡 초기 상태 설정
+                setTitle(data.title || "");
+                setDate(data.date || "");
+                setDescription(data.description || "");
+                setTracks(data.tracks && data.tracks.length > 0 ? data.tracks : [""]);
+                setVideoUrl(data.videoUrl || "");
+                
+                // 💡 기존 이미지 URL 설정
+                if (data.coverImageUrl) {
+                    setCoverImageUrl(data.coverImageUrl);
+                }
+            } catch (err) {
+                setAlertMessage({ message: extractErrorMessage(err, "앨범 데이터를 불러오는 데 실패했습니다."), severity: "error" });
+            } finally {
+                setInitialLoading(false);
+            }
+        };
+
+        fetchAlbumData();
+    }, [albumId, router]);
+
 
     // ---------------------------
-    // 3. 파일 변경 핸들러 및 유효성 검사
+    // 1. 파일 미리보기 URL 생성 및 해제
+    // ---------------------------
+    useEffect(() => {
+        // 1. 새 파일이 있으면 로컬 URL 사용
+        if (coverFile) {
+            const url = URL.createObjectURL(coverFile);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+        
+        // 2. 새 파일이 없으면 기존 S3 URL 사용
+        setPreviewUrl(coverImageUrl); 
+    }, [coverFile, coverImageUrl]);
+
+
+    // ---------------------------
+    // 2. 파일 변경 핸들러 및 유효성 검사 (로직 변경 없음)
     // ---------------------------
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         setAlertMessage(null);
-        if (!e.target.files?.[0]) {
+        const file = e.target.files?.[0];
+        
+        if (!file) {
             setCoverFile(null);
+            // 파일 선택 취소 시 기존 S3 URL로 복원
+            setPreviewUrl(coverImageUrl); 
             return;
         }
-        const file = e.target.files[0];
 
         if (!ALLOWED_TYPES.includes(file.type)) {
             setAlertMessage({ message: "지원되지 않는 이미지 형식입니다. jpg, jpeg, png만 가능합니다.", severity: "error" });
@@ -99,60 +134,81 @@ export default function AlbumDetail() {
             return;
         }
         if (file.size > MAX_FILE_SIZE) {
-            setAlertMessage({ message: "이미지 용량이 10MB를 초과합니다.", severity: "error" });
+            setAlertMessage({ message: `이미지 용량이 ${MAX_FILE_SIZE / 1024 / 1024}MB를 초과합니다.`, severity: "error" });
             if (fileInputRef.current) fileInputRef.current.value = "";
             return;
         }
 
         setCoverFile(file);
-        setAlertMessage({ message: "새 이미지가 선택되었습니다. 저장 시 기존 이미지가 대체됩니다.", severity: "success" });
+        setAlertMessage(null); 
+    };
+
+    // 3. 트랙 관리 핸들러 (로직 변경 없음)
+    const handleTrackChange = (idx: number, value: string) => {
+        const newTracks = [...tracks];
+        newTracks[idx] = value;
+        setTracks(newTracks);
+    };
+
+    const addTrack = () => setTracks([...tracks, ""]);
+    
+    const removeTrack = (idx: number) => {
+        const newTracks = tracks.filter((_, i) => i !== idx);
+        setTracks(newTracks.length > 0 ? newTracks : [""]); 
     };
 
     // ---------------------------
-    // 4. 앨범 정보 수정 (PUT)
+    // 4. 앨범 수정 (PUT)
     // ---------------------------
     const handleUpdate = async () => {
-        if (!album || !id) return;
-        setIsSaving(true);
         setAlertMessage(null);
+        
+        // 커버 파일이 없으면서, 기존 S3 URL도 없다면 필수 검사 실패
+        if (!coverFile && !coverImageUrl) { 
+            setAlertMessage({ message: "필수 항목: 커버 이미지를 선택해주세요.", severity: "error" });
+            return;
+        }
+        if (!title || !date) {
+            setAlertMessage({ message: "필수 항목: 타이틀과 발매일을 입력해주세요.", severity: "error" });
+            return;
+        }
+
+        setIsSaving(true);
 
         try {
             const formData = new FormData();
-            formData.append("title", album.title);
-            formData.append("date", album.date);
-            formData.append("description", album.description ?? "");
-            formData.append("videoUrl", album.videoUrl ?? "");
-            // 기존 이미지 URL을 보내어, 서버에서 커버 파일이 없으면 기존 것을 유지하도록 지시
-            formData.append("existingImage", album.image ?? ""); 
-            if (coverFile) formData.append("coverFile", coverFile);
+            formData.append("title", title);
+            formData.append("date", date);
+            formData.append("description", description);
+            formData.append("videoUrl", videoUrl);
+            
+            // 💡 coverFile이 변경된 경우에만 FormData에 추가
+            if (coverFile) {
+                formData.append("coverFile", coverFile);
+            }
+            
+            // 기존 이미지를 유지할 경우 서버에서 coverFile이 없음을 인식해야 합니다.
+            // 필요에 따라 'coverImageUrl'을 FormData에 함께 보내서 서버에 힌트를 줄 수 있습니다.
+            if (!coverFile && coverImageUrl) {
+                 formData.append("coverImageUrl", coverImageUrl);
+            }
 
-            // 비어있지 않은 트랙만 전송
-            (album.tracks ?? [])
-                .filter((t) => t?.trim() !== "")
-                .forEach((track, i) => formData.append(`tracks[${i}]`, track));
+            tracks.filter(t => t.trim() !== "").forEach((track, idx) => formData.append(`tracks[${idx}]`, track));
 
-            // 라우트 이름이 "/api/album/:id"라고 가정하고 수정
-            const res = await api.put<{ success: boolean; data?: AlbumItem }>(`/api/album/${id}`, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
+            // 🚨 PUT 메소드와 앨범 ID가 포함된 엔드포인트 사용
+            const res = await api.put<{ success: boolean; data?: AlbumItem }>(`/api/album/${albumId}`, formData, { 
+                headers: { "Content-Type": "multipart/form-data" } 
             });
 
-            setAlertMessage({ message: "앨범 정보가 성공적으로 수정되었습니다!", severity: "success" });
-            
-            // 성공 시 파일 상태 및 인풋 초기화
-            setCoverFile(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-            
-            if (res.data.data) {
-                // 수정된 데이터로 폼 상태 업데이트 및 트랙 정리
-                const updatedAlbum = res.data.data;
-                setAlbum({ ...updatedAlbum, tracks: updatedAlbum.tracks?.length ? updatedAlbum.tracks : [""] });
+            if (res.data.success) {
+                setAlertMessage({ message: "앨범이 성공적으로 수정되었습니다!", severity: "success" });
+                // 수정 완료 후, 최신 데이터로 다시 로딩할 필요 없이 상태를 업데이트하거나 목록으로 이동
             } else {
-                // 데이터가 반환되지 않으면 다시 불러옴
-                fetchAlbum(); 
+                setAlertMessage({ message: "수정 실패: 서버에서 오류가 발생했습니다.", severity: "error" });
             }
-        } catch (err) {
-            console.error("앨범 수정 실패:", err);
-            setAlertMessage({ message: extractErrorMessage(err, "앨범 수정 요청에 실패했습니다."), severity: "error" });
+        } catch (err: any) {
+            console.error("앨범 수정 요청 실패:", err);
+            setAlertMessage({ message: extractErrorMessage(err, "앨범 수정 요청에 실패했습니다. 서버 연결을 확인하세요."), severity: "error" });
         } finally {
             setIsSaving(false);
         }
@@ -162,129 +218,186 @@ export default function AlbumDetail() {
     // 5. 앨범 삭제 (DELETE)
     // ---------------------------
     const handleDelete = async () => {
-        if (!id) return;
-        if (!window.confirm("정말로 이 앨범을 삭제하시겠습니까? (커버 이미지와 함께 영구 삭제됩니다)")) return;
-
+        if (!confirm("정말로 이 앨범을 삭제하시겠습니까?")) return;
+        
         setIsSaving(true);
         setAlertMessage(null);
 
         try {
-            await api.delete(`/api/album/${id}`);
-            setAlertMessage({ message: "앨범이 성공적으로 삭제되었습니다!", severity: "success" });
-            setTimeout(() => router.push("/album"), 1000);
-        } catch (err) {
-            console.error("앨범 삭제 실패:", err);
+            // 🚨 DELETE 메소드와 앨범 ID가 포함된 엔드포인트 사용
+            await api.delete(`/api/album/${albumId}`);
+            
+            setAlertMessage({ message: "앨범이 성공적으로 삭제되었습니다! 목록으로 이동합니다.", severity: "success" });
+            setTimeout(() => router.push("/album"), 1500); 
+        } catch (err: any) {
+            console.error("앨범 삭제 요청 실패:", err);
             setAlertMessage({ message: extractErrorMessage(err, "앨범 삭제 요청에 실패했습니다."), severity: "error" });
+        } finally {
             setIsSaving(false);
         }
     };
-
-    // ---------------------------
-    // 6. 트랙 관리 핸들러
-    // ---------------------------
-    const handleTrackChange = (index: number, value: string) => {
-        if (!album) return;
-        const newTracks = [...(album.tracks ?? [])];
-        newTracks[index] = value;
-        setAlbum({ ...album, tracks: newTracks });
-    };
-
-    const addTrack = () => album && setAlbum({ ...album, tracks: [...(album.tracks ?? []), ""] });
     
-    const removeTrack = (index: number) => {
-        if (!album) return;
-        const newTracks = (album.tracks ?? []).filter((_, i) => i !== index);
-        // 트랙이 모두 삭제되면 빈 필드 하나 유지 (UX)
-        setAlbum({ ...album, tracks: newTracks.length > 0 ? newTracks : [""] }); 
-    };
-
     // ---------------------------
-    // 7. 렌더링
+    // 6. 렌더링
     // ---------------------------
-    if (!id)
+    if (initialLoading) {
         return (
             <Layout>
-                <Box p={4}>
-                    <Typography color="error">잘못된 접근입니다. 앨범 ID가 필요합니다.</Typography>
-                </Box>
-            </Layout>
-        );
-
-    if (loading || !album)
-        return (
-            <Layout>
-                <Box display="flex" justifyContent="center" py={8} flexDirection="column" alignItems="center">
+                <Box p={4} display="flex" justifyContent="center" alignItems="center" height="50vh">
                     <CircularProgress />
-                    <Typography ml={2} mt={2}>로딩 중...</Typography>
+                    <Typography ml={2}>데이터 로딩 중...</Typography>
                 </Box>
             </Layout>
         );
-
-    // 현재 표시할 이미지 URL 결정 (새 파일 > 기존 파일 > No Image)
-    const displayImageUrl = previewUrl || album.image || NO_IMAGE_URL;
+    }
 
     return (
         <Layout>
             <Box p={4}>
-                <Typography variant="h4" mb={2} fontWeight="bold">앨범 "{album.title}" 수정</Typography>
+                <Typography variant="h4" mb={2} fontWeight="bold">앨범 수정/상세</Typography>
 
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
 
                 <Stack spacing={3}>
-                    {/* 기본 정보 */}
-                    <TextField label="타이틀" value={album.title} onChange={(e) => setAlbum({ ...album, title: e.target.value })} disabled={isSaving} required />
-                    <TextField label="발매일" type="date" value={album.date} onChange={(e) => setAlbum({ ...album, date: e.target.value })} InputLabelProps={{ shrink: true }} disabled={isSaving} required />
-                    <TextField label="설명" multiline minRows={3} value={album.description ?? ""} onChange={(e) => setAlbum({ ...album, description: e.target.value })} disabled={isSaving} />
-                    <TextField label="유튜브 링크" value={album.videoUrl ?? ""} onChange={(e) => setAlbum({ ...album, videoUrl: e.target.value })} disabled={isSaving} />
-
-                    {/* 커버 이미지 */}
-                    <Typography variant="h6" mt={2} fontWeight="bold">커버 이미지</Typography>
-                    
-                    <Box mb={2} sx={{ width: 150, height: 150, position: 'relative', border: '1px solid #eee', borderRadius: 1, overflow: 'hidden' }}>
-                        <Image
-                            src={displayImageUrl}
-                            alt={`${album.title} Cover`}
-                            fill
-                            sizes="150px"
-                            style={{ objectFit: "cover" }}
-                            unoptimized={displayImageUrl === NO_IMAGE_URL || displayImageUrl === previewUrl}
-                        />
-                    </Box>
-
-                    <input type="file" ref={fileInputRef} accept="image/jpeg,image/jpg,image/png" onChange={handleFileChange} disabled={isSaving} />
-                    <Typography variant="caption" color="textSecondary">
-                        * 최대 10MB, JPG/PNG 허용. 새 이미지를 선택하고 '저장' 버튼을 누르면 기존 이미지를 대체합니다.
-                    </Typography>
-
-                    {/* 트랙 목록 */}
-                    <Typography variant="h6" mt={2} fontWeight="bold">트랙 목록</Typography>
-                    {(album.tracks ?? []).map((track, idx) => (
-                        <Stack direction="row" spacing={1} alignItems="center" key={idx}>
-                            <TextField label={`트랙 ${idx + 1}`} value={track ?? ""} onChange={(e) => handleTrackChange(idx, e.target.value)} fullWidth disabled={isSaving} />
-                            {(album.tracks?.length ?? 0) > 0 && 
-                                <Button onClick={() => removeTrack(idx)} color="error" disabled={isSaving}>삭제</Button>
-                            }
+                    {/* 기본 정보 Card (등록 페이지 UI 유지) */}
+                    <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+                        <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>기본 정보</Typography>
+                        <Stack spacing={3}>
+                            <TextField label="타이틀" value={title} onChange={e => setTitle(e.target.value)} required disabled={isSaving} />
+                            <TextField label="발매일" type="date" value={date} onChange={e => setDate(e.target.value)} InputLabelProps={{ shrink: true }} required disabled={isSaving} />
+                            <TextField label="설명 (선택 사항)" multiline minRows={3} value={description} onChange={e => setDescription(e.target.value)} disabled={isSaving} />
+                            <TextField label="유튜브 링크 (선택 사항)" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} disabled={isSaving} />
                         </Stack>
-                    ))}
-                    <Button onClick={addTrack} variant="outlined" disabled={isSaving}>트랙 추가</Button>
+                    </Card>
 
-                    {/* 액션 버튼 */}
-                    <Box display="flex" justifyContent="space-between" mt={4}>
+                    {/* 트랙 목록 Card (등록 페이지 UI 유지) */}
+                    <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+                        <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>트랙 목록</Typography>
+                        <Stack spacing={2}>
+                            {tracks.map((track, idx) => (
+                                <Stack direction="row" spacing={1} alignItems="center" key={idx}>
+                                    <TextField label={`트랙 ${idx + 1}`} value={track} onChange={e => handleTrackChange(idx, e.target.value)} fullWidth disabled={isSaving} size="small" />
+                                    {tracks.length > 1 && <Button onClick={() => removeTrack(idx)} color="error" size="small" disabled={isSaving}>삭제</Button>}
+                                </Stack>
+                            ))}
+                            <Button onClick={addTrack} variant="outlined" disabled={isSaving} sx={{ mt: 1, alignSelf: 'flex-start' }}>트랙 추가</Button>
+                        </Stack>
+                    </Card>
+
+                    {/* 커버 이미지 Card (등록 페이지 UI 유지) */}
+                    <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+                        <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>커버 이미지</Typography>
+                        
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="flex-start">
+                            <Box>
+                                <Button variant="contained" component="label" color="primary" disabled={isSaving}>
+                                    새 이미지 선택
+                                    <input 
+                                        type="file" 
+                                        hidden 
+                                        accept="image/jpeg,image/jpg,image/png" 
+                                        ref={fileInputRef} 
+                                        onChange={handleFileChange} 
+                                        disabled={isSaving}
+                                    />
+                                </Button>
+                                {(coverFile || coverImageUrl) && (
+                                    <Button 
+                                        variant="outlined" 
+                                        color="error" 
+                                        onClick={() => { setCoverFile(null); setCoverImageUrl(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                                        disabled={isSaving}
+                                        sx={{ ml: 2 }}
+                                    >
+                                        이미지 제거
+                                    </Button>
+                                )}
+                                
+                                {coverFile ? (
+                                    <Typography variant="body2" color="primary" mt={1}>
+                                        **새 파일:** {coverFile.name} (업데이트 예정)
+                                    </Typography>
+                                ) : (coverImageUrl && 
+                                    <Typography variant="body2" color="text.secondary" mt={1}>
+                                        **현재 파일:** 기존 이미지가 사용됩니다.
+                                    </Typography>
+                                )}
+                                <Typography variant="caption" display="block" color="text.secondary" mt={1}>
+                                    * 최대 크기: {MAX_FILE_SIZE / 1024 / 1024}MB, JPG/PNG 허용.
+                                </Typography>
+                            </Box>
+                            
+                            {/* 이미지 미리보기 UI (S3 URL 또는 로컬 파일) */}
+                            {(previewUrl) && (
+                                <Box>
+                                    <Typography variant="caption" display="block" mb={1}>미리보기</Typography>
+                                    <img 
+                                        src={previewUrl} 
+                                        alt="Album Cover Preview" 
+                                        style={{ 
+                                            width: '150px', 
+                                            height: '150px', 
+                                            objectFit: 'cover', 
+                                            borderRadius: '8px',
+                                            border: '1px solid #ddd'
+                                        }} 
+                                    />
+                                </Box>
+                            )}
+                            {(!previewUrl) && (
+                                <Box>
+                                     <Typography variant="caption" display="block" mb={1}>미리보기</Typography>
+                                     <img 
+                                        src={NO_IMAGE_URL} 
+                                        alt="No Image Placeholder" 
+                                        style={{ 
+                                            width: '150px', 
+                                            height: '150px', 
+                                            objectFit: 'cover', 
+                                            borderRadius: '8px',
+                                            border: '1px solid #ddd'
+                                        }} 
+                                    />
+                                </Box>
+                            )}
+                        </Stack>
+                    </Card>
+                    
+                    {/* 액션 버튼 (수정 페이지용) */}
+                    <Divider sx={{ mt: 4, mb: 4 }}/>
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
+                        <Button 
+                            variant="text" 
+                            color="primary" 
+                            size="large"
+                            onClick={() => router.push("/album")} 
+                            disabled={isSaving}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
+                        >
+                            목록
+                        </Button>
+                        <Button
+                            variant="outlined" 
+                            color="error" 
+                            size="large"
+                            onClick={handleDelete}
+                            disabled={isSaving}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
+                        >
+                            {isSaving ? "삭제 중..." : "삭제"}
+                        </Button>
                         <Button 
                             variant="contained" 
-                            color="primary" 
+                            color="success" 
+                            size="large"
                             onClick={handleUpdate} 
-                            disabled={isSaving || !album.title || !album.date} 
-                            startIcon={isSaving && <CircularProgress size={20} color="inherit" />}
+                            disabled={isSaving || !title || !date || (!coverFile && !coverImageUrl)} 
+                            startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : undefined}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }} 
                         >
-                            {isSaving ? "저장 중..." : "저장"}
+                            {isSaving ? "수정 중..." : "저장"}
                         </Button>
-                        <Button variant="contained" color="error" onClick={handleDelete} disabled={isSaving}>
-                            삭제
-                        </Button>
-                    </Box>
-
-                    <Button variant="text" onClick={() => router.push("/album")}>목록으로 돌아가기</Button>
+                    </Stack>
                 </Stack>
             </Box>
         </Layout>
