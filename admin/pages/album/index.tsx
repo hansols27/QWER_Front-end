@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image"; 
+import Link from "next/link"; // ⭐️ Link 컴포넌트 추가
 import { api } from "@shared/services/axios"; 
 import Layout from "@components/common/layout";
 import {
@@ -64,11 +65,10 @@ export default function AlbumList() {
         fetchAlbums();
     }, [fetchAlbums]);
 
-    // 앨범 상세/수정 페이지로 이동
-    const handleAlbumClick = (albumId: string) => {
-        // Next.js 라우터 푸시 함수를 사용하여 상세 페이지로 이동
-        router.push(`/album/${albumId}`);
-    };
+    // 앨범 상세/수정 페이지로 이동 함수는 Link 사용으로 인해 제거하거나 주석 처리합니다.
+    // const handleAlbumClick = (albumId: string) => {
+    //     router.push(`/album/${albumId}`);
+    // };
 
     // 앨범 생성 페이지로 이동
     const handleCreateClick = () => {
@@ -120,63 +120,69 @@ export default function AlbumList() {
                     </Typography>
                 )}
 
-                {/* 💡 Grid 컨테이너에 요청하신 캐스팅 구문 유지 */}
                 <Grid container spacing={4} {...({} as any)}>
                     {albums.map((album) => {
                         const imageUrl = album.image || NO_IMAGE_URL;
                         return (
-                            // 💡 Grid item에 요청하신 캐스팅 구문 유지
                             <Grid item xs={6} sm={4} md={3} key={album.id} {...({} as any)}>
-                                <Card
-                                    onClick={() => handleAlbumClick(album.id)} 
-                                    sx={{
-                                        cursor: "pointer",
-                                        transition: "transform 0.2s",
-                                        "&:hover": { transform: "scale(1.02)", boxShadow: 6 },
-                                        height: "100%",
-                                    }}
+                                {/* ⭐️ 상세 페이지 이동 문제 해결: Link로 Card를 감쌉니다. */}
+                                <Link
+                                    href={`/album/${album.id}`}
+                                    passHref 
+                                    legacyBehavior
+                                    style={{ textDecoration: 'none', color: 'inherit' }} // Link 스타일 제거
                                 >
-                                    {/* 이미지 영역: 1:1 (정사각형) -> 4:3 비율로 변경 (75%) */}
-                                    <Box
+                                    <Card
+                                        // 💡 onClick 이벤트는 제거합니다. Link가 라우팅을 처리합니다.
                                         sx={{
-                                            position: 'relative',
-                                            width: '100%',
-                                            // 💡 4:3 비율 (480/640 = 0.75)에 맞춰 paddingTop을 75%로 수정
-                                            paddingTop: '75%', 
+                                            cursor: "pointer",
+                                            transition: "transform 0.2s",
+                                            "&:hover": { transform: "scale(1.02)", boxShadow: 6 },
+                                            height: "100%",
                                         }}
                                     >
-                                        <Image
-                                            src={imageUrl}
-                                            alt={album.title}
-                                            fill
-                                            sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
-                                            style={{ 
-                                                // 💡 cover 유지 (4:3 컨테이너를 4:3 이미지가 채우므로 잘림 최소화)
-                                                objectFit: 'cover', 
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
+                                        {/* ⭐️ 이미지 비율 문제 해결: 컨테이너를 1:1 정사각형으로 통일 */}
+                                        <Box
+                                            sx={{
+                                                position: 'relative',
                                                 width: '100%',
-                                                height: '100%',
-                                            }} 
-                                            unoptimized={imageUrl === NO_IMAGE_URL}
-                                            priority={false}
-                                        />
-                                    </Box>
-                                    
-                                    <Box p={1}>
-                                        <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                                            {album.title}
-                                        </Typography>
-                                        <Typography 
-                                            variant="body2" 
-                                            color="textSecondary"
-                                            align="right" 
+                                                // 모든 앨범을 1:1 비율로 강제 통일
+                                                paddingTop: '100%', 
+                                            }}
                                         >
-                                            {album.date ? album.date.split('T')[0] : "날짜 미정"}
-                                        </Typography>
-                                    </Box>
-                                </Card>
+                                            <Image
+                                                src={imageUrl}
+                                                alt={album.title}
+                                                fill
+                                                sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
+                                                style={{ 
+                                                    // 1:1 컨테이너를 꽉 채우도록 설정 (비율이 다르면 잘림 발생)
+                                                    objectFit: 'cover', 
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                }}
+                                                unoptimized={imageUrl === NO_IMAGE_URL}
+                                                priority={false}
+                                            />
+                                        </Box>
+                                        
+                                        <Box p={1}>
+                                            <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                                                {album.title}
+                                            </Typography>
+                                            <Typography 
+                                                variant="body2" 
+                                                color="textSecondary"
+                                                align="right" 
+                                            >
+                                                {album.date ? album.date.split('T')[0] : "날짜 미정"}
+                                            </Typography>
+                                        </Box>
+                                    </Card>
+                                </Link>
                             </Grid>
                         );
                     })}
