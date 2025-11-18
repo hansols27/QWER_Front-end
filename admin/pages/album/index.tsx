@@ -128,7 +128,6 @@ export default function AlbumList() {
                             // 💡 Grid item에 요청하신 캐스팅 구문 유지
                             <Grid item xs={6} sm={4} md={3} key={album.id} {...({} as any)}>
                                 <Card
-                                    // 💡 Card에 onClick 이벤트가 정상적으로 바인딩되어 라우팅을 처리합니다.
                                     onClick={() => handleAlbumClick(album.id)} 
                                     sx={{
                                         cursor: "pointer",
@@ -137,12 +136,13 @@ export default function AlbumList() {
                                         height: "100%",
                                     }}
                                 >
-                                    {/* 이미지 영역 (1:1 정사각형 비율 유지 및 크기 축소 반영) */}
+                                    {/* 이미지 영역: 1:1 (정사각형) -> 4:3 비율로 변경 (75%) */}
                                     <Box
                                         sx={{
                                             position: 'relative',
                                             width: '100%',
-                                            paddingTop: '100%', // 1:1 Aspect Ratio (정사각형)
+                                            // 💡 4:3 비율 (480/640 = 0.75)에 맞춰 paddingTop을 75%로 수정
+                                            paddingTop: '75%', 
                                         }}
                                     >
                                         <Image
@@ -151,7 +151,8 @@ export default function AlbumList() {
                                             fill
                                             sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
                                             style={{ 
-                                                objectFit: 'cover',
+                                                // 💡 cover 유지 (4:3 컨테이너를 4:3 이미지가 채우므로 잘림 최소화)
+                                                objectFit: 'cover', 
                                                 position: 'absolute',
                                                 top: 0,
                                                 left: 0,
