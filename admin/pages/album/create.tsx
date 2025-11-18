@@ -228,22 +228,24 @@ export default function AlbumCreate() {
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                         <Button 
                             variant="text" 
-                            color="inherit" 
+                            color="primary" 
+                            size="large"
                             onClick={() => router.push("/album")} 
                             disabled={loading}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                         >
                             목록
                         </Button>
                         <Button 
                             variant="contained" 
-                            color="success" // 셋팅 페이지처럼 Save 버튼은 Success 색상 사용
+                            color="success" 
                             size="large"
                             onClick={handleSubmit} 
                             disabled={loading || !title || !date || !coverFile} 
                             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}
-                            sx={{ py: 1.5, px: 4, borderRadius: 2 }} // 셋팅 페이지처럼 크고 둥근 스타일
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }} 
                         >
-                            {loading ? "등록 중..." : "앨범 등록"}
+                            {loading ? "등록 중..." : "등록"}
                         </Button>
                     </Stack>
                 </Stack>
