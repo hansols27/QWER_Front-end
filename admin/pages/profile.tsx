@@ -84,7 +84,7 @@ const TextFields = ({ texts, onAdd, onRemove, onUpdate }: { texts: TextItem[]; o
                 alignItems="center" 
                 key={item.id} 
                 mb={1}
-                sx={{ width: '100%' }} // 👈 UI 안정화를 위해 추가
+                sx={{ width: '100%' }}
             >
                 <TextField
                     label={`텍스트 ${idx + 1}`}
@@ -109,7 +109,7 @@ const TextFields = ({ texts, onAdd, onRemove, onUpdate }: { texts: TextItem[]; o
 
 
 // ----------------------------
-// ImageFields 컴포넌트 (프리뷰 우측 정렬 및 안정화)
+// ImageFields 컴포넌트
 // ----------------------------
 const ImageFields = ({ images, onAdd, onRemove, onUpdate, }: { images: LocalImageItem[]; onAdd: () => void; onRemove: (id: string) => void; onUpdate: (id: string, file: File) => void; }) => {
     const [previews, setPreviews] = useState<Record<string, string | null>>({});
@@ -157,7 +157,7 @@ const ImageFields = ({ images, onAdd, onRemove, onUpdate, }: { images: LocalImag
                         alignItems="center" 
                         key={item.id} 
                         mb={1}
-                        sx={{ width: '100%' }} // 👈 UI 안정화를 위해 추가
+                        sx={{ width: '100%' }}
                     >
                         {/* 1. 파일 선택 버튼 */}
                         <Button variant="outlined" component="label">
@@ -170,14 +170,14 @@ const ImageFields = ({ images, onAdd, onRemove, onUpdate, }: { images: LocalImag
                             />
                         </Button>
 
-                        {/* 2. 파일 정보 텍스트 (남은 공간을 유연하게 채움) */}
+                        {/* 2. 파일 정보 텍스트 */}
                         <Typography
                             variant="body2"
                             sx={{ 
                                 overflow: "hidden", 
                                 textOverflow: "ellipsis", 
                                 whiteSpace: "nowrap",
-                                flexGrow: 1, // 👈 추가: 남은 공간을 확보하여 우측 쏠림 방지
+                                flexGrow: 1, 
                             }}
                         >
                             {item.file 
@@ -194,7 +194,7 @@ const ImageFields = ({ images, onAdd, onRemove, onUpdate, }: { images: LocalImag
                             </IconButton>
                         )}
                         
-                        {/* 4. 이미지 프리뷰 (우측에 배치) */}
+                        {/* 4. 이미지 프리뷰 */}
                         {previewUrl && (
                             <Box
                                 component="img"
@@ -238,7 +238,7 @@ const SNSFields = ({ fields, onAdd, onRemove, onUpdate, }: { fields: SNSLinkItem
                 alignItems="center" 
                 key={item.id} 
                 mb={1}
-                sx={{ width: '100%' }} // 👈 UI 안정화를 위해 추가
+                sx={{ width: '100%' }}
             >
                 <FormControl sx={{ minWidth: 120 }}>
                     <Select 
@@ -306,9 +306,19 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         setAlertMessage(null);
 
         try {
-            const res = await api.get<{ success: boolean; data: MemberProfileState }>(`/api/members/${memberId}`);
+            // 응답 타입에 null이 포함될 수 있음을 명시
+            const res = await api.get<{ success: boolean; data: MemberProfileState | null }>(`/api/members/${memberId}`);
             const data = res.data.data;
             
+            // 🚨 수정된 핵심 부분: data가 null일 경우 초기 상태로 설정하고 함수를 종료합니다.
+            if (data === null) {
+                console.log(`Profile for ${memberId} not found, loading initial state.`);
+                setMember({ ...initialLocalState }); 
+                setLoadError(false);
+                setAlertMessage(null);
+                return; 
+            }
+            // data가 null이 아닐 때만 안전하게 data.images에 접근합니다.
             const loadedImages: LocalImageItem[] = data.images.map(img => ({ 
                 id: img.id, 
                 url: img.url, 
@@ -371,9 +381,9 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
         const imageToRemove = member.images.find(img => img.id === id) as LocalImageItem | undefined;
 
         if (imageToRemove?.file) { 
-             try {
-                // Blob URL revoke 처리는 ImageFields 컴포넌트의 useEffect에서 처리합니다.
-             } catch(e) { /* ignore */ }
+             try {
+                 // Blob URL revoke 처리는 ImageFields 컴포넌트의 useEffect에서 처리합니다.
+             } catch(e) { /* ignore */ }
         }
         setMember(prev => ({ ...prev, images: prev.images.filter((i) => i.id !== id) }));
     };
@@ -456,6 +466,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
 
                 if (item.file) {
                     newImageFiles.push(item.file);
+                    // S3 업로드를 위해 백엔드에서 placeholder를 사용하도록 설정
                     payloadImages.push({ ...apiItem, url: "file_placeholder" }); 
                 } else if (item.url) {
                     payloadImages.push(apiItem);
@@ -477,6 +488,7 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
 
             await api.post(`/api/members/${memberId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
 
+            // 저장 후 데이터 다시 로드하여 S3 URL로 업데이트
             await fetchMemberData(); 
             setAlertMessage({ message: `${memberName} 데이터가 성공적으로 저장되었습니다!`, severity: "success" });
         } catch (err: any) {
@@ -497,7 +509,6 @@ const MemberForm = ({ memberId }: { memberId: (typeof memberIds)[number] }) => {
             sx={{ opacity: loading ? 0.6 : 1, pointerEvents: loading ? "none" : "auto" }}
         >
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                {/* ID 표시 제거 */}
                 {memberName}
             </Typography>
 
