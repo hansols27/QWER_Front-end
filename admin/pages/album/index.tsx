@@ -22,7 +22,6 @@ type AlertSeverity = "success" | "error";
 // 유틸리티 함수 (오류 메시지 추출)
 // ===========================
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
-    // 옵셔널 체이닝으로 안전하고 간결하게 접근
     if (error?.response?.data?.message) return error.response.data.message;
     if (error?.message) return error.message;
     return defaultMsg;
@@ -67,6 +66,7 @@ export default function AlbumList() {
 
     // 앨범 상세/수정 페이지로 이동
     const handleAlbumClick = (albumId: string) => {
+        // Next.js 라우터 푸시 함수를 사용하여 상세 페이지로 이동
         router.push(`/album/${albumId}`);
     };
 
@@ -120,13 +120,16 @@ export default function AlbumList() {
                     </Typography>
                 )}
 
+                {/* 💡 Grid 컨테이너에 요청하신 캐스팅 구문 유지 */}
                 <Grid container spacing={4} {...({} as any)}>
                     {albums.map((album) => {
                         const imageUrl = album.image || NO_IMAGE_URL;
                         return (
+                            // 💡 Grid item에 요청하신 캐스팅 구문 유지
                             <Grid item xs={6} sm={4} md={3} key={album.id} {...({} as any)}>
                                 <Card
-                                    onClick={() => handleAlbumClick(album.id)}
+                                    // 💡 Card에 onClick 이벤트가 정상적으로 바인딩되어 라우팅을 처리합니다.
+                                    onClick={() => handleAlbumClick(album.id)} 
                                     sx={{
                                         cursor: "pointer",
                                         transition: "transform 0.2s",
@@ -134,14 +137,12 @@ export default function AlbumList() {
                                         height: "100%",
                                     }}
                                 >
-                                    {/* Next/Image를 사용하여 최적화된 이미지 로딩 적용 */}
+                                    {/* 이미지 영역 (1:1 정사각형 비율 유지 및 크기 축소 반영) */}
                                     <Box
                                         sx={{
                                             position: 'relative',
                                             width: '100%',
-                                            // 너비에 비례하여 높이를 설정 (1:1 비율 = 정사각형)
-                                            // 이 컨테이너의 실제 높이는 0이 되지만, 자식 요소는 이 영역 안에서 'absolute'로 배치됨
-                                            paddingTop: '100%', 
+                                            paddingTop: '100%', // 1:1 Aspect Ratio (정사각형)
                                         }}
                                     >
                                         <Image
@@ -151,7 +152,6 @@ export default function AlbumList() {
                                             sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 25vw"
                                             style={{ 
                                                 objectFit: 'cover',
-                                                // 이 부분이 중요: 부모 Box의 'paddingTop: 100%'에 의해 생성된 영역을 채우도록 absolute 위치 설정
                                                 position: 'absolute',
                                                 top: 0,
                                                 left: 0,
@@ -164,18 +164,17 @@ export default function AlbumList() {
                                     </Box>
                                     
                                     <Box p={1}>
-                                            <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                                                {album.title}
-                                            </Typography>
-                                            <Typography 
-                                                variant="body2" 
-                                                color="textSecondary"
-                                                align="right" // 우측 정렬 적용
-                                            >
-                                                {/* 날짜 형식 변경: T 이전 부분만 사용 */}
-                                                {album.date ? album.date.split('T')[0] : "날짜 미정"}
-                                            </Typography>
-                                        </Box>
+                                        <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                                            {album.title}
+                                        </Typography>
+                                        <Typography 
+                                            variant="body2" 
+                                            color="textSecondary"
+                                            align="right" 
+                                        >
+                                            {album.date ? album.date.split('T')[0] : "날짜 미정"}
+                                        </Typography>
+                                    </Box>
                                 </Card>
                             </Grid>
                         );
