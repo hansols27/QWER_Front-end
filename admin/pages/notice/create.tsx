@@ -147,17 +147,6 @@ export default function NoticeCreate() {
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
                     <Button 
                         variant="contained" 
-                        color="success" 
-                        size="large"
-                        onClick={handleSubmit} 
-                        disabled={isProcessing || checkFormValidity()} 
-                        startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
-                        sx={{ py: 1.5, px: 4, borderRadius: 2 }}
-                    >
-                        {isProcessing ? "저장 중..." : "등록"}
-                    </Button>
-                    <Button 
-                        variant="contained" 
                         color="primary" 
                         size="large"
                         onClick={() => router.push("/notice")} 
@@ -166,6 +155,17 @@ export default function NoticeCreate() {
                     >
                         목록
                     </Button>
+                    <Button 
+                        variant="contained" 
+                        color="success" 
+                        size="large"
+                        onClick={handleSubmit} 
+                        disabled={isProcessing || checkFormValidity()} 
+                        startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
+                        sx={{ py: 1.5, px: 4, borderRadius: 2 }}
+                    >
+                        {isProcessing ? "저장 중..." : "등록"}
+                    </Button>                    
                 </Stack>
             </Box>
         </Layout>
