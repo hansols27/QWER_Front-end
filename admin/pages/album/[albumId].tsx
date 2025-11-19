@@ -289,7 +289,7 @@ export default function AlbumEdit() {
     return (
         <Layout>
             <Box p={4}>
-                <Typography variant="h4" mb={2} fontWeight="bold">앨범 수정/상세 ({id})</Typography> {/* 🟢 id 사용 */}
+                <Typography variant="h4" mb={2} fontWeight="bold">앨범 상세</Typography>
 
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
 
