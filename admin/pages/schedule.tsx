@@ -101,7 +101,7 @@ const SchedulePage = () => {
             setLoading(true);
             setAlertMessage(null);
             try {
-                const res = await api.get<{ success: boolean; data: ScheduleEvent[] }>("/schedules");
+                const res = await api.get<{ success: boolean; data: ScheduleEvent[] }>("/api/schedules");
                 // DB에서 문자열로 넘어온 start/end 필드를 Date 객체로 변환하여 저장
                 const fetchedEvents = res.data.data.map(e => ({
                     ...e,
@@ -217,7 +217,7 @@ const SchedulePage = () => {
 
         setLoading(true);
         try {
-            const res = await api.post<{ success: boolean; data: ScheduleEvent[] }>("/schedules", eventToSend);
+            const res = await api.post<{ success: boolean; data: ScheduleEvent[] }>("/api/schedules", eventToSend);
             
             // 백엔드에서 받은 배열의 Date 문자열을 다시 Date 객체로 변환
             const updatedEvents = res.data.data.map(e => ({
@@ -246,7 +246,7 @@ const SchedulePage = () => {
         setAlertMessage(null);
 
         try {
-            const res = await api.delete<{ success: boolean; data: ScheduleEvent[] }>(`/schedules/${editId}`);
+            const res = await api.delete<{ success: boolean; data: ScheduleEvent[] }>(`/api/schedules/${editId}`);
             
             // 백엔드에서 받은 배열의 Date 문자열을 다시 Date 객체로 변환
             const updatedEvents = res.data.data.map(e => ({
