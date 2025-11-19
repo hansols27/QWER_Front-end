@@ -101,7 +101,7 @@ const SchedulePage = () => {
             setLoading(true);
             setAlertMessage(null);
             try {
-                const res = await api.get<{ success: boolean; data: ScheduleEvent[] }>("/schedule");
+                const res = await api.get<{ success: boolean; data: ScheduleEvent[] }>("/schedules");
                 // DB에서 문자열로 넘어온 start/end 필드를 Date 객체로 변환하여 저장
                 const fetchedEvents = res.data.data.map(e => ({
                     ...e,
@@ -217,7 +217,7 @@ const SchedulePage = () => {
 
         setLoading(true);
         try {
-            const res = await api.post<{ success: boolean; data: ScheduleEvent[] }>("/schedule", eventToSend);
+            const res = await api.post<{ success: boolean; data: ScheduleEvent[] }>("/schedules", eventToSend);
             
             // 백엔드에서 받은 배열의 Date 문자열을 다시 Date 객체로 변환
             const updatedEvents = res.data.data.map(e => ({
@@ -246,7 +246,7 @@ const SchedulePage = () => {
         setAlertMessage(null);
 
         try {
-            const res = await api.delete<{ success: boolean; data: ScheduleEvent[] }>(`/schedule/${editId}`);
+            const res = await api.delete<{ success: boolean; data: ScheduleEvent[] }>(`/schedules/${editId}`);
             
             // 백엔드에서 받은 배열의 Date 문자열을 다시 Date 객체로 변환
             const updatedEvents = res.data.data.map(e => ({
@@ -301,7 +301,13 @@ const SchedulePage = () => {
                 />
 
                 {/* 일정 추가/수정 모달 */}
-                <Dialog open={modalOpen} onClose={() => { setModalOpen(false); setAlertMessage(null); }}>
+                <Dialog 
+                    // ⭐️⭐️ 수정된 부분: maxWidth와 fullWidth 추가 ⭐️⭐️
+                    open={modalOpen} 
+                    onClose={() => { setModalOpen(false); setAlertMessage(null); }}
+                    maxWidth="sm" // 최대 너비를 'sm' (600px)으로 설정
+                    fullWidth // maxWidth까지 모달이 꽉 차도록 설정
+                >
                     <DialogTitle>{editId ? "일정 수정" : "일정 추가"}</DialogTitle>
                     <DialogContent>
                         <Stack spacing={2} mt={1}>
