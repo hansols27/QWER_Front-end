@@ -129,7 +129,7 @@ export default function AlbumList() {
                     </Typography>
                 )}
 
-                {/* ⭐️ 수정된 부분: 앨범 목록 레이아웃 (Grid, 40px 간격, 좌측 정렬) */}
+                {/* 앨범 목록 레이아웃 (Grid, 40px 간격, 좌측 정렬) */}
                 <Box
                     sx={{
                         display: 'grid',
@@ -153,7 +153,7 @@ export default function AlbumList() {
                                         width: `${IMAGE_WIDTH}px`, 
                                     }}
                                 >
-                                    {/* ⭐️ 이미지 컨테이너 크기를 384x288로 고정 */}
+                                    {/* 이미지 컨테이너 크기를 384x288로 고정 */}
                                     <Box
                                         sx={{
                                             position: 'relative',
@@ -167,8 +167,8 @@ export default function AlbumList() {
                                             fill
                                             sizes={`${IMAGE_WIDTH}px`}
                                             style={{
-                                                // 384x288 컨테이너를 꽉 채우도록 설정 (백엔드에서 이미 리사이징됨)
-                                                objectFit: 'contain', // contain으로 설정하여 이미지가 찌그러지지 않도록 합니다.
+                                                // ⭐️⭐️ 수정된 부분: objectFit을 'cover'로 변경하여 컨테이너를 채웁니다. ⭐️⭐️
+                                                objectFit: 'cover', 
                                                 position: 'absolute',
                                                 top: 0,
                                                 left: 0,
