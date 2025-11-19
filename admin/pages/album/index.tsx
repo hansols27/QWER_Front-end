@@ -75,8 +75,8 @@ export default function AlbumList() {
         router.push(`/album/${albumId}`);
     };
 
-    // ⭐️ 수정: NO_IMAGE_URL 크기 360x280으로 변경
-    const NO_IMAGE_URL = 'https://via.placeholder.com/360x280?text=No+Image';
+    // ⭐️ 수정: NO_IMAGE_URL 크기 400x320으로 변경
+    const NO_IMAGE_URL = 'https://via.placeholder.com/400x320?text=No+Image';
 
     return (
         <Layout>
@@ -139,23 +139,22 @@ export default function AlbumList() {
                         const imageUrl = album.image || NO_IMAGE_URL;
                         return (
                             <Box key={album.id}>
-                                {/* ⚠️ Link 태그를 제거하고 Card에 onClick 이벤트로 대체 */}
                                 <Card
                                     onClick={() => handleAlbumClick(album.id)} 
                                     sx={{
                                         cursor: 'pointer',
                                         transition: 'transform 0.2s',
                                         '&:hover': { transform: 'scale(1.02)', boxShadow: 6 },
-                                        // ⭐️ 수정: Card의 너비를 360px로 고정
-                                        width: '360px', 
+                                        // Card의 너비를 400px로 고정
+                                        width: '400px', 
                                     }}
                                 >
-                                    {/* ⭐️ 수정: 이미지 컨테이너 크기를 360x280으로 고정 */}
+                                    {/* 이미지 컨테이너 크기를 400x320으로 고정 */}
                                     <Box
                                         sx={{
                                             position: 'relative',
-                                            width: '360px', // 가로 360px 고정
-                                            height: '280px', // 세로 280px 고정
+                                            width: '400px', // 가로 400px 고정
+                                            height: '320px', // 세로 320px 고정
                                         }}
                                     >
                                         <Image
