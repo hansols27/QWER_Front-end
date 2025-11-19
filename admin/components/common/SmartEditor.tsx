@@ -16,6 +16,7 @@ export interface SmartEditorProps {
     initialContent?: string;
     // 부모 컴포넌트에서 높이를 제어할 수 있도록 height prop 추가
     height?: string; 
+    disabled?: boolean;
 }
 
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(

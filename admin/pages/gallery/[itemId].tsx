@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { api } from "@shared/services/axios";
 import Layout from "@components/common/layout";
+import type { GalleryItem } from "@shared/types/gallery"; 
 import { 
     Box, 
     Button, 
@@ -16,7 +17,6 @@ import {
     Divider,
     useTheme
 } from "@mui/material";
-import type { GalleryItem } from "@shared/types/gallery"; 
 
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
     if (error?.response?.data?.message) return error.response.data.message;
@@ -33,7 +33,7 @@ const FALLBACK_IMAGE_URL = 'https://placehold.co/400x267?text=No+Image';
 
 export default function GalleryDetail() {
     const params = useParams();
-    const id = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : null; 
+    const id = params?.id as string | undefined;
     const router = useRouter();
     const theme = useTheme(); 
 

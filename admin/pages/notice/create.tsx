@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { api } from "@shared/services/axios";
 import Layout from "@components/common/layout";
 import type { SmartEditorHandle } from "@components/common/SmartEditor";
+import type { NoticeType } from "@shared/types/notice"; 
 import {
     Box,
     Button,
@@ -19,7 +20,7 @@ import {
     Card, 
     Divider 
 } from "@mui/material";
-import { SelectChangeEvent } from "@mui/material"; // SelectChangeEvent import 추가
+import { SelectChangeEvent } from "@mui/material"; 
 
 // 클라이언트 사이드 전용 에디터 동적 로딩
 const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
@@ -40,8 +41,7 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
 };
 
 export default function NoticeCreate() {
-    // 💡 type 상태 타입을 명확히 정의
-    const [type, setType] = useState<"공지" | "이벤트">("공지"); 
+    const [type, setType] = useState<NoticeType>("공지"); 
     const [title, setTitle] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
@@ -54,7 +54,6 @@ export default function NoticeCreate() {
         
         const trimmedTitle = title.trim();
         const content = editorRef.current?.getContent() || "";
-        // 💡 내용 검사 로직을 content 변수 아래에 배치
         const trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
 
         if (!trimmedTitle) {
@@ -76,6 +75,7 @@ export default function NoticeCreate() {
                 setAlertMessage({ message: "등록 완료! 목록으로 이동합니다.", severity: "success" });
                 setTimeout(() => router.push("/notice"), 1000);
             } else {
+                // 백엔드에서 success: false 응답이 올 경우 (흔하진 않으나 대비)
                 setAlertMessage({ message: "등록에 실패했습니다. 응답을 확인하세요.", severity: "error" });
                 setIsProcessing(false);
             }
@@ -86,13 +86,13 @@ export default function NoticeCreate() {
         }
     };
     
-    // 등록 버튼 비활성화 조건: 제목 또는 내용이 비었을 때 (HTML 태그 제거 후 검사)
-    // 💡 isFormInvalid 계산 시점을 렌더링 내로 옮기거나, useEffect를 사용하여 상태 관리하는 것이 안전하지만, 현재 구조에서는 함수 내에서 계산
     const checkFormValidity = (): boolean => {
         const titleValid = title.trim().length > 0;
         const content = editorRef.current?.getContent() || "";
         const contentValid = content.replace(/<[^>]*>?/gm, '').trim().length > 0;
-        return !titleValid || !contentValid;
+        
+        // 🟢 유효하지 않은 상태(Invalid)를 반환: 둘 중 하나라도 유효하지 않으면 true
+        return !titleValid || !contentValid; 
     }
     const isFormInValid = checkFormValidity();
 
@@ -104,7 +104,6 @@ export default function NoticeCreate() {
 
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
                 
-                {/* 앨범/갤러리 등록과 통일된 Card 레이아웃 적용 */}
                 <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                     <Stack spacing={3}>
                         <Typography variant="h6" borderBottom="1px solid #eee" pb={1}>공지 내용</Typography>
@@ -113,10 +112,10 @@ export default function NoticeCreate() {
                         <Stack direction="row" spacing={2} alignItems="center">
                             <Select 
                                 value={type} 
-                                // 💡 SelectChangeEvent 타입 사용
-                                onChange={(e: SelectChangeEvent<"공지" | "이벤트">) => setType(e.target.value as "공지" | "이벤트")} 
+                                // 🟢 SelectChangeEvent에 NoticeType 적용
+                                onChange={(e: SelectChangeEvent<NoticeType>) => setType(e.target.value as NoticeType)} 
                                 disabled={isProcessing} 
-                                sx={{ width: 150 }} // 고정 너비 지정
+                                sx={{ width: 150 }} 
                             >
                                 <MenuItem value="공지">공지</MenuItem>
                                 <MenuItem value="이벤트">이벤트</MenuItem>
@@ -128,12 +127,14 @@ export default function NoticeCreate() {
                                 onChange={(e) => setTitle(e.target.value)} 
                                 disabled={isProcessing} 
                                 fullWidth
+                                error={!title.trim()}
+                                helperText={!title.trim() && "제목은 필수입니다."}
                             />
                         </Stack>
 
                         {/* 에디터 영역 */}
-                        {/* 💡 에디터 영역에도 테두리 및 최소 높이 스타일 적용하여 명확하게 분리 */}
                         <Box sx={{ minHeight: '400px', border: '1px solid #ddd', borderRadius: 1, overflow: 'hidden' }}>
+                            {/* initialContent가 없으므로 전달하지 않음 */}
                             <SmartEditor ref={editorRef} height="400px" />
                         </Box>
                     </Stack>
@@ -157,12 +158,13 @@ export default function NoticeCreate() {
                         color="success" 
                         size="large"
                         onClick={handleSubmit} 
-                        disabled={isProcessing || checkFormValidity()} 
+                        // isFormInValid가 true일 때(유효하지 않을 때) disabled
+                        disabled={isProcessing || isFormInValid} 
                         startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
                         sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                     >
                         {isProcessing ? "저장 중..." : "등록"}
-                    </Button>                    
+                    </Button>
                 </Stack>
             </Box>
         </Layout>
