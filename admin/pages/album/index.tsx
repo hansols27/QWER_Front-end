@@ -69,14 +69,14 @@ export default function AlbumList() {
     };
 
     /**
-     * ⭐️ 수정: 앨범 상세/수정 페이지로 이동 (router.push 사용)
+     * 앨범 상세/수정 페이지로 이동 (router.push 사용)
      */
     const handleAlbumClick = (albumId: string) => {
         router.push(`/album/${albumId}`);
     };
 
-    // ⭐️ 수정: NO_IMAGE_URL 크기 400x320으로 변경
-    const NO_IMAGE_URL = 'https://via.placeholder.com/400x320?text=No+Image';
+    // ⭐️ 수정: NO_IMAGE_URL 크기 360x280으로 변경
+    const NO_IMAGE_URL = 'https://via.placeholder.com/360x280?text=No+Image';
 
     return (
         <Layout>
@@ -126,13 +126,14 @@ export default function AlbumList() {
                     </Typography>
                 )}
 
+                {/* ⭐️ 수정: 앨범 목록 레이아웃 (CSS Grid 적용 및 간격 축소) */}
                 <Box
                     sx={{
                         display: 'grid',
-                        gap: '24px',
-                        // ⭐️ 수정: 최소 너비를 360px으로 변경
+                        gap: '24px', // 앨범 간 간격 축소
+                        // 좌측 정렬 및 최소 너비 360px로 자동 맞춤
                         gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', 
-                        justifyContent: 'flex-start',
+                        justifyContent: 'flex-start', // 좌측 정렬 보장
                     }}
                 >
                     {albums.map((album) => {
@@ -145,16 +146,16 @@ export default function AlbumList() {
                                         cursor: 'pointer',
                                         transition: 'transform 0.2s',
                                         '&:hover': { transform: 'scale(1.02)', boxShadow: 6 },
-                                        // Card의 너비를 400px로 고정
-                                        width: '400px', 
+                                        // Card의 너비를 360px로 고정 (Grid minmax와 일치)
+                                        width: '360px', 
                                     }}
                                 >
-                                    {/* 이미지 컨테이너 크기를 400x320으로 고정 */}
+                                    {/*  이미지 컨테이너 크기를 360x280으로 고정 */}
                                     <Box
                                         sx={{
                                             position: 'relative',
-                                            width: '400px', // 가로 400px 고정
-                                            height: '320px', // 세로 320px 고정
+                                            width: '360px', // 가로 360px 고정
+                                            height: '280px', // 세로 280px 고정
                                         }}
                                     >
                                         <Image
