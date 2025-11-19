@@ -89,18 +89,20 @@ export default function AlbumEdit() {
                 setTracks(data.tracks && data.tracks.length > 0 ? data.tracks : [""]);
                 setVideoUrl(data.videoUrl || "");
                 
-                // ⭐️ 핵심 수정: 서버 응답 필드명 'image' 또는 'imageUrl'을 사용 (AlbumItem 타입을 확인하세요!)
-                // 여기서는 AlbumItem 타입에 'image' 필드가 있다고 가정합니다.
-                const existingImageUrl = data.image || data.coverImageUrl || null;
+                // ⭐️⭐️ 수정된 부분 ⭐️⭐️
+                // 백엔드에서 확인된 필드명 'image'만 사용
+                const existingImageUrl = data.image || null; 
 
                 if (existingImageUrl) {
                     setCoverImageUrl(existingImageUrl);
-                    // ⭐️ 기존 이미지를 미리보기에도 바로 설정합니다.
+                    // 기존 이미지를 미리보기에도 바로 설정합니다.
                     setPreviewUrl(existingImageUrl);
                 } else {
                     setCoverImageUrl(null);
                     setPreviewUrl(NO_IMAGE_URL);
                 }
+                // ⭐️⭐️ 수정된 부분 끝 ⭐️⭐️
+                
             } catch (err) {
                 const errorMsg = extractErrorMessage(err, "앨범 데이터를 불러오는 데 실패했습니다.");
                 setAlertMessage({ message: errorMsg + " 목록으로 돌아갑니다.", severity: "error" });
