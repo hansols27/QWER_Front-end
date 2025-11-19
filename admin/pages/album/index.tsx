@@ -26,6 +26,12 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
     return defaultMsg;
 };
 
+// ⭐️ 이미지 크기 상수를 정의합니다. (원본 640x480의 60% 비율)
+const IMAGE_WIDTH = 384;
+const IMAGE_HEIGHT = 288;
+const NO_IMAGE_URL = `https://via.placeholder.com/${IMAGE_WIDTH}x${IMAGE_HEIGHT}?text=No+Image`;
+
+
 export default function AlbumList() {
     const [albums, setAlbums] = useState<AlbumItem[]>([]);
     const [loading, setLoading] = useState(false);
@@ -75,9 +81,6 @@ export default function AlbumList() {
         router.push(`/album/${albumId}`);
     };
 
-    // ⭐️ 수정: NO_IMAGE_URL 크기 360x280으로 변경
-    const NO_IMAGE_URL = 'https://via.placeholder.com/360x280?text=No+Image';
-
     return (
         <Layout>
             <Box p={4}>
@@ -126,13 +129,13 @@ export default function AlbumList() {
                     </Typography>
                 )}
 
-                {/* ⭐️ 수정: 앨범 목록 레이아웃 (CSS Grid 적용 및 간격 축소) */}
+                {/* ⭐️ 수정된 부분: 앨범 목록 레이아웃 (Grid, 40px 간격, 좌측 정렬) */}
                 <Box
                     sx={{
                         display: 'grid',
-                        gap: '24px', // 앨범 간 간격 축소
-                        // 좌측 정렬 및 최소 너비 360px로 자동 맞춤
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', 
+                        gap: '40px', // 앨범과 앨범 사이 간격 40px
+                        // 좌측 정렬 및 최소 너비 384px(이미지 너비)로 자동 맞춤
+                        gridTemplateColumns: `repeat(auto-fill, ${IMAGE_WIDTH}px)`, 
                         justifyContent: 'flex-start', // 좌측 정렬 보장
                     }}
                 >
@@ -146,26 +149,26 @@ export default function AlbumList() {
                                         cursor: 'pointer',
                                         transition: 'transform 0.2s',
                                         '&:hover': { transform: 'scale(1.02)', boxShadow: 6 },
-                                        // Card의 너비를 360px로 고정 (Grid minmax와 일치)
-                                        width: '360px', 
+                                        // Card의 너비를 이미지 너비와 일치
+                                        width: `${IMAGE_WIDTH}px`, 
                                     }}
                                 >
-                                    {/*  이미지 컨테이너 크기를 360x280으로 고정 */}
+                                    {/* ⭐️ 이미지 컨테이너 크기를 384x288로 고정 */}
                                     <Box
                                         sx={{
                                             position: 'relative',
-                                            width: '360px', // 가로 360px 고정
-                                            height: '280px', // 세로 280px 고정
+                                            width: `${IMAGE_WIDTH}px`, 
+                                            height: `${IMAGE_HEIGHT}px`, 
                                         }}
                                     >
                                         <Image
                                             src={imageUrl}
                                             alt={album.title}
                                             fill
-                                            sizes="360px"
+                                            sizes={`${IMAGE_WIDTH}px`}
                                             style={{
-                                                // 360x280 컨테이너를 꽉 채우도록 설정
-                                                objectFit: 'cover',
+                                                // 384x288 컨테이너를 꽉 채우도록 설정 (백엔드에서 이미 리사이징됨)
+                                                objectFit: 'contain', // contain으로 설정하여 이미지가 찌그러지지 않도록 합니다.
                                                 position: 'absolute',
                                                 top: 0,
                                                 left: 0,
