@@ -6,5 +6,5 @@ export interface ScheduleEvent {
   end: Date;
   type: EventType;
   title: string;
-  allDay?: boolean;
+  allDay: boolean;
 }
