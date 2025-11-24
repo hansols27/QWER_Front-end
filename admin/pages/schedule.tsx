@@ -275,7 +275,7 @@ const SchedulePage = () => {
             return; // 저장 중단
         }
 
-        // FullCalendar 규칙: end Date는 다음날 자정으로 설정
+        // FullCalendar 규칙: allDay=true 인 경우, end Date는 다음날 자정으로 설정
         const actualEndDateForFC = new Date(endDate);
         actualEndDateForFC.setDate(actualEndDateForFC.getDate() + 1);
 
@@ -284,7 +284,8 @@ const SchedulePage = () => {
             title: title.trim(),
             type,
             allDay: true,
-            start: startDate.toISOString(),
+            // ⭐️ 백엔드에서 타임존을 처리하므로 ISO String 형태로 전송
+            start: startDate.toISOString(), 
             end: actualEndDateForFC.toISOString(),
         };
 
@@ -363,13 +364,13 @@ const SchedulePage = () => {
                     // ⭐️ events 배열에 DB 일정과 고정 일정이 모두 포함됨
                     events={events.map(e => ({
                         id: e.id,
-                        // title에 유형 명칭 추가
-                        title: `${ALL_EVENT_TYPES[e.type]}: ${e.title}`, 
+                        // ⭐️ 수정된 부분: 유형 설명 없이 제목(e.title)만 표시
+                        title: e.title, 
                         start: e.start.toISOString().split('T')[0],
                         // FullCalendar는 end-1일까지 표시하므로 end 날짜를 그대로 사용
                         end: e.end.toISOString().split('T')[0], 
                         allDay: true,
-                        // ⭐️ color는 이제 DB와 고정 일정 모두에서 color 필드를 사용하도록 수정
+                        // color는 DB와 고정 일정에서 지정된 색상을 그대로 사용
                         color: e.color, 
                     }))}
                     dateClick={handleDateClick}
