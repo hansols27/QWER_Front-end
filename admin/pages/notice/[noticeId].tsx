@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { api } from "@shared/services/axios"; 
-import Layout from "@components/common/layout";
 import type { SmartEditorHandle } from "@components/common/SmartEditor"; 
+import Layout from "@components/common/layout";
 import type { Notice, NoticeType } from "@shared/types/notice"; 
 import {
     Box,
@@ -25,7 +25,7 @@ import { SelectChangeEvent } from "@mui/material";
 // 클라이언트 사이드 전용 에디터 동적 로딩
 const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
 
-type AlertSeverity = "success" | "error" | "info" | "warning"; // Warning 추가
+type AlertSeverity = "success" | "error" | "info" | "warning"; 
 
 interface NoticeResponse {
     success: boolean;
@@ -40,25 +40,20 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
 };
 
 export default function NoticeDetail() {
-    // Next.js App Router에서 ID 가져오기
     const params = useParams();
     const id = params?.noticeId as string | undefined; 
     const router = useRouter();
     const editorRef = useRef<SmartEditorHandle>(null);
 
-    // 상세 데이터 상태
     const [notice, setNotice] = useState<Notice | null>(null);
     const [loading, setLoading] = useState(true);
-    // 수정/삭제 처리 중 상태
     const [isProcessing, setIsProcessing] = useState(false); 
-    // 폼 입력 상태 (수정 가능하도록 초기화)
     const [title, setTitle] = useState("");
     const [type, setType] = useState<NoticeType>("공지"); 
-    // 에디터 초기값 저장을 위한 상태
     const [initialContent, setInitialContent] = useState(""); 
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
-    // ✅ 데이터 로딩 함수
+    // 데이터 로딩 함수
     const fetchNotice = useCallback(async () => {
         if (!id) {
             setLoading(false);
@@ -71,16 +66,14 @@ export default function NoticeDetail() {
             const res = await api.get<NoticeResponse>(`/api/notice/${id}`); 
             const data = res.data.data;
 
-            // 로드 후 상태 업데이트
             setNotice(data);
             setTitle(data.title);
             setType(data.type);
-            setInitialContent(data.content); // 에디터 초기값 설정
+            setInitialContent(data.content); 
             
         } catch (err: any) {
             console.error("공지사항 로드 실패:", err);
             setAlertMessage({ message: extractErrorMessage(err, "공지사항 로드 실패"), severity: "error" });
-            // 로드 실패 시 notice를 null로 유지하여 '찾을 수 없음' UI 표시
             setNotice(null); 
         } finally {
             setLoading(false);
@@ -91,25 +84,41 @@ export default function NoticeDetail() {
         fetchNotice(); 
     }, [fetchNotice]);
 
-    // 💡 수정된 헬퍼: 내용 유효성 검사
+    // 🏆 강화된 헬퍼: 내용 유효성 검사 (getContent 함수 존재 여부까지 체크)
     const isContentValid = useCallback((): boolean => {
-        // 1. 에디터 인스턴스가 아직 로드되지 않았다면 (동적 임포트 문제), 일단 true를 반환하여 버튼 비활성화를 방지합니다.
-        if (!editorRef.current) return true; 
+        // 1. Ref나 getContent 함수가 준비 안 됐으면, 일단 버튼 활성화를 위해 true 반환
+        if (!editorRef.current || typeof editorRef.current.getContent !== 'function') {
+            return true; 
+        }
         
         // 2. 에디터 내용 추출 및 유효성 검사
         const content = editorRef.current.getContent() || "";
-        // HTML 태그 제거 및 공백 제거 후 내용 길이가 0보다 큰지 확인
-        return content.replace(/<[^>]*>?/gm, '').trim().length > 0;
+        
+        // HTML 태그 제거 및 공백 제거
+        const textContent = content.replace(/<[^>]*>?/gm, '').trim();
+
+        // ReactQuill의 빈 값: "<p><br></p>" 또는 ""
+        const isQuillEmpty = content === '<p><br></p>' || content === '';
+        
+        // 텍스트 내용이 존재하고, Quill 빈 값이 아니어야 유효함
+        return textContent.length > 0 && !isQuillEmpty;
     }, []);
 
-    // 💡 수정(저장) 핸들러
+    // 🏆 강화된 저장 핸들러
     const handleSave = async () => {
-        // 1. 필수 유효성 검사 (ID, 데이터, 에디터 레퍼런스)
+        // 1. 필수 데이터 및 에디터 Ref 유효성 검사
         if (!id || !notice || !editorRef.current) {
-             console.error("저장 실패: 필수 데이터 또는 에디터가 준비되지 않았습니다.");
+             console.error("저장 실패: 필수 데이터 또는 에디터 Ref가 준비되지 않았습니다.");
              return; 
         }
         
+        // ⭐️ 핵심: getContent 함수 존재 여부 재확인 (Uncaught TypeError 방지)
+        if (typeof editorRef.current.getContent !== 'function') {
+             console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
+             setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
+             return; 
+        }
+
         const trimmedTitle = title.trim();
         const content = editorRef.current.getContent() || "";
         
@@ -119,8 +128,11 @@ export default function NoticeDetail() {
             return; 
         }
         
-        // 3. 내용 유효성 검사 (isContentValid 로직을 여기서 다시 실행)
-        if (content.replace(/<[^>]*>?/gm, '').trim().length === 0) {
+        // 3. 내용 유효성 검사
+        const textContent = content.replace(/<[^>]*>?/gm, '').trim();
+        const isQuillEmpty = content === '<p><br></p>' || content === '';
+
+        if (textContent.length === 0 || isQuillEmpty) {
             setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" }); 
             return; 
         }
@@ -129,10 +141,8 @@ export default function NoticeDetail() {
         setAlertMessage(null);
 
         try {
-            // PUT API 호출 (수정)
             await api.put(`/api/notice/${id}`, { type, title: trimmedTitle, content }); 
             
-            // 성공 후 알림 표시 및 상태 초기화
             setAlertMessage({ message: "수정 완료!", severity: "success" });
             setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type } : null);
 
@@ -142,7 +152,7 @@ export default function NoticeDetail() {
         } finally { setIsProcessing(false); }
     };
 
-    // 💡 삭제 핸들러
+    // 삭제, 목록 이동 핸들러는 이전과 동일
     const handleDelete = async () => {
         if (!id || isProcessing || !window.confirm("정말로 공지사항을 삭제하시겠습니까?")) return; 
 
@@ -162,12 +172,11 @@ export default function NoticeDetail() {
         }
     };
     
-    // 💡 목록 이동 핸들러
     const handleListMove = () => {
         router.push("/notice");
     };
 
-    // 로딩 중 UI
+    // 로딩 / 에러 UI는 이전과 동일
     if (loading) {
         return (
             <Layout>
@@ -179,7 +188,6 @@ export default function NoticeDetail() {
         );
     }
 
-    // 데이터 없음/에러 UI
     if (!id || !notice) { 
         return (
             <Layout>
@@ -242,7 +250,7 @@ export default function NoticeDetail() {
                                 ref={editorRef} 
                                 height="400px" 
                                 initialContent={initialContent} 
-                                disabled={isProcessing} // 에디터 입력 비활성화
+                                disabled={isProcessing} 
                             />
                         </Box>
                         
@@ -267,7 +275,7 @@ export default function NoticeDetail() {
                             onClick={handleDelete} 
                             disabled={isProcessing}
                             startIcon={isProcessing && alertMessage?.severity === "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
-                            sx={{ py: 1.5, px: 4, borderRadius: 2, marginRight: 'auto' }} // auto로 왼쪽 끝에 배치
+                            sx={{ py: 1.5, px: 4, borderRadius: 2, marginRight: 'auto' }} 
                         >
                             {isProcessing && alertMessage?.severity === "info" ? "삭제 중..." : "삭제"}
                         </Button>
@@ -290,7 +298,7 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
-                            // 💡 수정된 isContentValid()를 사용하여 에디터 로딩 중 불필요한 비활성화 방지
+                            // isContentValid()가 이제 getContent() 함수 존재 여부를 체크하므로 안정적입니다.
                             disabled={isProcessing || !title.trim() || !isContentValid()} 
                             startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
