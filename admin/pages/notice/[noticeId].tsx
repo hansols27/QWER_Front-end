@@ -25,7 +25,7 @@ import { SelectChangeEvent } from "@mui/material";
 // 클라이언트 사이드 전용 에디터 동적 로딩
 const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
 
-type AlertSeverity = "success" | "error" | "info";
+type AlertSeverity = "success" | "error" | "info" | "warning"; // Warning 추가
 
 interface NoticeResponse {
     success: boolean;
@@ -91,25 +91,36 @@ export default function NoticeDetail() {
         fetchNotice(); 
     }, [fetchNotice]);
 
-    // 헬퍼: 내용 유효성 검사 (useCallback으로 최적화)
+    // 💡 수정된 헬퍼: 내용 유효성 검사
     const isContentValid = useCallback((): boolean => {
-        const content = editorRef.current?.getContent() || "";
+        // 1. 에디터 인스턴스가 아직 로드되지 않았다면 (동적 임포트 문제), 일단 true를 반환하여 버튼 비활성화를 방지합니다.
+        if (!editorRef.current) return true; 
+        
+        // 2. 에디터 내용 추출 및 유효성 검사
+        const content = editorRef.current.getContent() || "";
+        // HTML 태그 제거 및 공백 제거 후 내용 길이가 0보다 큰지 확인
         return content.replace(/<[^>]*>?/gm, '').trim().length > 0;
     }, []);
 
     // 💡 수정(저장) 핸들러
     const handleSave = async () => {
-        if (!id || !notice) return; 
+        // 1. 필수 유효성 검사 (ID, 데이터, 에디터 레퍼런스)
+        if (!id || !notice || !editorRef.current) {
+             console.error("저장 실패: 필수 데이터 또는 에디터가 준비되지 않았습니다.");
+             return; 
+        }
         
         const trimmedTitle = title.trim();
-        const content = editorRef.current?.getContent() || "";
+        const content = editorRef.current.getContent() || "";
         
-        // 유효성 검사
+        // 2. 폼 필드 유효성 검사
         if (!trimmedTitle) { 
             setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" }); 
             return; 
         }
-        if (!isContentValid()) {
+        
+        // 3. 내용 유효성 검사 (isContentValid 로직을 여기서 다시 실행)
+        if (content.replace(/<[^>]*>?/gm, '').trim().length === 0) {
             setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" }); 
             return; 
         }
@@ -123,7 +134,6 @@ export default function NoticeDetail() {
             
             // 성공 후 알림 표시 및 상태 초기화
             setAlertMessage({ message: "수정 완료!", severity: "success" });
-            // 성공 시, notice state의 제목과 타입을 수정한 값으로 즉시 업데이트 (createdAt 필드는 변하지 않음)
             setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type } : null);
 
         } catch (err: any) {
@@ -174,7 +184,6 @@ export default function NoticeDetail() {
         return (
             <Layout>
                 <Box p={4}>
-                    {/* 로드 실패 시 표시된 에러 메시지가 있다면 그대로 유지 */}
                     {!alertMessage && <Alert severity="warning">공지사항을 찾을 수 없거나 접근 경로가 잘못되었습니다.</Alert>}
                     {alertMessage && alertMessage.severity !== "success" && (
                         <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>
@@ -232,7 +241,6 @@ export default function NoticeDetail() {
                             <SmartEditor 
                                 ref={editorRef} 
                                 height="400px" 
-                                // 로드된 내용을 initialContent로 전달하여 에디터에 표시
                                 initialContent={initialContent} 
                                 disabled={isProcessing} // 에디터 입력 비활성화
                             />
@@ -251,7 +259,7 @@ export default function NoticeDetail() {
                 <Box>
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                         
-                        {/* 삭제 버튼 (좌측으로 배치하여 강조를 낮춤) */}
+                        {/* 삭제 버튼 */}
                         <Button 
                             variant="outlined" 
                             color="error" 
@@ -282,6 +290,7 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
+                            // 💡 수정된 isContentValid()를 사용하여 에디터 로딩 중 불필요한 비활성화 방지
                             disabled={isProcessing || !title.trim() || !isContentValid()} 
                             startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
