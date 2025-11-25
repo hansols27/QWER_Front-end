@@ -107,6 +107,15 @@ const formatDateToInput = (date: Date): string => {
     return `${year}-${month}-${day}`;
 };
 
+// 🌟 [신규 추가] FullCalendar의 End Date Exclusion 문제를 해결하기 위해 하루를 더하는 헬퍼 함수
+const addDayAndFormat = (date: Date): string => {
+    const nextDay = new Date(date); // 원본 Date 객체 복사
+    // 복사된 날짜에 1일을 더함 (FullCalendar는 end 날짜를 포함하지 않기 때문)
+    nextDay.setDate(date.getDate() + 1); 
+    // +1일 된 Date 객체를 YYYY-MM-DD 형식으로 변환하여 반환
+    return formatDateToInput(nextDay);
+};
+
 const getErrorMessage = (error: any, defaultMessage: string = "요청 처리 중 오류가 발생했습니다."): string => {
     if (error?.response?.data?.message) return error.response.data.message;
     if (error?.message) return error.message;
@@ -350,9 +359,10 @@ const SchedulePage = () => {
                     events={events.map(e => ({
                         id: e.id,
                         title: e.title, 
-                        // ⭐️ 수정: FullCalendar 렌더링 시 로컬 시간 기준 'YYYY-MM-DD' 문자열 전달
+                        // Start Date는 그대로
                         start: formatDateToInput(e.start),
-                        end: formatDateToInput(e.end), 
+                        // ⭐️ [수정된 부분] FullCalendar의 End Date Exclusion 문제 해결을 위해 +1일 적용
+                        end: addDayAndFormat(e.end), 
                         allDay: true,
                         color: e.color, 
                     }))}
