@@ -51,6 +51,7 @@ export default function NoticeDetail() {
     const [title, setTitle] = useState("");
     const [type, setType] = useState<NoticeType>("공지"); 
     const [initialContent, setInitialContent] = useState(""); 
+    const [isEditorReady, setIsEditorReady] = useState(false); // ⭐️ 에디터 준비 상태
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
     // 데이터 로딩 함수
@@ -84,25 +85,28 @@ export default function NoticeDetail() {
         fetchNotice(); 
     }, [fetchNotice]);
 
-    // 🏆 강화된 헬퍼: 내용 유효성 검사 (getContent 함수 존재 여부까지 체크)
+    // 💡 에디터 준비 완료 핸들러
+    const handleEditorReady = useCallback(() => {
+        setIsEditorReady(true);
+        console.log("SmartEditor: 준비 완료. 저장 버튼 활성화.");
+    }, []);
+
+
+    // 🏆 강화된 헬퍼: 내용 유효성 검사 (로딩 및 함수 존재 여부까지 체크)
     const isContentValid = useCallback((): boolean => {
-        // 1. Ref나 getContent 함수가 준비 안 됐으면, 일단 버튼 활성화를 위해 true 반환
-        if (!editorRef.current || typeof editorRef.current.getContent !== 'function') {
-            return true; 
+        // 1. 에디터가 준비되지 않았거나, Ref/함수가 없으면 false (버튼 비활성화)
+        if (!isEditorReady || !editorRef.current || typeof editorRef.current.getContent !== 'function') {
+            return false; 
         }
         
         // 2. 에디터 내용 추출 및 유효성 검사
         const content = editorRef.current.getContent() || "";
         
-        // HTML 태그 제거 및 공백 제거
         const textContent = content.replace(/<[^>]*>?/gm, '').trim();
-
-        // ReactQuill의 빈 값: "<p><br></p>" 또는 ""
         const isQuillEmpty = content === '<p><br></p>' || content === '';
         
-        // 텍스트 내용이 존재하고, Quill 빈 값이 아니어야 유효함
         return textContent.length > 0 && !isQuillEmpty;
-    }, []);
+    }, [isEditorReady]);
 
     // 🏆 강화된 저장 핸들러
     const handleSave = async () => {
@@ -112,10 +116,16 @@ export default function NoticeDetail() {
              return; 
         }
         
-        // ⭐️ 핵심: getContent 함수 존재 여부 재확인 (Uncaught TypeError 방지)
+        // ⭐️ 핵심: isEditorReady가 false면 (버튼이 비활성화되어야 했지만 만약의 경우) 바로 리턴
+        if (!isEditorReady) {
+            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
+            return;
+        }
+
+        // getContent 함수 존재 여부 재확인 (방어 코드)
         if (typeof editorRef.current.getContent !== 'function') {
              console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
-             setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
+             setAlertMessage({ message: "에디터 인스턴스 오류. 새로고침 후 시도해주세요.", severity: "error" });
              return; 
         }
 
@@ -128,7 +138,7 @@ export default function NoticeDetail() {
             return; 
         }
         
-        // 3. 내용 유효성 검사
+        // 3. 내용 유효성 검사 (함수 호출 대신 인라인으로 재확인)
         const textContent = content.replace(/<[^>]*>?/gm, '').trim();
         const isQuillEmpty = content === '<p><br></p>' || content === '';
 
@@ -151,8 +161,8 @@ export default function NoticeDetail() {
             setAlertMessage({ message: extractErrorMessage(err, "수정 실패"), severity: "error" });
         } finally { setIsProcessing(false); }
     };
-
-    // 삭제, 목록 이동 핸들러는 이전과 동일
+    
+    // 삭제 및 목록 이동 핸들러 (동일)
     const handleDelete = async () => {
         if (!id || isProcessing || !window.confirm("정말로 공지사항을 삭제하시겠습니까?")) return; 
 
@@ -176,7 +186,7 @@ export default function NoticeDetail() {
         router.push("/notice");
     };
 
-    // 로딩 / 에러 UI는 이전과 동일
+    // 로딩 / 에러 UI (동일)
     if (loading) {
         return (
             <Layout>
@@ -251,6 +261,7 @@ export default function NoticeDetail() {
                                 height="400px" 
                                 initialContent={initialContent} 
                                 disabled={isProcessing} 
+                                onReady={handleEditorReady} // ⭐️ 준비 완료 콜백 연결
                             />
                         </Box>
                         
@@ -298,8 +309,8 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
-                            // isContentValid()가 이제 getContent() 함수 존재 여부를 체크하므로 안정적입니다.
-                            disabled={isProcessing || !title.trim() || !isContentValid()} 
+                            // ⭐️ 에디터 준비, 제목, 내용 유효성을 모두 확인
+                            disabled={isProcessing || !title.trim() || !isEditorReady || !isContentValid()} 
                             startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                         >
