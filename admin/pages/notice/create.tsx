@@ -127,8 +127,6 @@ export default function NoticeCreate() {
                                 onChange={(e) => setTitle(e.target.value)} 
                                 disabled={isProcessing} 
                                 fullWidth
-                                error={!title.trim()}
-                                helperText={!title.trim() && "제목은 필수입니다."}
                             />
                         </Stack>
 
