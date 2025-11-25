@@ -16,6 +16,9 @@ import {
 } from "@mui/material";
 import { VideoItem } from "@shared/types/video";
 
+// 💡 AlertSeverity에 'warning' 추가 (유효성 검사 시 사용)
+type AlertSeverity = "success" | "error" | "warning"; 
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
@@ -40,7 +43,8 @@ const getThumbnail = (url: string) => {
 export default function VideoList() {
     const [items, setItems] = useState<VideoItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error"; } | null>(null);
+    // 💡 AlertSeverity 타입 변경 반영
+    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity; } | null>(null);
     const router = useRouter();
 
     const fetchVideoItems = useCallback(async () => {
@@ -54,7 +58,6 @@ export default function VideoList() {
         setAlertMessage(null);
 
         try {
-            // API_BASE_URL을 제거하고 상대 경로만 사용하여 URL 중복을 방지합니다.
             const res = await api.get<{ success: boolean; data: VideoItem[] }>("/api/video"); 
             setItems(res.data.data);
         } catch (err: any) {
@@ -66,6 +69,23 @@ export default function VideoList() {
     }, []);
 
     useEffect(() => { fetchVideoItems(); }, [fetchVideoItems]);
+
+    /**
+     * 💡 상세 페이지 이동 핸들러 (공지사항/앨범 목록과 통일)
+     */
+    const handleVideoClick = (videoId: string | number) => {
+        const id = String(videoId); // ID가 숫자일 수도 있으므로 문자열로 통일
+        
+        if (!id || typeof id !== 'string') {
+            console.error("⛔ 유효하지 않은 영상 ID:", videoId);
+            setAlertMessage({ message: "유효하지 않은 영상 항목입니다.", severity: "warning" });
+            return;
+        }
+        
+        // ⭐️ 디버깅: 실제 라우팅 되는 ID 값을 확인
+        console.log(`✅ 상세 페이지로 이동 시도: /video/${videoId}`);
+        router.push(`/video/${videoId}`);
+    };
 
     return (
         <Layout>
@@ -88,12 +108,12 @@ export default function VideoList() {
                     <Typography variant="body1" color="textSecondary" align="center" py={4}>등록된 영상이 없습니다.</Typography>
                 )}
 
-                {/* Grid 컴포넌트의 any 타입 및 Grid 설정을 요청에 따라 유지했습니다. */}
                 <Grid container spacing={4} {...({} as any)}> 
                     {items.map((item) => (
                         <Grid item xs={6} sm={4} md={3} key={String(item.id)} {...({} as any)}>
                             <Card
-                                onClick={() => router.push(`/video/${String(item.id)}`)}
+                                // 💡 분리된 핸들러 사용
+                                onClick={() => handleVideoClick(item.id)}
                                 sx={{ cursor: "pointer", transition: "transform 0.2s", "&:hover": { transform: "scale(1.02)", boxShadow: 6 } }}
                             >
                                 <CardMedia

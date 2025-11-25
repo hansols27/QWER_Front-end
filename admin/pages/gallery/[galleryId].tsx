@@ -33,7 +33,7 @@ const FALLBACK_IMAGE_URL = 'https://placehold.co/400x267?text=No+Image';
 
 export default function GalleryDetail() {
     const params = useParams();
-    const id = params?.id as string | undefined;
+    const id = params?.galleryId as string | undefined;
     const router = useRouter();
     const theme = useTheme(); 
 

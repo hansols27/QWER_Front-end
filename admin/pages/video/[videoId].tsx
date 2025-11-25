@@ -37,7 +37,7 @@ const getThumbnail = (url: string) => {
 
 export default function VideoDetail() {
     const params = useParams();
-    const id = params?.id as string;
+    const id = params?.videoId as string;
     const router = useRouter();
 
     const [video, setVideo] = useState<VideoItem | null>(null);

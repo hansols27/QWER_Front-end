@@ -59,8 +59,8 @@ export default function GalleryList() {
         fetchGalleryItems();
     }, [fetchGalleryItems]);
 
-    const handleItemClick = (itemId: string) => {
-        router.push(`/gallery/${itemId}`); 
+    const handleItemClick = (galleryId: string) => {
+        router.push(`/gallery/${galleryId}`); 
     };
     
     const handleCreateClick = () => {
