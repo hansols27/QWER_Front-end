@@ -43,7 +43,7 @@ export default function NoticeCreate() {
     const [title, setTitle] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [editorLoaded, setEditorLoaded] = useState(false); 
-    // ⭐ [추가] 에디터 내용 변경을 감지하여 폼 유효성을 재검사하도록 유도하는 상태
+    // 에디터 내용 변경을 감지하여 폼 유효성을 재검사하도록 유도하는 상태
     const [contentChanged, setContentChanged] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
@@ -55,7 +55,7 @@ export default function NoticeCreate() {
         setEditorLoaded(true);
     };
     
-    // ⭐ [추가] 에디터 내용 변경 시 호출될 콜백
+    // 에디터 내용 변경 시 호출될 콜백
     const handleContentChange = () => {
         // 상태를 변경하여 컴포넌트 리렌더링 및 checkFormValidity 재실행 유도
         setContentChanged(prev => !prev); 
@@ -72,17 +72,21 @@ export default function NoticeCreate() {
         }
 
         const trimmedTitle = title.trim();
-        const content = contentGetter() || "";
+        const rawContentHTML = contentGetter() || "";
         
         // HTML 콘텐츠에서 태그를 제거하고, 남은 텍스트의 유효성을 검사합니다.
-        const trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
+        const trimmedContentText = rawContentHTML.replace(/<[^>]*>?/gm, '').trim(); 
+        
+        // ReactQuill이 반환하는 빈 값 패턴 체크
+        const isEmptyQuillContent = rawContentHTML.trim() === "<p><br></p>" || rawContentHTML.trim() === "";
+
 
         if (!trimmedTitle) {
             setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" });
             return;
         }
         
-        if (!trimmedContentText) {
+        if (!trimmedContentText || isEmptyQuillContent) {
             setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" });
             return;
         }
@@ -90,7 +94,7 @@ export default function NoticeCreate() {
         setIsProcessing(true);
 
         try {
-            const res = await api.post<NoticeCreateResponse>("/api/notice", { type, title: trimmedTitle, content });
+            const res = await api.post<NoticeCreateResponse>("/api/notice", { type, title: trimmedTitle, content: rawContentHTML });
             
             if (res.data.success) {
                 setAlertMessage({ message: "등록 완료! 목록으로 이동합니다.", severity: "success" });
@@ -116,14 +120,20 @@ export default function NoticeCreate() {
         
         let contentValid = false;
         let trimmedContentText = "";
+        let rawContentHTML = ""; // 💡 [수정] 로그 출력을 위해 변수 추가
 
         // editorLoaded가 true이고 getContent 함수가 있을 때만 내용 유효성 검사 수행
         if (editorLoaded && typeof contentGetter === 'function') {
-            const content = contentGetter() || ""; 
+            rawContentHTML = contentGetter() || ""; // 💡 [수정] 원본 HTML 저장
             
             // ReactQuill이 반환하는 HTML에서 태그를 제거하여 실제 텍스트만 추출
-            trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
-            contentValid = trimmedContentText.length > 0;
+            trimmedContentText = rawContentHTML.replace(/<[^>]*>?/gm, '').trim(); 
+            
+            // ⭐ [핵심 수정] ReactQuill의 일반적인 빈 콘텐츠 형태 추가 체크
+            const isEmptyQuillContent = rawContentHTML.trim() === "<p><br></p>" || rawContentHTML.trim() === "";
+
+            // 텍스트가 존재하고, 에디터의 빈 콘텐츠 패턴이 아니어야 유효함
+            contentValid = trimmedContentText.length > 0 && !isEmptyQuillContent; 
         }
         
         // isInvalid = (에디터가 로드되지 않았거나) OR (제목이 유효하지 않거나) OR (내용이 유효하지 않거나)
@@ -134,9 +144,8 @@ export default function NoticeCreate() {
             console.groupCollapsed("❌ Form Invalid Check");
             console.log(`Editor Loaded: ${editorLoaded}`);
             console.log(`Title Valid: ${titleValid} (Title: ${title})`);
+            console.log(`Raw Content HTML: ${rawContentHTML}`); // 💡 [수정] 원본 HTML 출력
             console.log(`Content Valid: ${contentValid} (Trimmed Text Length: ${trimmedContentText.length})`);
-            // getContent()가 존재한다면 HTML 내용도 로그에 남깁니다.
-            if(contentGetter) console.log(`Raw Content HTML: ${contentGetter()}`);
             console.log(`Final Result (isFormInValid): ${isInvalid}`);
             console.groupEnd();
         }
@@ -185,7 +194,7 @@ export default function NoticeCreate() {
                                 ref={editorRef} 
                                 height="400px" 
                                 onReady={handleEditorReady}
-                                // ⭐ [추가] 에디터 내용 변경 감지
+                                // 에디터 내용 변경 감지
                                 onChange={handleContentChange} 
                             />
                             {!editorLoaded && (
