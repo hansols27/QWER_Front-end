@@ -34,7 +34,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // ⭐️ 고정 일정 데이터 및 헬퍼 함수
 // -----------------------------
 
-// 데뷔일 및 생일 같은 고정 일정임을 표시하기 위한 확장 타입
 interface StaticScheduleEvent extends ScheduleEvent {
     isStatic: true;
 }
@@ -47,30 +46,27 @@ const createYearlyEvent = (
     day: number,
     isBirthday: boolean = false
 ): StaticScheduleEvent => {
-    // 고정 일정은 UTC 기준 자정 (YYYY-MM-DD T00:00:00Z)으로 설정하여 시간대 문제를 방지
     const currentYear = new Date().getFullYear();
-    const dateStr = `${currentYear}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T00:00:00Z`;
-    const date = new Date(dateStr);
-
+    // FullCalendar 렌더링을 위해 'YYYY-MM-DD' 형식의 문자열을 사용
+    const dateStr = `${currentYear}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
     const eventType: EventType = isBirthday ? 'B' : type;
 
     return {
-        // 고정 일정임을 나타내기 위해 특별한 ID 패턴 사용 (수정/삭제 방지용)
         id: `static-${eventType}-${month}-${day}`, 
         title,
         type: eventType,
-        start: date,
-        end: date,
+        // State 관리를 위해 Date 객체를 생성하지만, 아래 캘린더 렌더링 시에는 YYYY-MM-DD 문자열만 사용됨
+        start: new Date(dateStr),
+        end: new Date(dateStr), 
         allDay: true,
-        color: eventType === 'B' ? '#ff9800' : eventType === 'E' ? '#4caf50' : '#9e9e9e', // 색상 하드코딩 (B: 주황, E: 녹색)
+        color: eventType === 'B' ? '#ff9800' : eventType === 'E' ? '#4caf50' : '#9e9e9e',
         isStatic: true,
     };
 };
 
-// 1. 데뷔일 (요청: E 타입, 10월 18일)
 const getDebutEvents = createYearlyEvent('데뷔일 ♡', 'E', 10, 18);
 
-// 2. 멤버 생일
 const MEMBERS = [
     { name: 'CHODAN', month: 11, day: 1 },
     { name: 'MAJENTA', month: 6, day: 2 },
@@ -82,33 +78,33 @@ const getBirthdayEvents = MEMBERS.map(member =>
     createYearlyEvent(`${member.name} 생일`, 'B', member.month, member.day, true)
 );
 
-// ⭐️ 모든 고정 일정
 const STATIC_EVENTS: StaticScheduleEvent[] = [
     getDebutEvents, 
     ...getBirthdayEvents
 ];
 
 // -----------------------------
-// 일정 유형 정의 (기존 유지)
+// 일정 유형 정의
 // -----------------------------
 
-// ⭐️ 관리자 등록용 유형: 이벤트, 콘서트만
 const ADMIN_EVENT_TYPES: { [key in 'E' | 'C']: string } = {
     C: "콘서트 (Concert)",
     E: "이벤트 (Event)",
 };
 
-// ⭐️ 사용자에게 보여지는 전체 유형 (하드코딩된 생일 포함)
 const ALL_EVENT_TYPES: { [key in EventType]: string } = {
     B: "생일 (Birthday)",
     C: "콘서트 (Concert)",
     E: "이벤트 (Event)",
 };
 
-// Date 객체를 'YYYY-MM-DD' 형식의 문자열로 변환하는 헬퍼 함수 (기존 유지)
+// ⭐️ 핵심 수정: Date 객체를 로컬 시간대 기준 'YYYY-MM-DD' 문자열로 변환하는 헬퍼 함수
 const formatDateToInput = (date: Date): string => {
-    // toISOString()을 사용하여 UTC 기준으로 변환하고, 날짜 부분만 추출
-    return date.toISOString().split('T')[0];
+    // 로컬 시간(KST)을 기준으로 연, 월, 일을 추출하여 순수 날짜 문자열 반환
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 const getErrorMessage = (error: any, defaultMessage: string = "요청 처리 중 오류가 발생했습니다."): string => {
@@ -118,7 +114,7 @@ const getErrorMessage = (error: any, defaultMessage: string = "요청 처리 중
 };
 
 // -----------------------------
-// FullCalendar v6 타입 정의 (기존 유지)
+// FullCalendar v6 타입 정의
 // -----------------------------
 interface DateClickArg {
     date: Date;
@@ -159,7 +155,6 @@ const SchedulePage = () => {
         );
     }
 
-    // ⭐️ ScheduleEvent와 StaticScheduleEvent를 모두 포함할 수 있도록 타입 확장
     const [events, setEvents] = useState<(ScheduleEvent | StaticScheduleEvent)[]>([]); 
     const [loading, setLoading] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error" } | null>(null);
@@ -185,14 +180,16 @@ const SchedulePage = () => {
             try {
                 const res = await api.get<{ success: boolean; data: ScheduleEvent[] }>("/api/schedules");
                 
+                // 백엔드에서 받은 YYYY-MM-DD 문자열을 Date 객체로 변환
                 const fetchedEvents = res.data.data.map(e => ({
                     ...e,
-                    start: new Date(e.start),
+                    // DB에서 DATE 타입으로 저장된 문자열(YYYY-MM-DD)을 Date 객체로 변환
+                    // 'YYYY-MM-DD' 형식은 로컬 시간대의 00:00:00으로 파싱됨
+                    start: new Date(e.start), 
                     end: e.end ? new Date(e.end) : new Date(e.start),
-                    isStatic: false, // DB에서 온 이벤트는 정적 이벤트가 아님
+                    isStatic: false,
                 }));
                 
-                // ⭐️ DB 이벤트와 고정 일정을 합쳐서 저장
                 setEvents([...fetchedEvents, ...STATIC_EVENTS]);
             } catch (err: any) {
                 console.error("Failed to load schedule:", err);
@@ -208,6 +205,7 @@ const SchedulePage = () => {
     // 날짜 클릭 시 모달 열기 (새 일정 추가)
     // ===========================
     const handleDateClick = (arg: DateClickArg) => {
+        // FullCalendar에서 받은 Date 객체는 이미 로컬 시간대로 설정되어 있음
         setStartDate(arg.date);
         setEndDate(arg.date);
         
@@ -223,24 +221,18 @@ const SchedulePage = () => {
     // 이벤트 클릭 시 수정 모달 열기 (수정 불가능한 일정 차단)
     // ===========================
     const handleEventClick = (arg: EventClickArg) => {
-        // ⭐️ 고정 일정인지 확인
         const evt = events.find(e => e.id === arg.event.id);
         if (!evt) return;
 
-        // ⭐️ 수정/삭제 불가능한 고정 일정(Static)이면 모달을 열지 않고 종료
         if ((evt as StaticScheduleEvent).isStatic) {
             console.log(`Static event clicked: ${evt.title}. Edit/Delete blocked.`);
-            // 사용자에게 피드백이 필요하면 Alert를 사용할 수 있습니다.
-            // setAlertMessage({ message: "생일이나 데뷔일 같은 고정 일정은 수정할 수 없습니다.", severity: "warning" });
             return;
         }
 
-        // ⭐️ Date 객체를 그대로 사용
         setStartDate(evt.start);
         setEndDate(evt.end); 
         
         setTitle(evt.title);
-        // DB에서 온 이벤트이므로 type은 ADMIN_EVENT_TYPES에 포함될 것이라 가정
         setType(evt.type as keyof typeof ADMIN_EVENT_TYPES);
         setAllDay(evt.allDay || true); 
         setEditId(evt.id);
@@ -249,7 +241,7 @@ const SchedulePage = () => {
     };
 
     // ===========================
-    // 일정 저장 (기존 로직 유지)
+    // 일정 저장 (Timezone 문제 해결 적용)
     // ===========================
     const saveEvent = async () => {
         if (!startDate || !endDate) return;
@@ -264,6 +256,7 @@ const SchedulePage = () => {
             return; 
         }
         
+        // ⭐️ 수정: 로컬 시간 기준 날짜 문자열(YYYY-MM-DD)을 추출
         const startStr = formatDateToInput(startDate);
         const endStr = formatDateToInput(endDate);
 
@@ -275,18 +268,14 @@ const SchedulePage = () => {
             return; // 저장 중단
         }
 
-        // FullCalendar 규칙: allDay=true 인 경우, end Date는 다음날 자정으로 설정
-        const actualEndDateForFC = new Date(endDate);
-        actualEndDateForFC.setDate(actualEndDateForFC.getDate() + 1);
-
         const eventToSend = {
             id: editId || uuidv4(),
             title: title.trim(),
             type,
             allDay: true,
-            // ⭐️ 백엔드에서 타임존을 처리하므로 ISO String 형태로 전송
-            start: startDate.toISOString(), 
-            end: actualEndDateForFC.toISOString(),
+            // ⭐️ 핵심 수정: ISO String 대신 순수 날짜 문자열(YYYY-MM-DD) 전송
+            start: startStr, 
+            end: endStr,
         };
 
         setLoading(true);
@@ -296,15 +285,13 @@ const SchedulePage = () => {
 
             const res = await method<{ success: boolean; data: ScheduleEvent[] }>(url, eventToSend);
             
-            // 백엔드에서 받은 배열의 Date 문자열을 다시 Date 객체로 변환
             const updatedDbEvents = res.data.data.map(e => ({
                 ...e,
                 start: new Date(e.start),
                 end: e.end ? new Date(e.end) : new Date(e.start),
-                isStatic: false, // DB 이벤트임을 명시
+                isStatic: false,
             }));
             
-            // ⭐️ DB 이벤트와 고정 일정을 합쳐서 setEvents 호출
             setEvents([...updatedDbEvents, ...STATIC_EVENTS]);
 
             setModalOpen(false);
@@ -318,7 +305,7 @@ const SchedulePage = () => {
     };
 
     // ===========================
-    // 일정 삭제 (기존 로직 유지)
+    // 일정 삭제
     // ===========================
     const deleteEvent = async () => {
         if (!editId) return;
@@ -332,10 +319,9 @@ const SchedulePage = () => {
                 ...e,
                 start: new Date(e.start),
                 end: e.end ? new Date(e.end) : new Date(e.start),
-                isStatic: false, // DB 이벤트임을 명시
+                isStatic: false,
             }));
             
-            // ⭐️ DB 이벤트와 고정 일정을 합쳐서 setEvents 호출
             setEvents([...updatedDbEvents, ...STATIC_EVENTS]);
             
             setModalOpen(false);
@@ -361,20 +347,17 @@ const SchedulePage = () => {
                 <FullCalendar
                     plugins={[dayGridPlugin, interactionPlugin]}
                     initialView="dayGridMonth"
-                    // ⭐️ events 배열에 DB 일정과 고정 일정이 모두 포함됨
                     events={events.map(e => ({
                         id: e.id,
-                        // ⭐️ 수정된 부분: 유형 설명 없이 제목(e.title)만 표시
                         title: e.title, 
-                        start: e.start.toISOString().split('T')[0],
-                        // FullCalendar는 end-1일까지 표시하므로 end 날짜를 그대로 사용
-                        end: e.end.toISOString().split('T')[0], 
+                        // ⭐️ 수정: FullCalendar 렌더링 시 로컬 시간 기준 'YYYY-MM-DD' 문자열 전달
+                        start: formatDateToInput(e.start),
+                        end: formatDateToInput(e.end), 
                         allDay: true,
-                        // color는 DB와 고정 일정에서 지정된 색상을 그대로 사용
                         color: e.color, 
                     }))}
                     dateClick={handleDateClick}
-                    eventClick={handleEventClick} // ⭐️ 고정 일정 차단 로직 포함
+                    eventClick={handleEventClick}
                     headerToolbar={{
                         left: "prev,next today",
                         center: "title",
@@ -424,7 +407,11 @@ const SchedulePage = () => {
                                 label="시작일자"
                                 type="date"
                                 value={startDate ? formatDateToInput(startDate) : ''}
-                                onChange={e => setStartDate(new Date(e.target.value))}
+                                onChange={e => {
+                                    // ⭐️ 핵심 수정: KST 00:00:00을 기준으로 Date 객체를 생성
+                                    const dateString = e.target.value; // YYYY-MM-DD
+                                    setStartDate(new Date(`${dateString}T00:00:00`));
+                                }}
                                 fullWidth
                                 InputLabelProps={{ shrink: true }}
                                 required
@@ -435,7 +422,11 @@ const SchedulePage = () => {
                                 label="종료일자"
                                 type="date"
                                 value={endDate ? formatDateToInput(endDate) : ''}
-                                onChange={e => setEndDate(new Date(e.target.value))}
+                                onChange={e => {
+                                    // ⭐️ 핵심 수정: KST 00:00:00을 기준으로 Date 객체를 생성
+                                    const dateString = e.target.value; // YYYY-MM-DD
+                                    setEndDate(new Date(`${dateString}T00:00:00`));
+                                }}
                                 fullWidth
                                 InputLabelProps={{ shrink: true }}
                                 required
