@@ -16,24 +16,25 @@ import {
     Typography,
     CircularProgress,
     Alert,
-    Paper
+    Paper,
+    TableContainer // 💡 TableContainer 추가
 } from "@mui/material";
 
-type AlertSeverity = "success" | "error" | "info";
+// 💡 앨범 목록처럼 'warning' 타입을 추가하여 더 유연하게 대응
+type AlertSeverity = "success" | "error" | "info" | "warning"; 
 
 interface NoticeListResponse {
     success: boolean;
     data: Notice[]; 
 }
 
-// 🟢 컴포넌트 외부로 이동: 등록일자 포맷 함수
+// 🟢 등록일자 포맷 함수
 const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    // 현재 구현된 로직 유지 (YYYY-MM-DD 형태 예상)
     return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\./g, '-').slice(0, -1);
 };
 
-// 헬퍼: 에러 메시지 추출
+// 헬퍼: 에러 메시지 추출 (앨범 목록과 동일하게 유지)
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
     if (error?.response?.data?.message) return error.response.data.message;
     if (error?.message) return error.message;
@@ -64,10 +65,25 @@ export default function NoticeList() {
         }
     }, []);
 
-    // 🟢 의존성 배열에 fetchNotices만 유지하거나, Next.js 모범 사례에 따라 []를 사용합니다.
     useEffect(() => {
         fetchNotices();
     }, [fetchNotices]); 
+
+    /**
+     * 💡 앨범 목록과 동일하게 상세 페이지 이동 핸들러를 명확히 분리
+     */
+    const handleRowClick = (noticeId: string) => {
+        if (!noticeId || typeof noticeId !== 'string') {
+            // 유효성 검사 및 경고 메시지 처리 (404 추적 목적)
+            console.error("⛔ 유효하지 않은 공지사항 ID:", noticeId);
+            setAlertMessage({ message: "유효하지 않은 항목입니다.", severity: "warning" });
+            return;
+        }
+        
+        // ⭐️ 디버깅: 라우팅 되는 ID 값을 확인
+        console.log(`✅ 상세 페이지로 이동 시도: /notice/${noticeId}`);
+        router.push(`/notice/${noticeId}`);
+    };
 
     return (
         <Layout>
@@ -90,44 +106,46 @@ export default function NoticeList() {
                     <Typography variant="body1" color="textSecondary" align="center" py={4}>등록된 공지사항이 없습니다.</Typography>
                 ) : (
                     <Paper>
-                        <Table sx={{ minWidth: 650 }} aria-label="공지사항 목록">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: "bold", width: "10%" }}>구분</TableCell>
-                                    <TableCell sx={{ fontWeight: "bold", width: "70%" }}>제목</TableCell> 
-                                    <TableCell sx={{ fontWeight: "bold", width: "20%" }}>등록일</TableCell> 
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {notices.map((notice) => (
-                                    <TableRow 
-                                        key={notice.id} 
-                                        hover 
-                                        sx={{ cursor: "pointer" }} 
-                                        onClick={() => router.push(`/notice/${notice.id}`)}
-                                    >
-                                        <TableCell>
-                                            <Box
-                                                sx={{
-                                                    padding: "2px 8px",
-                                                    borderRadius: "4px",
-                                                    // NoticeType을 사용하므로 === "공지"가 타입 안전합니다.
-                                                    backgroundColor: notice.type === "공지" ? "#e3f2fd" : "#fff3e0",
-                                                    color: notice.type === "공지" ? "#1565c0" : "#e65100",
-                                                    fontWeight: "bold",
-                                                    fontSize: "0.75rem",
-                                                    display: 'inline-block' 
-                                                }}
-                                            >
-                                                {notice.type}
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>{notice.title}</TableCell>
-                                        <TableCell>{formatDate(notice.createdAt)}</TableCell> 
+                        <TableContainer> {/* 💡 TableContainer로 감싸서 안정성 확보 */}
+                            <Table sx={{ minWidth: 650 }} aria-label="공지사항 목록">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ fontWeight: "bold", width: "10%" }}>구분</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold", width: "70%" }}>제목</TableCell> 
+                                        <TableCell sx={{ fontWeight: "bold", width: "20%" }}>등록일</TableCell> 
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHead>
+                                <TableBody>
+                                    {notices.map((notice) => (
+                                        <TableRow 
+                                            key={notice.id} 
+                                            hover 
+                                            sx={{ cursor: "pointer" }} 
+                                            // 💡 분리된 핸들러를 호출하도록 수정
+                                            onClick={() => handleRowClick(notice.id)}
+                                        >
+                                            <TableCell>
+                                                <Box
+                                                    sx={{
+                                                        padding: "2px 8px",
+                                                        borderRadius: "4px",
+                                                        backgroundColor: notice.type === "공지" ? "#e3f2fd" : "#fff3e0",
+                                                        color: notice.type === "공지" ? "#1565c0" : "#e65100",
+                                                        fontWeight: "bold",
+                                                        fontSize: "0.75rem",
+                                                        display: 'inline-block' 
+                                                    }}
+                                                >
+                                                    {notice.type}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>{notice.title}</TableCell>
+                                            <TableCell>{formatDate(notice.createdAt)}</TableCell> 
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
                     </Paper>
                 )}
             </Box>
