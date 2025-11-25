@@ -44,7 +44,7 @@ export default function NoticeCreate() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [editorLoaded, setEditorLoaded] = useState(false); 
     
-    // ⭐ [핵심 추가] 에디터의 내용을 직접 관리할 상태
+    // 에디터의 내용을 직접 관리할 상태
     const [contentHtml, setContentHtml] = useState(""); 
 
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
@@ -58,7 +58,7 @@ export default function NoticeCreate() {
         setEditorLoaded(true);
     };
     
-    // ⭐ [핵심 수정] 내용 변경 시 contentHtml 상태 업데이트
+    // 내용 변경 시 contentHtml 상태 업데이트
     const handleContentChange = (value: string) => {
         setContentHtml(value); 
     };
@@ -66,16 +66,11 @@ export default function NoticeCreate() {
     const handleSubmit = async () => {
         setAlertMessage(null);
         
-        // Ref 대신 contentHtml 상태를 사용
+        // 제출 시점의 최종 유효성 검사
         const rawContentHTML = contentHtml || ""; 
-        
-        // HTML 콘텐츠에서 태그를 제거하고, 남은 텍스트의 유효성을 검사합니다.
         const trimmedTitle = title.trim();
         const trimmedContentText = rawContentHTML.replace(/<[^>]*>?/gm, '').trim(); 
-        
-        // ReactQuill이 반환하는 빈 값 패턴 체크
         const isEmptyQuillContent = rawContentHTML.trim() === "<p><br></p>" || rawContentHTML.trim() === "";
-
 
         if (!trimmedTitle) {
             setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" });
@@ -114,7 +109,7 @@ export default function NoticeCreate() {
     const checkFormValidity = (): boolean => {
         const titleValid = title.trim().length > 0;
         
-        // ⭐ [핵심 수정] contentHtml 상태를 직접 사용 (ref 호출 불필요)
+        // contentHtml 상태를 직접 사용
         const rawContentHTML = contentHtml || ""; 
         
         let contentValid = false;
@@ -136,17 +131,7 @@ export default function NoticeCreate() {
         // isInvalid = (에디터가 로드되지 않았거나) OR (제목이 유효하지 않거나) OR (내용이 유효하지 않거나)
         const isInvalid = !editorLoaded || !titleValid || !contentValid;
 
-        // 💡💡💡 디버깅을 위한 로그 (버튼이 비활성화될 때만 출력됨) 💡💡💡
-        if (isInvalid) {
-            console.groupCollapsed("❌ Form Invalid Check");
-            console.log(`Editor Loaded: ${editorLoaded}`);
-            console.log(`Title Valid: ${titleValid} (Title: ${title})`);
-            // ⭐ [수정] 이제 contentHtml 상태를 사용하므로, 타이밍 문제 없이 정확한 내용을 보여줍니다.
-            console.log(`Raw Content HTML: ${rawContentHTML}`); 
-            console.log(`Content Valid: ${contentValid} (Trimmed Text Length: ${trimmedContentText.length})`);
-            console.log(`Final Result (isFormInValid): ${isInvalid}`);
-            console.groupEnd();
-        }
+        // 디버깅 로그를 제거했습니다.
 
         return isInvalid; 
     }
@@ -164,6 +149,7 @@ export default function NoticeCreate() {
                 
                 <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                     <Stack spacing={3}>
+                        <Typography variant="h6" borderBottom="1px solid #eee" pb={1}>공지 내용</Typography>
 
                         <Stack direction="row" spacing={2} alignItems="center">
                             <Select 
@@ -190,9 +176,9 @@ export default function NoticeCreate() {
                                 ref={editorRef} 
                                 height="400px" 
                                 onReady={handleEditorReady}
-                                // ⭐ [핵심 수정] 에디터 내용 변경 시 contentHtml 상태 업데이트
+                                // 에디터 내용 변경 시 contentHtml 상태 업데이트
                                 onChange={handleContentChange} 
-                                // SmartEditor의 content 상태가 아닌, 부모 컴포넌트의 contentHtml 상태를 초기값으로 제공합니다.
+                                // 부모 컴포넌트의 contentHtml 상태를 초기값으로 제공합니다.
                                 initialContent={contentHtml} 
                             />
                             {!editorLoaded && (
