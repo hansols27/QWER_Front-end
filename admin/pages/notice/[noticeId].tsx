@@ -51,7 +51,7 @@ export default function NoticeDetail() {
     const [title, setTitle] = useState("");
     const [type, setType] = useState<NoticeType>("공지"); 
     const [initialContent, setInitialContent] = useState(""); 
-    const [isEditorReady, setIsEditorReady] = useState(false); // ⭐️ 에디터 준비 상태
+    const [isEditorReady, setIsEditorReady] = useState(false); 
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
     // 데이터 로딩 함수
@@ -85,44 +85,40 @@ export default function NoticeDetail() {
         fetchNotice(); 
     }, [fetchNotice]);
 
-    // 💡 에디터 준비 완료 핸들러
+    // 에디터 준비 완료 핸들러
     const handleEditorReady = useCallback(() => {
         setIsEditorReady(true);
-        console.log("SmartEditor: 준비 완료. 저장 버튼 활성화.");
+        // console.log("SmartEditor: 준비 완료. 저장 버튼 활성화.");
     }, []);
 
 
-    // 🏆 강화된 헬퍼: 내용 유효성 검사 (로딩 및 함수 존재 여부까지 체크)
+    // 이 함수는 이제 버튼 비활성화에 사용되지 않으며, handleSave 내부의 최종 검사용으로만 사용됩니다.
+    // 하지만, 현재 로직이 명확하므로 주석 처리하고 handleSave에서 직접 검사하는 로직을 유지합니다.
     const isContentValid = useCallback((): boolean => {
-        // 1. 에디터가 준비되지 않았거나, Ref/함수가 없으면 false (버튼 비활성화)
         if (!isEditorReady || !editorRef.current || typeof editorRef.current.getContent !== 'function') {
             return false; 
         }
         
-        // 2. 에디터 내용 추출 및 유효성 검사
         const content = editorRef.current.getContent() || "";
-        
         const textContent = content.replace(/<[^>]*>?/gm, '').trim();
         const isQuillEmpty = content === '<p><br></p>' || content === '';
         
         return textContent.length > 0 && !isQuillEmpty;
     }, [isEditorReady]);
 
-    // 🏆 강화된 저장 핸들러
+    // 저장 핸들러
     const handleSave = async () => {
-        // 1. 필수 데이터 및 에디터 Ref 유효성 검사
+        
         if (!id || !notice || !editorRef.current) {
              console.error("저장 실패: 필수 데이터 또는 에디터 Ref가 준비되지 않았습니다.");
              return; 
         }
         
-        // ⭐️ 핵심: isEditorReady가 false면 (버튼이 비활성화되어야 했지만 만약의 경우) 바로 리턴
         if (!isEditorReady) {
             setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
             return;
         }
 
-        // getContent 함수 존재 여부 재확인 (방어 코드)
         if (typeof editorRef.current.getContent !== 'function') {
              console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
              setAlertMessage({ message: "에디터 인스턴스 오류. 새로고침 후 시도해주세요.", severity: "error" });
@@ -132,13 +128,13 @@ export default function NoticeDetail() {
         const trimmedTitle = title.trim();
         const content = editorRef.current.getContent() || "";
         
-        // 2. 폼 필드 유효성 검사
+        // 2. 제목 유효성 검사 (필수)
         if (!trimmedTitle) { 
             setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" }); 
             return; 
         }
         
-        // 3. 내용 유효성 검사 (함수 호출 대신 인라인으로 재확인)
+        // 3. 내용 유효성 검사 (최종 제출 시, 사용자가 내용을 비웠는지 확인)
         const textContent = content.replace(/<[^>]*>?/gm, '').trim();
         const isQuillEmpty = content === '<p><br></p>' || content === '';
 
@@ -261,7 +257,7 @@ export default function NoticeDetail() {
                                 height="400px" 
                                 initialContent={initialContent} 
                                 disabled={isProcessing} 
-                                onReady={handleEditorReady} // ⭐️ 준비 완료 콜백 연결
+                                onReady={handleEditorReady} 
                             />
                         </Box>
                         
@@ -309,8 +305,8 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
-                            // ⭐️ 에디터 준비, 제목, 내용 유효성을 모두 확인
-                            disabled={isProcessing || !title.trim() || !isEditorReady || !isContentValid()} 
+                            // ⭐️ !isContentValid() 조건을 제거하여 데이터 로드 시 바로 활성화되도록 수정
+                            disabled={isProcessing || !title.trim() || !isEditorReady} 
                             startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                         >
