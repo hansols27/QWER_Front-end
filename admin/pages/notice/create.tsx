@@ -72,7 +72,7 @@ export default function NoticeCreate() {
         }
 
         const trimmedTitle = title.trim();
-        const rawContentHTML = contentGetter() || "";
+        const rawContentHTML = contentGetter() || ""; // 최신 HTML 가져오기
         
         // HTML 콘텐츠에서 태그를 제거하고, 남은 텍스트의 유효성을 검사합니다.
         const trimmedContentText = rawContentHTML.replace(/<[^>]*>?/gm, '').trim(); 
@@ -94,6 +94,7 @@ export default function NoticeCreate() {
         setIsProcessing(true);
 
         try {
+            // rawContentHTML을 API에 전달
             const res = await api.post<NoticeCreateResponse>("/api/notice", { type, title: trimmedTitle, content: rawContentHTML });
             
             if (res.data.success) {
@@ -120,16 +121,16 @@ export default function NoticeCreate() {
         
         let contentValid = false;
         let trimmedContentText = "";
-        let rawContentHTML = ""; // 💡 [수정] 로그 출력을 위해 변수 추가
+        let rawContentHTML = ""; 
 
         // editorLoaded가 true이고 getContent 함수가 있을 때만 내용 유효성 검사 수행
         if (editorLoaded && typeof contentGetter === 'function') {
-            rawContentHTML = contentGetter() || ""; // 💡 [수정] 원본 HTML 저장
+            rawContentHTML = contentGetter() || ""; 
             
             // ReactQuill이 반환하는 HTML에서 태그를 제거하여 실제 텍스트만 추출
             trimmedContentText = rawContentHTML.replace(/<[^>]*>?/gm, '').trim(); 
             
-            // ⭐ [핵심 수정] ReactQuill의 일반적인 빈 콘텐츠 형태 추가 체크
+            // ReactQuill의 일반적인 빈 콘텐츠 형태 추가 체크
             const isEmptyQuillContent = rawContentHTML.trim() === "<p><br></p>" || rawContentHTML.trim() === "";
 
             // 텍스트가 존재하고, 에디터의 빈 콘텐츠 패턴이 아니어야 유효함
@@ -144,7 +145,7 @@ export default function NoticeCreate() {
             console.groupCollapsed("❌ Form Invalid Check");
             console.log(`Editor Loaded: ${editorLoaded}`);
             console.log(`Title Valid: ${titleValid} (Title: ${title})`);
-            console.log(`Raw Content HTML: ${rawContentHTML}`); // 💡 [수정] 원본 HTML 출력
+            console.log(`Raw Content HTML: ${rawContentHTML}`); 
             console.log(`Content Valid: ${contentValid} (Trimmed Text Length: ${trimmedContentText.length})`);
             console.log(`Final Result (isFormInValid): ${isInvalid}`);
             console.groupEnd();

@@ -1,11 +1,13 @@
 'use client';
 
 import dynamic from "next/dynamic";
-import { forwardRef, useImperativeHandle, useState, useEffect } from "react";
+import { forwardRef, useImperativeHandle, useState, useEffect, useRef } from "react";
 import "react-quill/dist/quill.snow.css";
+// ⭐ [수정 1] ReactQuill 자체를 import하는 대신, 타입스크립트 오류를 피하기 위해 타입만 임포트
+import type ReactQuill from "react-quill"; 
 
-// ReactQuill 컴포넌트를 동적으로 로드합니다.
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+// ⭐ [수정 2] 동적 로드 시 이름 변경 (타입 오류 회피)
+const EditorComponent = dynamic(() => import("react-quill"), { ssr: false });
 
 export interface SmartEditorHandle {
     getContent: () => string;
@@ -18,12 +20,21 @@ export interface SmartEditorProps {
     height?: string; 
     disabled?: boolean;
     onReady?: () => void;
-    // ⭐ [수정 1] 부모 컴포넌트와의 타입 에러를 해결하고 변경 감지 로직을 연결
     onChange?: (value: string) => void; 
 }
 
+// ReactQuill 인스턴스 타입을 정의합니다. getEditor() 메서드를 노출합니다.
+// null을 허용하고, forwardRef가 아닌 일반 useRef를 위해 ReactQuill 타입을 확장합니다.
+type QuillRef = ReactQuill | null;
+
+
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
-    ({ initialContent = "", height = '400px', disabled = false, onReady, onChange }, ref) => { // 💡 onChange prop 받기
+    ({ initialContent = "", height = '400px', disabled = false, onReady, onChange }, ref) => {
+        
+        // ⭐ [수정 3] useRef의 초기값을 null로 설정하고, 타입은 ReactQuill의 인스턴스로 지정
+        // ReactQuill은 DOM 요소가 아닌 컴포넌트 인스턴스를 반환하므로 HTMLInputElement가 아님.
+        const quillRef = useRef<QuillRef>(null); 
+        
         const [content, setContent] = useState(initialContent);
         const [readOnly, setReadOnlyState] = useState(disabled);
         
@@ -47,7 +58,16 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
 
         // 4. ref를 통해 부모에게 노출할 메서드 정의
         useImperativeHandle(ref, () => ({
-            getContent: () => content,
+            // ⭐ [수정 4] getContent 로직에서 null 체크와 getEditor() 사용 안전하게 구현
+            getContent: () => {
+                const editor = quillRef.current?.getEditor();
+                if (editor && editor.root) {
+                    // 최신 DOM 내용을 반환합니다.
+                    return editor.root.innerHTML || "";
+                }
+                // 인스턴스가 준비되지 않은 경우, 현재 content 상태를 반환합니다.
+                return content; 
+            },
             setContent: (c: string) => setContent(c),
             setReadOnly: (r: boolean) => setReadOnlyState(r),
         }));
@@ -75,6 +95,9 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
             'link', 'image', 'video'
         ];
 
+        // ⭐ [핵심 수정] 동적 로드된 컴포넌트의 타입 오류를 피하기 위해 any로 캐스팅
+        const QuillWithRef = EditorComponent as any;
+
 
         return (
             <div
@@ -87,11 +110,13 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
                     boxSizing: "border-box",
                 }}
             >
-                <ReactQuill
+                {/* ⭐ [수정 5] 캐스팅된 QuillWithRef를 사용합니다. */}
+                <QuillWithRef
+                    ref={quillRef} 
                     theme="snow"
                     value={content}
-                    // ⭐ [수정 2] 내용 변경 시 부모 컴포넌트의 onChange 함수 호출
-                    onChange={(value) => {
+                    // ⭐ [수정 6] value 매개변수에 string 타입을 명시적으로 지정
+                    onChange={(value: string) => { 
                         setContent(value); // 1. 에디터 자체 상태 업데이트
                         if (onChange) {
                             onChange(value); // 2. 부모 컴포넌트의 contentChanged 상태 변경 유도
