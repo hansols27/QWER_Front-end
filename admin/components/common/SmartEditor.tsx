@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from "next/dynamic";
-import { forwardRef, useImperativeHandle, useState, useRef, useEffect } from "react";
+import { forwardRef, useImperativeHandle, useState, useEffect } from "react";
 import "react-quill/dist/quill.snow.css";
 
 // ReactQuill 컴포넌트를 동적으로 로드합니다.
@@ -25,27 +25,22 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
     ({ initialContent = "", height = '400px', disabled = false, onReady }, ref) => {
         const [content, setContent] = useState(initialContent);
         const [readOnly, setReadOnlyState] = useState(disabled);
-        const wrapperRef = useRef<HTMLDivElement>(null);
         
-        // 💡 런타임 오류를 유발했던 quillRef를 제거합니다. 
-        // useImperativeHandle을 통해 이미 getContent를 제공하고 있습니다.
-        // const quillRef = useRef<any>(null); 
-
         // 1. initialContent 변경 시 content 상태 업데이트
         useEffect(() => {
             setContent(initialContent);
         }, [initialContent]);
 
-        // 2. onReady 구현: 컴포넌트 마운트 완료 후 onReady 호출
+        // 2. 💡 onReady 구현 (수정): 컴포넌트 마운트 완료 후 onReady 호출
+        // setTimeout을 제거하여 지연 없이 즉시 호출하도록 변경
         useEffect(() => {
             if (onReady) {
-                // setTimeout을 사용하여 렌더링 사이클 이후에 호출, 안정성 확보
-                const timer = setTimeout(() => {
-                    onReady(); 
-                }, 0); 
-                return () => clearTimeout(timer);
+                // 💡 마운트 직후, 렌더링 루프 내에서 즉시 onReady를 호출하여
+                // 부모 컴포넌트의 editorLoaded 상태를 바로 true로 변경합니다.
+                onReady(); 
             }
-        }, [onReady]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []); // 빈 배열: 컴포넌트 마운트 시점에 단 한 번만 실행
 
         // 3. disabled prop이 변경될 때 readOnly 상태 업데이트
         useEffect(() => {
@@ -59,9 +54,32 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
             setReadOnly: (r: boolean) => setReadOnlyState(r),
         }));
 
+        // modules와 formats 정의 (Quill 설정을 커스텀하려면 여기에 추가)
+        const modules = {
+            toolbar: [
+                [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
+                [{size: []}],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{'list': 'ordered'}, {'list': 'bullet'}, 
+                 {'indent': '-1'}, {'indent': '+1'}],
+                ['link', 'image', 'video'],
+                ['clean']
+            ],
+            clipboard: {
+                matchVisual: false,
+            }
+        };
+
+        const formats = [
+            'header', 'font', 'size',
+            'bold', 'italic', 'underline', 'strike', 'blockquote',
+            'list', 'bullet', 'indent',
+            'link', 'image', 'video'
+        ];
+
+
         return (
             <div
-                ref={wrapperRef}
                 style={{
                     backgroundColor: "#fff",
                     height: height, 
@@ -72,11 +90,12 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
                 }}
             >
                 <ReactQuill
-                    // ref prop 제거: TypeScript 오류 해결
                     theme="snow"
                     value={content}
                     onChange={setContent}
                     readOnly={readOnly}
+                    modules={modules} // 모듈 적용
+                    formats={formats} // 포맷 적용
                     className="smart-editor"
                     style={{ height: '100%' }} 
                 />

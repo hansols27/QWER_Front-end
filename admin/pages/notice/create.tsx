@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material"; 
 
+// SmartEditor는 SSR 제외하고 동적 로딩
 const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
 
 type AlertSeverity = "success" | "error" | "info";
@@ -41,12 +42,14 @@ export default function NoticeCreate() {
     const [type, setType] = useState<NoticeType>("공지"); 
     const [title, setTitle] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
+    // 이 상태가 true가 되어야 버튼이 활성화됩니다.
     const [editorLoaded, setEditorLoaded] = useState(false); 
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
     const editorRef = useRef<SmartEditorHandle>(null);
     const router = useRouter();
 
+    // SmartEditor가 로드 완료 시 호출되는 콜백
     const handleEditorReady = () => {
         setEditorLoaded(true);
     };
@@ -64,8 +67,7 @@ export default function NoticeCreate() {
         const trimmedTitle = title.trim();
         const content = contentGetter() || "";
         
-        // 💡 HTML 콘텐츠에서 태그를 제거하고, 남은 텍스트의 유효성을 검사합니다.
-        // 유니코드 공백도 제거하기 위해 \s+ 대신 공백 및 태그 제거 로직 사용
+        // HTML 콘텐츠에서 태그를 제거하고, 남은 텍스트의 유효성을 검사합니다.
         const trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
 
         if (!trimmedTitle) {
@@ -97,6 +99,10 @@ export default function NoticeCreate() {
         }
     };
     
+    /**
+     * 폼 유효성 검사 (버튼 비활성화 여부 결정)
+     * @returns {boolean} true이면 비활성화 (등록 불가능), false이면 활성화 (등록 가능)
+     */
     const checkFormValidity = (): boolean => {
         const titleValid = title.trim().length > 0;
         const contentGetter = editorRef.current?.getContent;
@@ -104,18 +110,19 @@ export default function NoticeCreate() {
         let contentValid = false;
         let trimmedContentText = "";
 
-        // R.current.getContent (contentGetter)가 함수일 때만 호출
+        // editorLoaded가 true이고 getContent 함수가 있을 때만 내용 유효성 검사 수행
         if (editorLoaded && typeof contentGetter === 'function') {
             const content = contentGetter() || ""; 
             
-            // 💡 ReactQuill이 반환하는 HTML에서 태그를 제거하여 실제 텍스트만 추출
+            // ReactQuill이 반환하는 HTML에서 태그를 제거하여 실제 텍스트만 추출
             trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
             contentValid = trimmedContentText.length > 0;
         }
         
+        // isInvalid = (에디터가 로드되지 않았거나) OR (제목이 유효하지 않거나) OR (내용이 유효하지 않거나)
         const isInvalid = !editorLoaded || !titleValid || !contentValid;
 
-        // 💡💡💡 등록 버튼이 안 눌릴 때 디버깅을 위한 로그 💡💡💡
+        // 💡💡💡 디버깅을 위한 로그 (버튼이 비활성화될 때만 출력됨) 💡💡💡
         if (isInvalid) {
             console.groupCollapsed("❌ Form Invalid Check");
             console.log(`Editor Loaded: ${editorLoaded}`);
@@ -198,6 +205,7 @@ export default function NoticeCreate() {
                         color="success" 
                         size="large"
                         onClick={handleSubmit} 
+                        // isFormInValid가 false일 때만 활성화 (disabled = false)
                         disabled={isProcessing || isFormInValid} 
                         startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
                         sx={{ py: 1.5, px: 4, borderRadius: 2 }}
