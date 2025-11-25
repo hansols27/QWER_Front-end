@@ -42,8 +42,9 @@ export default function NoticeCreate() {
     const [type, setType] = useState<NoticeType>("공지"); 
     const [title, setTitle] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
-    // 이 상태가 true가 되어야 버튼이 활성화됩니다.
     const [editorLoaded, setEditorLoaded] = useState(false); 
+    // ⭐ [추가] 에디터 내용 변경을 감지하여 폼 유효성을 재검사하도록 유도하는 상태
+    const [contentChanged, setContentChanged] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
     const editorRef = useRef<SmartEditorHandle>(null);
@@ -52,6 +53,12 @@ export default function NoticeCreate() {
     // SmartEditor가 로드 완료 시 호출되는 콜백
     const handleEditorReady = () => {
         setEditorLoaded(true);
+    };
+    
+    // ⭐ [추가] 에디터 내용 변경 시 호출될 콜백
+    const handleContentChange = () => {
+        // 상태를 변경하여 컴포넌트 리렌더링 및 checkFormValidity 재실행 유도
+        setContentChanged(prev => !prev); 
     };
 
     const handleSubmit = async () => {
@@ -134,10 +141,11 @@ export default function NoticeCreate() {
             console.groupEnd();
         }
 
-
         // 에디터 로드 전이나 내용이 유효하지 않으면 버튼 비활성화
         return isInvalid; 
     }
+    
+    // contentChanged 상태가 추가되어 에디터 내용 변경 시에도 재계산됨
     const isFormInValid = checkFormValidity();
 
 
@@ -177,6 +185,8 @@ export default function NoticeCreate() {
                                 ref={editorRef} 
                                 height="400px" 
                                 onReady={handleEditorReady}
+                                // ⭐ [추가] 에디터 내용 변경 감지
+                                onChange={handleContentChange} 
                             />
                             {!editorLoaded && (
                                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255, 255, 255, 0.9)', zIndex: 10 }}>

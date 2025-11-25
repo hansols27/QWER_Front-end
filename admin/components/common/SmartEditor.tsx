@@ -17,12 +17,13 @@ export interface SmartEditorProps {
     initialContent?: string;
     height?: string; 
     disabled?: boolean;
-    // onReady prop을 추가하여 부모 컴포넌트의 타입 오류 해결
     onReady?: () => void;
+    // ⭐ [수정 1] 부모 컴포넌트와의 타입 에러를 해결하고 변경 감지 로직을 연결
+    onChange?: (value: string) => void; 
 }
 
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
-    ({ initialContent = "", height = '400px', disabled = false, onReady }, ref) => {
+    ({ initialContent = "", height = '400px', disabled = false, onReady, onChange }, ref) => { // 💡 onChange prop 받기
         const [content, setContent] = useState(initialContent);
         const [readOnly, setReadOnlyState] = useState(disabled);
         
@@ -31,16 +32,13 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
             setContent(initialContent);
         }, [initialContent]);
 
-        // 2. 💡 onReady 구현 (수정): 컴포넌트 마운트 완료 후 onReady 호출
-        // setTimeout을 제거하여 지연 없이 즉시 호출하도록 변경
+        // 2. onReady 구현: 컴포넌트 마운트 완료 후 onReady 호출
         useEffect(() => {
             if (onReady) {
-                // 💡 마운트 직후, 렌더링 루프 내에서 즉시 onReady를 호출하여
-                // 부모 컴포넌트의 editorLoaded 상태를 바로 true로 변경합니다.
                 onReady(); 
             }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []); // 빈 배열: 컴포넌트 마운트 시점에 단 한 번만 실행
+        }, []); 
 
         // 3. disabled prop이 변경될 때 readOnly 상태 업데이트
         useEffect(() => {
@@ -54,7 +52,7 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
             setReadOnly: (r: boolean) => setReadOnlyState(r),
         }));
 
-        // modules와 formats 정의 (Quill 설정을 커스텀하려면 여기에 추가)
+        // modules와 formats 정의
         const modules = {
             toolbar: [
                 [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
@@ -92,10 +90,16 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
                 <ReactQuill
                     theme="snow"
                     value={content}
-                    onChange={setContent}
+                    // ⭐ [수정 2] 내용 변경 시 부모 컴포넌트의 onChange 함수 호출
+                    onChange={(value) => {
+                        setContent(value); // 1. 에디터 자체 상태 업데이트
+                        if (onChange) {
+                            onChange(value); // 2. 부모 컴포넌트의 contentChanged 상태 변경 유도
+                        }
+                    }}
                     readOnly={readOnly}
-                    modules={modules} // 모듈 적용
-                    formats={formats} // 포맷 적용
+                    modules={modules} 
+                    formats={formats} 
                     className="smart-editor"
                     style={{ height: '100%' }} 
                 />
@@ -133,7 +137,7 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
                         border-radius: 0 0 4px 4px; 
                     }
                     
-                    /* 실제 글쓰기 영역 (가장 중요: Flexbox에서 높이 계산 문제 방지) */
+                    /* 실제 글쓰기 영역 */
                     .smart-editor .ql-editor {
                         flex: 1;
                         min-height: 0;
