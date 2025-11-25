@@ -54,7 +54,6 @@ export default function NoticeCreate() {
     const handleSubmit = async () => {
         setAlertMessage(null);
         
-        // 💡 콘텐츠를 가져올 때도 안정성 확인 로직 사용
         const contentGetter = editorRef.current?.getContent;
         
         if (!editorLoaded || typeof contentGetter !== 'function') {
@@ -63,7 +62,10 @@ export default function NoticeCreate() {
         }
 
         const trimmedTitle = title.trim();
-        const content = contentGetter() || ""; // 안전하게 호출
+        const content = contentGetter() || "";
+        
+        // 💡 HTML 콘텐츠에서 태그를 제거하고, 남은 텍스트의 유효성을 검사합니다.
+        // 유니코드 공백도 제거하기 위해 \s+ 대신 공백 및 태그 제거 로직 사용
         const trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
 
         if (!trimmedTitle) {
@@ -97,19 +99,37 @@ export default function NoticeCreate() {
     
     const checkFormValidity = (): boolean => {
         const titleValid = title.trim().length > 0;
-        
         const contentGetter = editorRef.current?.getContent;
         
         let contentValid = false;
+        let trimmedContentText = "";
 
-        // 💡 R.current.getContent (contentGetter)가 함수일 때만 호출
+        // R.current.getContent (contentGetter)가 함수일 때만 호출
         if (editorLoaded && typeof contentGetter === 'function') {
             const content = contentGetter() || ""; 
-            contentValid = content.replace(/<[^>]*>?/gm, '').trim().length > 0;
+            
+            // 💡 ReactQuill이 반환하는 HTML에서 태그를 제거하여 실제 텍스트만 추출
+            trimmedContentText = content.replace(/<[^>]*>?/gm, '').trim(); 
+            contentValid = trimmedContentText.length > 0;
         }
         
+        const isInvalid = !editorLoaded || !titleValid || !contentValid;
+
+        // 💡💡💡 등록 버튼이 안 눌릴 때 디버깅을 위한 로그 💡💡💡
+        if (isInvalid) {
+            console.groupCollapsed("❌ Form Invalid Check");
+            console.log(`Editor Loaded: ${editorLoaded}`);
+            console.log(`Title Valid: ${titleValid} (Title: ${title})`);
+            console.log(`Content Valid: ${contentValid} (Trimmed Text Length: ${trimmedContentText.length})`);
+            // getContent()가 존재한다면 HTML 내용도 로그에 남깁니다.
+            if(contentGetter) console.log(`Raw Content HTML: ${contentGetter()}`);
+            console.log(`Final Result (isFormInValid): ${isInvalid}`);
+            console.groupEnd();
+        }
+
+
         // 에디터 로드 전이나 내용이 유효하지 않으면 버튼 비활성화
-        return !editorLoaded || !titleValid || !contentValid; 
+        return isInvalid; 
     }
     const isFormInValid = checkFormValidity();
 
