@@ -80,8 +80,7 @@ export default function NoticeList() {
             return;
         }
         
-        // ⭐️ 디버깅: 라우팅 되는 ID 값을 확인
-        console.log(`✅ 상세 페이지로 이동 시도: /notice/${noticeId}`);
+        // ⭐️ 디버깅: 라우팅 되는 ID 값을 확인        
         router.push(`/notice/${noticeId}`);
     };
 

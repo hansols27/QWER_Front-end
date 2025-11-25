@@ -51,7 +51,7 @@ export default function NoticeDetail() {
     const [title, setTitle] = useState("");
     const [type, setType] = useState<NoticeType>("공지"); 
     const [initialContent, setInitialContent] = useState(""); 
-    const [isEditorReady, setIsEditorReady] = useState(false); 
+    const [isEditorReady, setIsEditorReady] = useState(false); // 에디터 준비 상태
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
     // 데이터 로딩 함수
@@ -92,8 +92,7 @@ export default function NoticeDetail() {
     }, []);
 
 
-    // 이 함수는 이제 버튼 비활성화에 사용되지 않으며, handleSave 내부의 최종 검사용으로만 사용됩니다.
-    // 하지만, 현재 로직이 명확하므로 주석 처리하고 handleSave에서 직접 검사하는 로직을 유지합니다.
+    // 이 함수는 버튼 비활성화에 사용되지 않지만, 최종 제출 시 유효성 검사 로직을 명확히 함
     const isContentValid = useCallback((): boolean => {
         if (!isEditorReady || !editorRef.current || typeof editorRef.current.getContent !== 'function') {
             return false; 
@@ -114,12 +113,14 @@ export default function NoticeDetail() {
              return; 
         }
         
+        // 1. 에디터 준비 상태 최종 확인 (Ref 오류 방지)
         if (!isEditorReady) {
             setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
             return;
         }
 
         if (typeof editorRef.current.getContent !== 'function') {
+             // 이 로그는 사용자가 로딩 직후 너무 빨리 클릭했을 때 발생하며, API 호출을 막아줌
              console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
              setAlertMessage({ message: "에디터 인스턴스 오류. 새로고침 후 시도해주세요.", severity: "error" });
              return; 
@@ -305,7 +306,7 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
-                            // ⭐️ !isContentValid() 조건을 제거하여 데이터 로드 시 바로 활성화되도록 수정
+                            // ⭐️ 에디터 준비와 제목만 유효하면 활성화
                             disabled={isProcessing || !title.trim() || !isEditorReady} 
                             startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
