@@ -19,7 +19,6 @@ import {
     CircularProgress,
     Card, 
     Divider,
-    // 💡 window.confirm을 대체하기 위해 Dialog 컴포넌트 추가
     Dialog,
     DialogTitle,
     DialogContent,
@@ -58,7 +57,6 @@ export default function NoticeDetail() {
     const [initialContent, setInitialContent] = useState(""); 
     const [isEditorReady, setIsEditorReady] = useState(false); // 에디터 준비 상태
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
-    // 💡 삭제 확인 모달 상태 추가
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // 데이터 로딩 함수
@@ -113,10 +111,11 @@ export default function NoticeDetail() {
             return;
         }
 
+        // 💡 핵심: SmartEditor에서 500ms 지연을 주었으므로 이 코드는 이제 안전하게 동작해야 합니다.
         if (typeof editorRef.current.getContent !== 'function') {
-             // 이 로그는 사용자가 로딩 직후 너무 빨리 클릭했을 때 발생하며, API 호출을 막아줌
+             // 타이밍 문제 발생 시 최종 방어벽
              console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
-             setAlertMessage({ message: "에디터 인스턴스 오류. 새로고침 후 시도해주세요.", severity: "error" });
+             setAlertMessage({ message: "에디터 인스턴스 초기화 오류. 새로고침 후 시도해주세요.", severity: "error" });
              return; 
         }
 
@@ -153,9 +152,9 @@ export default function NoticeDetail() {
         } finally { setIsProcessing(false); }
     };
     
-    // 💡 커스텀 모달을 통한 실제 삭제 실행 함수
+    // 커스텀 모달을 통한 실제 삭제 실행 함수
     const executeDelete = async () => {
-        setShowDeleteConfirm(false); // 모달 닫기
+        setShowDeleteConfirm(false); 
         if (!id || isProcessing) return; 
 
         setIsProcessing(true);
@@ -174,7 +173,7 @@ export default function NoticeDetail() {
         }
     };
 
-    // 💡 삭제 버튼 클릭 시 모달만 열도록 변경
+    // 삭제 버튼 클릭 시 모달만 열기
     const handleDelete = () => {
         if (isProcessing) return;
         setShowDeleteConfirm(true); 
@@ -254,13 +253,17 @@ export default function NoticeDetail() {
                             borderRadius: 1, 
                             overflow: 'hidden',
                         }}> 
-                            {/* isEditorReady가 false일 때 로딩 인디케이터를 보여줄 수도 있습니다. */}
+                            {/* 💡 에디터 로딩 시 로딩 인디케이터 표시 */}
                             {!isEditorReady && (
                                 <Box display="flex" justifyContent="center" alignItems="center" height="400px">
                                     <CircularProgress />
                                 </Box>
                             )}
-                            <Box sx={{ display: isEditorReady ? 'block' : 'none', height: '100%' }}>
+                            <Box sx={{ 
+                                // 에디터가 준비되지 않으면 숨김 (지연 로딩이므로)
+                                display: isEditorReady ? 'block' : 'none', 
+                                height: isEditorReady ? '100%' : '0' 
+                            }}>
                                 <SmartEditor 
                                     ref={editorRef} 
                                     height="400px" 
@@ -289,7 +292,7 @@ export default function NoticeDetail() {
                             variant="outlined" 
                             color="error" 
                             size="large"
-                            onClick={handleDelete} // 모달 열기
+                            onClick={handleDelete} 
                             disabled={isProcessing}
                             startIcon={isProcessing && alertMessage?.severity === "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2, marginRight: 'auto' }} 
@@ -315,7 +318,7 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
-                            // ⭐️ 에디터 준비와 제목만 유효하면 활성화
+                            // 에디터 준비와 제목 유효성 검사를 통해 활성화
                             disabled={isProcessing || !title.trim() || !isEditorReady} 
                             startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
@@ -326,7 +329,7 @@ export default function NoticeDetail() {
                 </Box>
             </Box>
             
-            {/* 💡 삭제 확인 커스텀 모달 */}
+            {/* 삭제 확인 커스텀 모달 */}
             <Dialog
                 open={showDeleteConfirm}
                 onClose={() => setShowDeleteConfirm(false)}

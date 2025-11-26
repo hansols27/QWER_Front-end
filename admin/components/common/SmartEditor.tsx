@@ -40,14 +40,14 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
             setContent(initialContent);
         }, [initialContent]);
 
-        // 💡 핵심 수정: 에디터 인스턴스 초기화 완료 시간을 확보하기 위해 100ms 지연을 줍니다.
-        // 이 지연이 NoticeDetail.tsx의 handleSave에서 getContent()가 유효하도록 보장합니다.
+        // 💡 수정: 에디터 인스턴스 초기화 완료 시간을 확보하기 위해 지연 시간을 500ms로 늘립니다.
         useEffect(() => {
             if (!onReady) return;
 
+            // 500ms 지연 후 onReady 호출
             const timer = setTimeout(() => {
                 onReady(); 
-            }, 100); 
+            }, 500); 
 
             return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,8 +124,6 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
                     ref={quillRef} 
                     theme="snow"
                     value={content}
-                    // 💡 ReactQuill의 onChange는 value, delta, source를 제공하지만, 
-                    // HTML 문자열인 value만 사용하여 상태를 업데이트하는 것이 일반적입니다.
                     onChange={(value: string, delta: Delta, source: string) => { 
                         setContent(value); 
                         if (onChange) {
