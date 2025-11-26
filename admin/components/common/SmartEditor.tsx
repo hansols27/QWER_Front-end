@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { forwardRef, useImperativeHandle, useState, useEffect, useRef } from "react";
 import "react-quill/dist/quill.snow.css";
 import type ReactQuill from "react-quill"; 
-import { Delta } from 'quill'; // Delta 타입 임포트 (추가)
+import { Delta } from 'quill'; // Delta 타입 임포트
 
 // 클라이언트 사이드에서만 ReactQuill 로드
 const EditorComponent = dynamic(() => import("react-quill"), { ssr: false });
@@ -40,10 +40,16 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
             setContent(initialContent);
         }, [initialContent]);
 
+        // 💡 핵심 수정: 에디터 인스턴스 초기화 완료 시간을 확보하기 위해 100ms 지연을 줍니다.
+        // 이 지연이 NoticeDetail.tsx의 handleSave에서 getContent()가 유효하도록 보장합니다.
         useEffect(() => {
-            if (onReady) {
+            if (!onReady) return;
+
+            const timer = setTimeout(() => {
                 onReady(); 
-            }
+            }, 100); 
+
+            return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []); 
 
@@ -55,9 +61,6 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
         useImperativeHandle(ref, () => ({
             getContent: () => {
                 // 1. 상태값(content)을 사용하여 **최신 내용**을 반환합니다.
-                // ReactQuill은 onChange를 통해 state를 업데이트하므로, state가 가장 신뢰할 수 있는 최신 값입니다.
-                // 비어 있는 <p><br></p> 등의 초기값은 여기서 무시합니다.
-                
                 const currentContent = content || "";
 
                 if (currentContent.trim() && currentContent.trim() !== "<p><br></p>") {
