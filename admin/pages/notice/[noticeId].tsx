@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { api } from "@shared/services/axios"; 
 import type { SmartEditorHandle } from "@components/common/SmartEditor"; 
-import Layout from "@components/common/layout";
+import Layout from "@components/common/layout"; 
 import type { Notice, NoticeType } from "@shared/types/notice"; 
 import {
     Box,
@@ -26,15 +26,13 @@ import {
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material";
 
-// 클라이언트 사이드 전용 에디터 동적 로딩
-const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
+// 클라이언트 사이드 전용 에디터 동적 로딩 (실제 경로 가정)
+const SmartEditor = dynamic<any>(
+    () => import("@components/common/SmartEditor").then(mod => mod.default), 
+    { ssr: false, loading: () => <Box display="flex" justifyContent="center" alignItems="center" height="400px"><CircularProgress /></Box> }
+);
 
 type AlertSeverity = "success" | "error" | "info" | "warning"; 
-
-interface NoticeResponse {
-    success: boolean;
-    data: Notice; 
-}
 
 // 헬퍼: 에러 메시지 추출
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
@@ -43,10 +41,19 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
     return defaultMsg;
 };
 
+// API 응답 타입 (실제 환경에 맞게 조정 필요)
+interface NoticeResponse {
+    success: boolean;
+    data: Notice; 
+}
+
 export default function NoticeDetail() {
     const params = useParams();
-    const id = params?.noticeId as string | undefined; 
+    // 실제 환경에서는 ID를 useParams에서 가져옴
+    const id = params?.noticeId ? params.noticeId as string : ''; 
     const router = useRouter();
+    
+    // 💡 핵심: SmartEditorHandle 타입으로 useRef 선언
     const editorRef = useRef<SmartEditorHandle>(null);
 
     const [notice, setNotice] = useState<Notice | null>(null);
@@ -63,12 +70,15 @@ export default function NoticeDetail() {
     const fetchNotice = useCallback(async () => {
         if (!id) {
             setLoading(false);
+            // ID가 없으면 에러 메시지를 표시하고 목록으로 이동하도록 유도
+            setAlertMessage({ message: "공지사항 ID가 유효하지 않습니다.", severity: "warning" });
             return; 
         }
 
         setLoading(true);
         setAlertMessage(null);
         try {
+            // 실제 API 호출
             const res = await api.get<NoticeResponse>(`/api/notice/${id}`); 
             const data = res.data.data;
 
@@ -93,30 +103,31 @@ export default function NoticeDetail() {
     // 에디터 준비 완료 핸들러
     const handleEditorReady = useCallback(() => {
         setIsEditorReady(true);
-        // console.log("SmartEditor: 준비 완료. 저장 버튼 활성화.");
+        console.log("SmartEditor: 준비 완료. 저장 버튼 활성화.");
     }, []);
 
 
     // 저장 핸들러
     const handleSave = async () => {
         
-        if (!id || !notice || !editorRef.current) {
-             console.error("저장 실패: 필수 데이터 또는 에디터 Ref가 준비되지 않았습니다.");
-             return; 
+        if (!id || !notice) {
+            console.error("저장 실패: 필수 데이터가 누락되었습니다.");
+            setAlertMessage({ message: "수정할 공지사항 정보가 없습니다.", severity: "error" });
+            return; 
         }
-        
+
         // 1. 에디터 준비 상태 최종 확인 (Ref 오류 방지)
-        if (!isEditorReady) {
-            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
+        if (!isEditorReady || !editorRef.current) {
+            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요. (Ref Not Ready)", severity: "warning" });
             return;
         }
 
-        // 💡 핵심: SmartEditor에서 500ms 지연을 주었으므로 이 코드는 이제 안전하게 동작해야 합니다.
-        if (typeof editorRef.current.getContent !== 'function') {
-             // 타이밍 문제 발생 시 최종 방어벽
-             console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
-             setAlertMessage({ message: "에디터 인스턴스 초기화 오류. 새로고침 후 시도해주세요.", severity: "error" });
-             return; 
+        // 💡 핵심: Ref가 유효하고 isEditorReady가 true일 때만 호출
+        if (typeof editorRef.current?.getContent !== 'function') {
+            // 타이밍 문제 발생 시 최종 방어벽 (이 메시지가 보이면 SmartEditor 구현을 재확인해야 함)
+            console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
+            setAlertMessage({ message: "에디터 인스턴스 초기화 오류. 새로고침 후 시도해주세요.", severity: "error" });
+            return; 
         }
 
         const trimmedTitle = title.trim();
@@ -128,11 +139,11 @@ export default function NoticeDetail() {
             return; 
         }
         
-        // 3. 내용 유효성 검사 (최종 제출 시, 사용자가 내용을 비웠는지 확인)
-        const textContent = content.replace(/<[^>]*>?/gm, '').trim();
+        // 3. 내용 유효성 검사
+        // Quill 기본 비어 있는 값 체크: <p><br></p>
         const isQuillEmpty = content === '<p><br></p>' || content === '';
 
-        if (textContent.length === 0 || isQuillEmpty) {
+        if (isQuillEmpty) {
             setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" }); 
             return; 
         }
@@ -141,10 +152,11 @@ export default function NoticeDetail() {
         setAlertMessage(null);
 
         try {
+            // 실제 API 호출
             await api.put(`/api/notice/${id}`, { type, title: trimmedTitle, content }); 
             
             setAlertMessage({ message: "수정 완료!", severity: "success" });
-            setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type } : null);
+            setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type, content: content } : null); // content 업데이트 추가
 
         } catch (err: any) {
             console.error("공지사항 수정 실패:", err);
@@ -161,6 +173,7 @@ export default function NoticeDetail() {
         setAlertMessage({ message: "삭제 중...", severity: "info" });
 
         try {
+            // 실제 API 호출
             await api.delete(`/api/notice/${id}`);
             
             setAlertMessage({ message: "삭제 완료! 목록으로 이동합니다.", severity: "success" });
@@ -253,23 +266,23 @@ export default function NoticeDetail() {
                             borderRadius: 1, 
                             overflow: 'hidden',
                         }}> 
-                            {/* 💡 에디터 로딩 시 로딩 인디케이터 표시 */}
+                            
                             {!isEditorReady && (
                                 <Box display="flex" justifyContent="center" alignItems="center" height="400px">
                                     <CircularProgress />
                                 </Box>
                             )}
                             <Box sx={{ 
-                                // 에디터가 준비되지 않으면 숨김 (지연 로딩이므로)
+                                // 에디터가 준비되지 않으면 숨김
                                 display: isEditorReady ? 'block' : 'none', 
-                                height: isEditorReady ? '100%' : '0' 
+                                height: '100%'
                             }}>
                                 <SmartEditor 
-                                    ref={editorRef} 
+                                    ref={editorRef} // 💡 핵심: Ref 연결
                                     height="400px" 
                                     initialContent={initialContent} 
                                     disabled={isProcessing} 
-                                    onReady={handleEditorReady} 
+                                    onReady={handleEditorReady} // 💡 핵심: 준비 완료 시 isEditorReady=true 설정
                                 />
                             </Box>
                         </Box>
