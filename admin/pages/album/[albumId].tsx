@@ -15,6 +15,10 @@ import {
     CircularProgress, 
     Card, 
     Divider, 
+    Dialog, // ⭐️ Dialog 추가
+    DialogTitle, // ⭐️ DialogTitle 추가
+    DialogContent, // ⭐️ DialogContent 추가
+    DialogActions, // ⭐️ DialogActions 추가
 } from "@mui/material";
 
 // 상수
@@ -22,7 +26,7 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 const NO_IMAGE_URL = "https://placehold.co/150x150?text=Cover+Image"; 
 
-type AlertSeverity = "success" | "error" | "info"; 
+type AlertSeverity = "success" | "error" | "info" | "warning"; // warning 추가
 
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
     if (error?.response?.data?.message) return error.response.data.message;
@@ -55,11 +59,13 @@ export default function AlbumEdit() {
     // 이미지 상태
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null); 
-    // ⭐️ 수정: 초기값은 NO_IMAGE_URL로 설정하고, 로딩 후 업데이트
     const [previewUrl, setPreviewUrl] = useState<string>(NO_IMAGE_URL); 
 
     const [isSaving, setIsSaving] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
+    
+    // ⭐️ 삭제 확인 모달 상태 추가
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); 
 
     // ---------------------------
     // 0. 초기 데이터 로딩
@@ -89,19 +95,15 @@ export default function AlbumEdit() {
                 setTracks(data.tracks && data.tracks.length > 0 ? data.tracks : [""]);
                 setVideoUrl(data.videoUrl || "");
                 
-                // ⭐️⭐️ 수정된 부분 ⭐️⭐️
-                // 백엔드에서 확인된 필드명 'image'만 사용
                 const existingImageUrl = data.image || null; 
 
                 if (existingImageUrl) {
                     setCoverImageUrl(existingImageUrl);
-                    // 기존 이미지를 미리보기에도 바로 설정합니다.
                     setPreviewUrl(existingImageUrl);
                 } else {
                     setCoverImageUrl(null);
                     setPreviewUrl(NO_IMAGE_URL);
                 }
-                // ⭐️⭐️ 수정된 부분 끝 ⭐️⭐️
                 
             } catch (err) {
                 const errorMsg = extractErrorMessage(err, "앨범 데이터를 불러오는 데 실패했습니다.");
@@ -116,14 +118,14 @@ export default function AlbumEdit() {
     }, [id, router]);
 
     // ---------------------------
-    // 1. 파일 미리보기 URL 생성 및 해제 (로직 개선)
+    // 1. 파일 미리보기 URL 생성 및 해제
     // ---------------------------
     useEffect(() => {
         // 1. 새 파일이 있으면 -> 로컬 URL 사용
         if (coverFile) {
             const url = URL.createObjectURL(coverFile);
             setPreviewUrl(url);
-            // ⭐️ 클린업 함수: 컴포넌트 언마운트 또는 coverFile이 변경/제거될 때 로컬 URL 해제
+            // 클린업 함수: 컴포넌트 언마운트 또는 coverFile이 변경/제거될 때 로컬 URL 해제
             return () => URL.revokeObjectURL(url);
         }
         
@@ -134,13 +136,12 @@ export default function AlbumEdit() {
         // 3. 둘 다 없으면 -> 대체 이미지 사용
             setPreviewUrl(NO_IMAGE_URL);
         }
-        // 이 경우 클린업은 필요 없음
         
     }, [coverFile, coverImageUrl]);
 
 
     // ---------------------------
-    // 2. 파일 변경 핸들러 및 유효성 검사 (변경 없음)
+    // 2. 파일 변경 핸들러 및 유효성 검사
     // ---------------------------
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         setAlertMessage(null);
@@ -148,7 +149,6 @@ export default function AlbumEdit() {
         
         if (!file) {
             setCoverFile(null);
-            // setPreviewUrl은 위 useEffect에서 처리됨
             return;
         }
 
@@ -167,7 +167,7 @@ export default function AlbumEdit() {
         setAlertMessage({ message: `✅ 새 커버 이미지 (${file.name})가 선택되었습니다. 저장 버튼을 눌러 적용하세요.`, severity: "info" });
     };
 
-    // 3. 트랙 관리 핸들러 (생략: 변경 없음)
+    // 3. 트랙 관리 핸들러
     const handleTrackChange = (idx: number, value: string) => {
         const newTracks = [...tracks];
         newTracks[idx] = value;
@@ -197,7 +197,7 @@ export default function AlbumEdit() {
              return;
         }
         if (!title || !date) {
-             setAlertMessage({ message: "필수 항목: 타이틀과 발매일을 입력해주세요.", severity: "error" });
+            setAlertMessage({ message: "필수 항목: 타이틀과 발매일을 입력해주세요.", severity: "error" });
              return;
         }
 
@@ -214,9 +214,9 @@ export default function AlbumEdit() {
                 formData.append("coverFile", coverFile);
             }
             
-            // 이미지 제거를 요청하는 경우 (coverFile=null, coverImageUrl=null)
-            if (!coverFile && !coverImageUrl) {
-            }
+            // 이미지 제거를 요청하는 경우, 백엔드 로직에 따라 별도 필드를 추가할 수도 있지만, 
+            // 여기서는 coverFile이 없고 기존 coverImageUrl도 없을 때 별도 처리 없이 진행합니다.
+            // (백엔드가 이 경우 이미지 삭제를 유추한다고 가정)
 
             tracks.filter(t => t.trim() !== "").forEach((track, idx) => formData.append(`tracks[${idx}]`, track));
 
@@ -239,15 +239,22 @@ export default function AlbumEdit() {
     };
 
     // ---------------------------
-    // 5. 앨범 삭제 (DELETE) (변경 없음)
+    // 5. 앨범 삭제 (DELETE) 로직 분리
     // ---------------------------
-    const handleDelete = async () => {
+
+    // ⭐️ 삭제 버튼 클릭 시: 모달 표시
+    const handleDelete = () => {
+        if (isSaving) return;
+        setShowDeleteConfirm(true); 
+    };
+    
+    // ⭐️ 모달에서 '삭제 확인' 클릭 시: 실제 삭제 실행
+    const executeDelete = async () => {
+        setShowDeleteConfirm(false); // 모달 닫기
         if (!id) return;
         
-        if (!window.confirm("삭제하시겠습니까?")) return;
-        
         setIsSaving(true);
-        setAlertMessage({ message: "앨범을 삭제 중...", severity: "error" }); 
+        setAlertMessage({ message: "앨범을 삭제 중...", severity: "info" }); 
 
         try {
             await api.delete(`/api/album/${id}`);
@@ -258,13 +265,12 @@ export default function AlbumEdit() {
         } catch (err: any) {
             console.error("앨범 삭제 요청 실패:", err);
             setAlertMessage({ message: extractErrorMessage(err, "앨범 삭제 요청에 실패했습니다."), severity: "error" });
-        } finally {
             setIsSaving(false);
         }
     };
     
     // ---------------------------
-    // 6. 렌더링 (변경 없음)
+    // 6. 렌더링
     // ---------------------------
     
     if (!id && !initialLoading)
@@ -354,7 +360,13 @@ export default function AlbumEdit() {
                                     <Button 
                                         variant="outlined" 
                                         color="error" 
-                                        onClick={() => { setCoverFile(null); setCoverImageUrl(null); setPreviewUrl(NO_IMAGE_URL); if (fileInputRef.current) fileInputRef.current.value = ""; setAlertMessage({message: "커버 이미지가 제거되었습니다. 저장 시 이미지가 삭제됩니다.", severity: "info"}); }}
+                                        onClick={() => { 
+                                            setCoverFile(null); 
+                                            setCoverImageUrl(null); 
+                                            setPreviewUrl(NO_IMAGE_URL); 
+                                            if (fileInputRef.current) fileInputRef.current.value = ""; 
+                                            setAlertMessage({message: "커버 이미지가 제거되었습니다. 저장 시 이미지가 삭제됩니다.", severity: "info"}); 
+                                        }}
                                         disabled={isSaving}
                                         sx={{ ml: 2 }}
                                     >
@@ -400,42 +412,80 @@ export default function AlbumEdit() {
                     
                     {/* 액션 버튼 */}
                     <Divider sx={{ mt: 4, mb: 4 }}/>
-                    <Stack direction="row" spacing={2} justifyContent="flex-end">
-                        <Button 
-                            variant="contained" 
-                            color="primary" 
-                            size="large"
-                            onClick={() => router.push("/album")} 
-                            disabled={isSaving}
-                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
-                        >
-                            목록
-                        </Button>
-                        <Button
+                    <Box>
+                        <Stack direction="row" spacing={2} justifyContent="flex-end">
+
+                            {/* 삭제 버튼 */}
+                            <Button 
                             variant="outlined" 
                             color="error" 
                             size="large"
-                            onClick={handleDelete} 
+                            onClick={handleDelete} // ⭐️ 모달을 여는 핸들러 호출
                             disabled={isSaving}
-                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
-                        >
-                            {isSaving && alertMessage?.message.includes("삭제 중...") ? <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} /> : null}
-                            {isSaving && alertMessage?.message.includes("삭제 중...") ? "삭제 중..." : "삭제"}
-                        </Button>
-                        <Button 
+                            sx={{ py: 1.5, px: 4, borderRadius: 2, marginRight: 'auto' }} 
+                            >
+                                삭제
+                            </Button>
+
+                            {/* 목록 버튼 */}
+                            <Button 
+                                variant="contained" 
+                                color="primary" 
+                                size="large"
+                                onClick={() => router.push("/album")} 
+                                disabled={isSaving}
+                                sx={{ py: 1.5, px: 4, borderRadius: 2 }}
+                            >
+                                목록
+                            </Button>
+
+                            {/* 저장 (수정) 버튼 */}    
+                            <Button 
                             variant="contained" 
                             color="success" 
                             size="large"
                             onClick={handleUpdate} 
                             disabled={isSaving || !title || !date || (!coverFile && !coverImageUrl)} 
-                            startIcon={isSaving && !alertMessage?.message.includes("삭제 중...") ? <CircularProgress size={20} color="inherit" /> : undefined}
-                            sx={{ py: 1.5, px: 4, borderRadius: 2 }} 
-                        >
-                            {isSaving && !alertMessage?.message.includes("삭제 중...") ? "수정 중..." : "저장"}
-                        </Button>
-                    </Stack>
+                            startIcon={isSaving && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
+                            >
+                                {isSaving && alertMessage?.severity !== "info" ? "저장 중..." : "저장"}
+                            </Button>
+                        </Stack>
+                    </Box>
                 </Stack>
-            </Box>
+                
+                {/* ⭐️⭐️ 삭제 확인 커스텀 모달 (Dialog) 추가 ⭐️⭐️ */}
+                <Dialog
+                    open={showDeleteConfirm}
+                    onClose={() => setShowDeleteConfirm(false)}
+                    aria-labelledby="album-delete-dialog-title"
+                    aria-describedby="album-delete-dialog-description"
+                >
+                    <DialogTitle id="album-delete-dialog-title">{"삭제 확인"}</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            삭제하시겠습니까?
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setShowDeleteConfirm(false)} color="primary" disabled={isSaving}>
+                            취소
+                        </Button>
+                        <Button 
+                            onClick={executeDelete} 
+                            color="error" 
+                            variant="contained" 
+                            autoFocus
+                            disabled={isSaving}
+                            startIcon={isSaving && alertMessage?.message.includes("삭제 중") ? <CircularProgress size={20} color="inherit" /> : undefined}
+                        >
+                            확인
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                {/* ⭐️⭐️ 모달 끝 ⭐️⭐️ */}
+            </Box>                 
         </Layout>
     );
 }

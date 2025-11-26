@@ -14,7 +14,13 @@ import {
     Stack, 
     Paper, 
     Card, // Card 컴포넌트 추가
-    Divider // Divider 컴포넌트 추가
+    Divider, // Divider 컴포넌트 추가
+    // 삭제 확인 모달을 위한 Dialog 컴포넌트 추가
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from "@mui/material"; 
 import { VideoItem } from "@shared/types/video";
 
@@ -46,6 +52,8 @@ export default function VideoDetail() {
     const [loading, setLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: "success" | "error" | "info"; } | null>(null);
+    // [New] 삭제 모달 상태
+    const [isModalOpen, setIsModalOpen] = useState(false); 
 
     const fetchVideo = useCallback(async () => {
         if (!id) { setLoading(false); return; }
@@ -105,13 +113,18 @@ export default function VideoDetail() {
             setAlertMessage({ message: extractErrorMessage(err, "영상 수정 실패"), severity: "error" });
         } finally { setIsProcessing(false); }
     };
+    
+    // [New] 삭제 모달 닫기 핸들러
+    const handleCloseDeleteModal = () => {
+        setIsModalOpen(false);
+    };
 
-    // 💡 삭제 핸들러
-    const handleDelete = async () => {
+    // [New] 실제 삭제 실행 핸들러 (API 호출)
+    const handleConfirmDelete = async () => {
         if (!video) return;
-        // 💡 공지사항과 동일하게 "삭제하시겠습니까?" 컨펌 사용
-        if (!window.confirm("삭제하시겠습니까?")) return; 
         
+        handleCloseDeleteModal(); // 모달 닫기
+
         setIsProcessing(true);
         setAlertMessage({ message: "삭제 중...", severity: "info" });
 
@@ -125,6 +138,12 @@ export default function VideoDetail() {
             setAlertMessage({ message: extractErrorMessage(err, "삭제 실패"), severity: "error" });
             setIsProcessing(false);
         }
+    };
+
+    // 💡 삭제 핸들러 (모달 열기) - 기존 window.confirm 로직 대체
+    const handleDelete = () => {
+        if (!video) return;
+        setIsModalOpen(true);
     };
 
     // 💡 목록 이동 핸들러
@@ -235,12 +254,12 @@ export default function VideoDetail() {
                             목록
                         </Button>
                         
-                        {/* 삭제 버튼 */}
+                        {/* 삭제 버튼 - 클릭 시 모달 열기 */}
                         <Button 
                             variant="outlined" 
                             color="error" 
                             size="large"
-                            onClick={handleDelete} 
+                            onClick={handleDelete} // 모달을 여는 함수 호출
                             disabled={isProcessing}
                             startIcon={isProcessing && alertMessage?.severity === "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
@@ -250,6 +269,36 @@ export default function VideoDetail() {
                     </Stack>
                 </Box>
             </Box>
+
+            {/* [New] 삭제 확인 다이얼로그 */}
+            <Dialog
+                open={isModalOpen}
+                onClose={handleCloseDeleteModal}
+                aria-labelledby="delete-dialog-title"
+                aria-describedby="delete-dialog-description"            >
+                
+                <DialogTitle id="album-delete-dialog-title">{"삭제 확인"}</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            삭제하시겠습니까?
+                        </Typography>
+                    </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeleteModal} color="primary" disabled={isProcessing}>
+                        취소
+                    </Button>
+                    <Button 
+                        onClick={handleConfirmDelete} // 실제 삭제 로직 호출
+                        color="error" 
+                        variant="contained" 
+                        autoFocus
+                        disabled={isProcessing}
+                        startIcon={isProcessing && alertMessage?.severity === "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
+                    >
+                        확인
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Layout>
     );
 }

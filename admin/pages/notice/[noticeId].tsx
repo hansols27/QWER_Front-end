@@ -336,10 +336,10 @@ export default function NoticeDetail() {
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
-                <DialogTitle id="alert-dialog-title">{"공지사항 삭제 확인"}</DialogTitle>
+                <DialogTitle id="alert-dialog-title">{"삭제 확인"}</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        정말로 이 공지사항을 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.
+                        삭제하시겠습니까? 
                     </Typography>
                 </DialogContent>
                 <DialogActions>
@@ -354,7 +354,7 @@ export default function NoticeDetail() {
                         disabled={isProcessing}
                         startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
                     >
-                        삭제 확인
+                        확인
                     </Button>
                 </DialogActions>
             </Dialog>
