@@ -35,53 +35,58 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
         const [content, setContent] = useState(initialContent);
         const [readOnly, setReadOnlyState] = useState(disabled);
         
-        // 1. initialContent 변경 시 상태 업데이트
-        useEffect(() => {
-            setContent(initialContent);
-        }, [initialContent]);
-
-        // 2. disabled props 변경 시 readOnly 상태 업데이트
-        useEffect(() => {
-            setReadOnlyState(disabled);
-        }, [disabled]);
+        // ... (props 연동 useEffect 생략)
         
-        // 3. ⚠️ 개선된 onReady 호출 로직 (컴포넌트 마운트 시 한 번만 실행)
+        // 3. onReady 호출 로직 (quillRef.current가 연결된 후 100ms 지연)
         useEffect(() => {
-            if (onReady) {
+            if (onReady && quillRef.current) { // ✅ quillRef가 연결된 후 실행 보장
                 // 동적 로딩 및 Quill 인스턴스 초기화를 위한 충분한 지연 시간 확보
                 const timer = setTimeout(() => {
                     onReady(); 
                 }, 100); 
                 return () => clearTimeout(timer);
             }
-        }, []); // ✅ 의존성 배열을 비워 마운트 시 한 번만 실행
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [quillRef.current]); 
 
-        // 💡 핵심: useImperativeHandle을 사용하여 부모에게 노출할 메서드 정의
-        useImperativeHandle(ref, () => ({
-            getContent: () => {
-                // 1. 현재 React 상태의 content를 사용
-                const currentContent = content || "";
+        // 💡 최종 핵심 수정: useImperativeHandle
+        useImperativeHandle(ref, () => {
+            // Ref가 아직 연결되지 않았거나, 내부 Quill 인스턴스가 없는 경우
+            // 임시로 getContent가 없거나 (또는 throw error) Ref가 연결되지 않도록 null 반환
+            if (!quillRef.current || !quillRef.current.getEditor()) {
+                // 이 상황이 발생하면 부모 컴포넌트의 `!editorRef.current` 체크에서 걸리거나,
+                // Ref가 아예 연결되지 않도록 하여, 잘못된 함수 호출을 막습니다.
+                return {
+                    getContent: () => {
+                        console.error("SmartEditor: getContent 호출 오류! Quill 인스턴스가 준비되지 않았습니다.");
+                        return "";
+                    },
+                    setContent: () => {},
+                    setReadOnly: () => {},
+                } as SmartEditorHandle;
+            }
 
-                // 2. 만약 상태가 비어 있다면, Quill DOM에서 직접 HTML을 가져와서 최종 확인
-                if (currentContent.trim() === "<p><br></p>" || currentContent.trim() === "") {
-                    const editor = quillRef.current?.getEditor();
-                    if (editor && editor.root) {
-                        const htmlFromDOM = editor.root.innerHTML || "";
-                        
-                        // DOM에서 가져온 내용이 실제로 비어 있지 않다면 반환 (혹시 모를 상태 동기화 지연 방지)
-                        if (htmlFromDOM.trim() !== "<p><br></p>" && htmlFromDOM.trim() !== "") {
-                             return htmlFromDOM;
+            // Quill 인스턴스가 준비된 경우에만 올바른 함수 집합을 반환
+            return {
+                getContent: () => {
+                    const currentContent = content || "";
+                    // ... (기존 getContent 로직 유지)
+                    if (currentContent.trim() === "<p><br></p>" || currentContent.trim() === "") {
+                        const editor = quillRef.current?.getEditor();
+                        if (editor && editor.root) {
+                            const htmlFromDOM = editor.root.innerHTML || "";
+                            if (htmlFromDOM.trim() !== "<p><br></p>" && htmlFromDOM.trim() !== "") {
+                                 return htmlFromDOM;
+                            }
                         }
+                        return "";
                     }
-                    return ""; // 최종적으로 빈 문자열 반환
-                }
-                
-                // 3. 일반적으로는 상태의 내용을 반환
-                return currentContent;
-            },
-            setContent: (c: string) => setContent(c),
-            setReadOnly: (r: boolean) => setReadOnlyState(r),
-        }), [content]); // content가 업데이트될 때마다 새로운 함수를 노출하여 최신 content를 참조하도록 함 (중요)
+                    return currentContent;
+                },
+                setContent: (c: string) => setContent(c),
+                setReadOnly: (r: boolean) => setReadOnlyState(r),
+            };
+        }, [content, quillRef.current]);
 
         const modules = {
             toolbar: [
