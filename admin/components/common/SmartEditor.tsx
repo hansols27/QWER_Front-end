@@ -4,12 +4,12 @@ import dynamic from "next/dynamic";
 import { forwardRef, useImperativeHandle, useState, useEffect, useRef } from "react";
 import "react-quill/dist/quill.snow.css";
 import type ReactQuill from "react-quill";
-import { Box } from "@mui/material";
+import { Box } from '@mui/material';
 
-// ReactQuill Dynamic Import (SSR 방지)
+// 클라이언트 사이드에서만 ReactQuill 로드 (SSR 방지)
 const EditorComponent = dynamic(() => import("react-quill"), { ssr: false });
 
-/** 외부에서 사용할 핸들러 타입 */
+/** 부모가 접근 가능한 메서드 */
 export interface SmartEditorHandle {
     getContent: () => string;
     setContent: (content: string) => void;
@@ -27,92 +27,74 @@ export interface SmartEditorProps {
 type QuillRef = ReactQuill | null;
 
 const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
-    ({ initialContent = "", height = "400px", disabled = false, onReady, onChange }, ref) => {
+    ({ initialContent = "", height = '400px', disabled = false, onReady, onChange }, ref) => {
+
         const quillRef = useRef<QuillRef>(null);
         const [content, setContent] = useState(initialContent);
         const [readOnly, setReadOnlyState] = useState(disabled);
-        const [isReady, setIsReady] = useState(false);
 
-        /** ⛳ initialContent 변경 → 에디터에 반영 */
+        /** props → 내부 state 반영 */
         useEffect(() => {
             setContent(initialContent);
         }, [initialContent]);
 
-        /** ⛳ disabled 변경 → readOnly 반영 */
         useEffect(() => {
             setReadOnlyState(disabled);
         }, [disabled]);
 
-        /**
-         * ⛳ Quill 초기화 직후 onReady 이벤트 호출
-         * quillRef.current가 잡히고 DOM이 그려진 뒤 호출 보장
-         */
+        /** onReady 호출 (dynamic 로딩 후) */
         useEffect(() => {
-            if (!onReady) return;
-
-            // quillRef가 준비된 후 50~100ms 지연 후 콜백 실행
-            const t = setTimeout(() => {
-                if (quillRef.current && !isReady) {
-                    setIsReady(true);
-                    onReady();
-                }
-            }, 120);
-
-            return () => clearTimeout(t);
+            if (quillRef.current && onReady) {
+                const timer = setTimeout(() => onReady(), 100);
+                return () => clearTimeout(timer);
+            }
         }, [quillRef.current]);
 
-        /**
-         * ⛳ ImperativeHandler
-         * ref.current.getContent / setContent / setReadOnly 제공
-         */
+        /** ⭐ 핵심: useImperativeHandle 안정화 버전 */
         useImperativeHandle(ref, () => {
-            const instance = quillRef.current?.getEditor();
-
-            if (!instance) {
-                return {
-                    getContent: () => {
-                        console.warn("SmartEditor: Quill 인스턴스가 아직 준비되지 않았습니다.");
-                        return "";
-                    },
-                    setContent: () => {},
-                    setReadOnly: () => {},
-                } as SmartEditorHandle;
-            }
+            const editorInstance = quillRef.current?.getEditor();
 
             return {
+                /** 현재 내용 반환 */
                 getContent: () => {
+                    if (!editorInstance) return "";
+
+                    // state 값 우선
                     const currentContent = content || "";
 
-                    // 에디터가 비어있는 경우 dom에서 추출
                     if (
                         currentContent.trim() === "<p><br></p>" ||
                         currentContent.trim() === ""
                     ) {
-                        const html = instance.root.innerHTML || "";
-                        if (html.trim() !== "<p><br></p>" && html.trim() !== "") {
-                            return html;
+                        const htmlFromDOM = editorInstance.root.innerHTML || "";
+                        if (
+                            htmlFromDOM.trim() !== "<p><br></p>" &&
+                            htmlFromDOM.trim() !== ""
+                        ) {
+                            return htmlFromDOM;
                         }
                         return "";
                     }
-
                     return currentContent;
                 },
 
+                /** setContent 시 DOM도 즉시 반영 */
                 setContent: (value: string) => {
                     setContent(value);
-                    // Quill DOM 즉시 반영 (지연 없이)
-                    if (instance.root) {
-                        instance.root.innerHTML = value;
+
+                    if (editorInstance?.root) {
+                        editorInstance.root.innerHTML = value;
                     }
                 },
 
-                setReadOnly: (r: boolean) => {
-                    setReadOnlyState(r);
+                /** readOnly 변경 */
+                setReadOnly: (value: boolean) => {
+                    setReadOnlyState(value);
                 },
             };
-        }, [content, quillRef.current]);
+        }, [content]); // quillRef.current 제거 (중요!)
 
-        /** Quill toolbar & formats */
+        /** Quill 설정 */
         const modules = {
             toolbar: readOnly
                 ? false
@@ -163,17 +145,21 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
                     boxSizing: "border-box",
                     border: readOnly ? "none" : "1px solid #ccc",
                     borderRadius: "4px",
+
                     "& .ql-container": {
                         border: "none !important",
                         flex: 1,
                         minHeight: 0,
+                        ...(readOnly && {
+                            borderTop: "1px solid #eee !important",
+                        }),
                     },
                     "& .ql-toolbar": {
                         border: "none !important",
                         borderBottom: readOnly ? "none" : "1px solid #eee",
-                        display: readOnly ? "none" : "block",
                     },
                     "& .ql-editor": {
+                        minHeight: 0,
                         flex: 1,
                         overflowY: "auto",
                         padding: "12px 15px",
@@ -184,11 +170,11 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
                     ref={quillRef}
                     theme="snow"
                     value={content}
+                    readOnly={readOnly}
                     onChange={(value: string) => {
                         setContent(value);
                         onChange?.(value);
                     }}
-                    readOnly={readOnly}
                     modules={modules}
                     formats={formats}
                     style={{
