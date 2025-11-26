@@ -19,7 +19,6 @@ import {
     CircularProgress,
     Card, 
     Divider,
-    // 💡 window.confirm을 대체하기 위해 Dialog 컴포넌트 추가
     Dialog,
     DialogTitle,
     DialogContent,
@@ -44,6 +43,16 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
     return defaultMsg;
 };
 
+// 💡 추가된 헬퍼 함수: 내용이 비어있는지 확인
+const isContentEmpty = (htmlContent: string): boolean => {
+    // HTML 태그를 제거하고 공백을 없앤 문자열이 비어있는지 확인
+    const textContent = htmlContent.replace(/<[^>]*>?/gm, '').trim();
+    // Quill 기본 빈 값 또는 완전히 비어있는지 확인
+    const isQuillEmpty = htmlContent === '<p><br></p>' || htmlContent === '';
+
+    return textContent.length === 0 || isQuillEmpty;
+};
+
 export default function NoticeDetail() {
     const params = useParams();
     const id = params?.noticeId as string | undefined; 
@@ -58,8 +67,9 @@ export default function NoticeDetail() {
     const [initialContent, setInitialContent] = useState(""); 
     const [isEditorReady, setIsEditorReady] = useState(false); // 에디터 준비 상태
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
-    // 💡 삭제 확인 모달 상태 추가
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    // 💡 추가: SmartEditor에서 실시간으로 업데이트되는 내용을 담을 상태
+    const [content, setContent] = useState(""); 
 
     // 데이터 로딩 함수
     const fetchNotice = useCallback(async () => {
@@ -78,6 +88,8 @@ export default function NoticeDetail() {
             setTitle(data.title);
             setType(data.type);
             setInitialContent(data.content); 
+            // 💡 추가: content 상태 초기화
+            setContent(data.content); 
             
         } catch (err: any) {
             console.error("공지사항 로드 실패:", err);
@@ -108,32 +120,25 @@ export default function NoticeDetail() {
         }
         
         // 1. 에디터 준비 상태 최종 확인 (Ref 오류 방지)
-        if (!isEditorReady) {
-            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
-            return;
-        }
-
-        if (typeof editorRef.current.getContent !== 'function') {
-             // 이 로그는 사용자가 로딩 직후 너무 빨리 클릭했을 때 발생하며, API 호출을 막아줌
-             console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
-             setAlertMessage({ message: "에디터 인스턴스 오류. 새로고침 후 시도해주세요.", severity: "error" });
+        // 이 검사를 통해 에디터 인스턴스가 getContent를 제공하는지 최종 확인합니다.
+        if (!isEditorReady || typeof editorRef.current.getContent !== 'function') {
+             console.error("저장 실패: SmartEditor 인스턴스가 완전히 초기화되지 않았습니다.");
+             setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
              return; 
         }
 
         const trimmedTitle = title.trim();
-        const content = editorRef.current.getContent() || "";
+        // 💡 변경: Ref에서 직접 내용을 가져오지 않고 content 상태를 사용합니다.
+        const currentContent = content || "";
         
-        // 2. 제목 유효성 검사 (필수)
+        // 2. 제목 유효성 검사
         if (!trimmedTitle) { 
             setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" }); 
             return; 
         }
         
-        // 3. 내용 유효성 검사 (최종 제출 시, 사용자가 내용을 비웠는지 확인)
-        const textContent = content.replace(/<[^>]*>?/gm, '').trim();
-        const isQuillEmpty = content === '<p><br></p>' || content === '';
-
-        if (textContent.length === 0 || isQuillEmpty) {
+        // 3. 내용 유효성 검사
+        if (isContentEmpty(currentContent)) {
             setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" }); 
             return; 
         }
@@ -142,7 +147,8 @@ export default function NoticeDetail() {
         setAlertMessage(null);
 
         try {
-            await api.put(`/api/notice/${id}`, { type, title: trimmedTitle, content }); 
+            // 💡 API 호출 시 content 상태 사용
+            await api.put(`/api/notice/${id}`, { type, title: trimmedTitle, content: currentContent }); 
             
             setAlertMessage({ message: "수정 완료!", severity: "success" });
             setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type } : null);
@@ -153,7 +159,7 @@ export default function NoticeDetail() {
         } finally { setIsProcessing(false); }
     };
     
-    // 💡 커스텀 모달을 통한 실제 삭제 실행 함수
+    // 💡 커스텀 모달을 통한 실제 삭제 실행 함수 (변경 없음)
     const executeDelete = async () => {
         setShowDeleteConfirm(false); // 모달 닫기
         if (!id || isProcessing) return; 
@@ -174,7 +180,7 @@ export default function NoticeDetail() {
         }
     };
 
-    // 💡 삭제 버튼 클릭 시 모달만 열도록 변경
+    // 💡 삭제 버튼 클릭 시 모달만 열도록 변경 (변경 없음)
     const handleDelete = () => {
         if (isProcessing) return;
         setShowDeleteConfirm(true); 
@@ -184,7 +190,7 @@ export default function NoticeDetail() {
         router.push("/notice");
     };
 
-    // 로딩 / 에러 UI (동일)
+    // ... (로딩/에러 UI는 변경 없음)
     if (loading) {
         return (
             <Layout>
@@ -258,6 +264,7 @@ export default function NoticeDetail() {
                             {!isEditorReady && (
                                 <Box display="flex" justifyContent="center" alignItems="center" height="400px">
                                     <CircularProgress />
+                                    <Typography>에디터 로딩 중...</Typography>
                                 </Box>
                             )}
                             <Box sx={{ display: isEditorReady ? 'block' : 'none', height: '100%' }}>
@@ -267,6 +274,8 @@ export default function NoticeDetail() {
                                     initialContent={initialContent} 
                                     disabled={isProcessing} 
                                     onReady={handleEditorReady} 
+                                    // 💡 추가: 에디터 내용 변경 시 content 상태 업데이트
+                                    onChange={setContent} 
                                 />
                             </Box>
                         </Box>
@@ -315,8 +324,17 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
-                            // ⭐️ 에디터 준비와 제목만 유효하면 활성화
-                            disabled={isProcessing || !title.trim() || !isEditorReady} 
+                            // ⭐️ 수정된 disabled 조건:
+                            // 1. 저장 처리 중 (isProcessing)
+                            // 2. 제목이 비어있음 (!title.trim())
+                            // 3. 내용이 비어있음 (isContentEmpty(content))
+                            // 4. 에디터가 아직 로드되지 않음 (!isEditorReady) - 안전을 위해 유지
+                            disabled={
+                                isProcessing || 
+                                !title.trim() || 
+                                isContentEmpty(content) || 
+                                !isEditorReady
+                            } 
                             startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2 }}
                         >
@@ -326,7 +344,7 @@ export default function NoticeDetail() {
                 </Box>
             </Box>
             
-            {/* 💡 삭제 확인 커스텀 모달 */}
+            {/* 💡 삭제 확인 커스텀 모달 (변경 없음) */}
             <Dialog
                 open={showDeleteConfirm}
                 onClose={() => setShowDeleteConfirm(false)}
