@@ -1,4 +1,14 @@
-import * as React from 'react';
+'use client';
+
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+// @shared/services/axios와 @shared/types/notice는 예시로 그대로 둠
+// 실제 환경에 맞게 경로를 수정해야 할 수 있습니다.
+import { api } from "@shared/services/axios"; 
+import type { SmartEditorHandle } from "@components/common/SmartEditor"; 
+import Layout from "@components/common/layout";
+import type { Notice, NoticeType } from "@shared/types/notice"; 
 import {
     Box,
     Button,
@@ -18,170 +28,62 @@ import {
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material";
 
-// ==========================================================
-// 1. Mock Types (외부 타입 정의 대체)
-// ==========================================================
-type NoticeType = "공지" | "이벤트";
-interface Notice {
-    id: string;
-    title: string;
-    type: NoticeType;
-    content: string;
-    createdAt: string;
-}
-// SmartEditorHandle: 에디터의 Ref 타입 정의
-interface SmartEditorHandle {
-    // 실제 SmartEditor에 구현된 함수가 있다면 여기에 정의
-    getContent: () => string; 
-}
+// 클라이언트 사이드 전용 에디터 동적 로딩
+// SmartEditor 컴포넌트가 해당 경로에 존재해야 합니다.
+const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
+
 type AlertSeverity = "success" | "error" | "info" | "warning"; 
 
-// ==========================================================
-// 2. Mock Data & API (API 및 데이터 대체)
-// ==========================================================
-const MOCK_NOTICE_DATA: Notice = {
-    id: "12345",
-    title: "새로운 공지사항 제목입니다",
-    type: "공지",
-    content: "<p>여기에 <b>공지사항의 초기 내용</b>이 로드됩니다.</p>",
-    createdAt: new Date().toISOString(),
-};
+interface NoticeResponse {
+    success: boolean;
+    data: Notice; 
+}
 
-// Mock API 함수: 데이터 로드 및 저장/삭제 시뮬레이션
-const mockApi = {
-    get: (url: string): Promise<{ data: { data: Notice } }> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                console.log(`Mock GET: ${url}`);
-                resolve({ data: { data: MOCK_NOTICE_DATA } });
-            }, 500);
-        });
-    },
-    put: (url: string, data: any): Promise<void> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                console.log(`Mock PUT: ${url}`, data);
-                // MOCK_NOTICE_DATA.title = data.title; // 실제 상태는 React state가 업데이트
-                resolve();
-            }, 800);
-        });
-    },
-    delete: (url: string): Promise<void> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                console.log(`Mock DELETE: ${url}`);
-                resolve();
-            }, 800);
-        });
-    },
-};
-
-// ==========================================================
-// 3. Mock Components & Hooks (외부 의존성 대체)
-// ==========================================================
-
-// Layout Mock: 간단한 중앙 정렬 컨테이너로 대체
-const Layout: React.FC<any> = ({ children }) => (
-    <Box sx={{ maxWidth: 1000, margin: '0 auto', p: { xs: 1, md: 4 } }}>
-        {children}
-    </Box>
-);
-
-// SmartEditor Mock: <textarea> 기반으로 동작을 시뮬레이션
-const SmartEditor = React.forwardRef<SmartEditorHandle, {
-    height: string;
-    initialContent: string;
-    disabled: boolean;
-    onReady: () => void;
-    onChange: (content: string) => void;
-}>(({ initialContent, disabled, onReady, onChange }, ref) => {
-    
-    // 컴포넌트 마운트 시 onReady 호출 시뮬레이션
-    React.useEffect(() => {
-        const timer = setTimeout(onReady, 50); // 약간의 딜레이 후 준비 완료 시뮬레이션
-        return () => clearTimeout(timer);
-    }, [onReady]);
-
-    // Ref API 목업 (필요하면 추가)
-    React.useImperativeHandle(ref, () => ({
-        getContent: () => initialContent, // onChange로 상태를 관리하므로 이 함수는 사용되지 않을 수 있음
-    }));
-
-    // 실제 에디터 대신 텍스트 영역 사용
-    return (
-        <TextField
-            fullWidth
-            multiline
-            rows={15}
-            defaultValue={initialContent}
-            onChange={(e) => onChange(e.target.value)}
-            disabled={disabled}
-            placeholder="에디터가 로드되면 여기에 초기 내용이 표시됩니다. (현재는 Mock Textarea)"
-            variant="outlined"
-            sx={{
-                '& .MuiInputBase-root': {
-                    padding: 0,
-                    height: '100%',
-                    '& textarea': { padding: '12px' }
-                }
-            }}
-        />
-    );
-});
-SmartEditor.displayName = 'SmartEditor';
-
-
-// Mock Hooks: Next.js 라우팅 대체
-const useMockParams = () => ({ noticeId: MOCK_NOTICE_DATA.id }); // ID를 목업 데이터의 ID로 설정
-
-const useMockRouter = () => ({
-    push: (path: string) => {
-        console.log(`Mock Navigation: Redirecting to ${path}`);
-        alert(`[Mock] 목록으로 이동: ${path}`);
-    }
-});
-
-
-// ==========================================================
-// 4. Main Component (원본 로직 유지)
-// ==========================================================
-// 헬퍼: 에러 메시지 추출 (Mock API에서는 단순화)
+// 헬퍼: 에러 메시지 추출
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
-    return error?.message || defaultMsg;
+    // API 응답 구조에 따라 에러 메시지 추출 로직 조정
+    if (error?.response?.data?.message) return error.response.data.message;
+    if (error?.message) return error.message;
+    return defaultMsg;
 };
 
 // 헬퍼 함수: 내용이 비어있는지 확인
 const isContentEmpty = (htmlContent: string): boolean => {
+    if (!htmlContent) return true;
+    
+    // HTML 태그를 제거하고 공백을 없앤 문자열이 비어있는지 확인
     const textContent = htmlContent.replace(/<[^>]*>?/gm, '').trim();
-    // Quill 에디터의 빈 내용 태그를 포함하여 검사
-    const isQuillEmpty = htmlContent === '<p><br></p>' || htmlContent === '';
+    
+    // Quill 기본 빈 값 또는 완전히 비어있는지 확인
+    const isQuillEmpty = htmlContent === '<p><br></p>' || htmlContent === '<p></p>' || htmlContent.trim() === '';
 
-    // Mock Editor는 textarea이므로, 텍스트가 없으면 비어있는 것으로 간주
     return textContent.length === 0 || isQuillEmpty;
 };
 
 export default function NoticeDetail() {
-    // Next.js 의존성 제거 및 Mock Hooks 사용
-    const params = useMockParams(); 
-    const id = params?.noticeId as string | undefined; 
-    const router = useMockRouter();
+    const params = useParams();
+    // noticeId가 배열일 가능성을 대비하여 string으로 확실히 캐스팅
+    const id = Array.isArray(params?.noticeId) ? params.noticeId[0] : (params?.noticeId as string | undefined);
     
-    const editorRef = React.useRef<SmartEditorHandle>(null); 
+    const router = useRouter();
+    // SmartEditorHandle 타입은 @components/common/SmartEditor에서 정의되어야 합니다.
+    const editorRef = useRef<SmartEditorHandle>(null); 
 
-    const [notice, setNotice] = React.useState<Notice | null>(null);
-    const [loading, setLoading] = React.useState(true);
-    const [isProcessing, setIsProcessing] = React.useState(false); 
-    const [title, setTitle] = React.useState("");
-    const [type, setType] = React.useState<NoticeType>("공지"); 
-    const [initialContent, setInitialContent] = React.useState(""); 
-    const [isEditorReady, setIsEditorReady] = React.useState(false); 
-    const [alertMessage, setAlertMessage] = React.useState<{ message: string; severity: AlertSeverity } | null>(null);
-    const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
-    // 핵심: SmartEditor의 onChange를 통해 실시간 업데이트되는 내용을 담을 상태
-    const [content, setContent] = React.useState(""); 
+    const [notice, setNotice] = useState<Notice | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false); 
+    const [title, setTitle] = useState("");
+    const [type, setType] = useState<NoticeType>("공지"); 
+    // 에디터의 초기값 설정용 상태. fetchNotice에서만 변경됨.
+    const [initialContent, setInitialContent] = useState(""); 
+    // SmartEditor의 실시간 내용을 담을 상태. 저장/유효성 검사에 사용됨.
+    const [content, setContent] = useState(""); 
+    const [isEditorReady, setIsEditorReady] = useState(false); // 에디터 준비 상태
+    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-    // 데이터 로딩 함수 (Mock API 사용)
-    const fetchNotice = React.useCallback(async () => {
+    // 데이터 로딩 함수
+    const fetchNotice = useCallback(async () => {
         if (!id) {
             setLoading(false);
             return; 
@@ -190,15 +92,15 @@ export default function NoticeDetail() {
         setLoading(true);
         setAlertMessage(null);
         try {
-            // Mock API 호출로 대체
-            const res = await mockApi.get(`/api/notice/${id}`); 
+            // API 경로가 `/api/notice/${id}`라고 가정
+            const res = await api.get<NoticeResponse>(`/api/notice/${id}`); 
             const data = res.data.data;
 
             setNotice(data);
             setTitle(data.title);
             setType(data.type);
+            // 초기 내용과 현재 내용을 모두 업데이트
             setInitialContent(data.content); 
-            // content 상태 초기화
             setContent(data.content); 
             
         } catch (err: any) {
@@ -210,84 +112,80 @@ export default function NoticeDetail() {
         }
     }, [id]);
 
-    React.useEffect(() => { 
+    // id가 변경될 때마다 데이터를 다시 불러옵니다.
+    useEffect(() => { 
         fetchNotice(); 
     }, [fetchNotice]);
 
     // 에디터 준비 완료 핸들러
-    const handleEditorReady = React.useCallback(() => {
+    const handleEditorReady = useCallback(() => {
         setIsEditorReady(true);
     }, []);
 
-
-    // 저장 핸들러 (Mock API 사용)
+    // 저장 핸들러
     const handleSave = async () => {
         
-        // 1. 필수 데이터 확인
+        // 1. 필수 데이터 및 준비 상태 확인
         if (!id || !notice) {
-            console.error("저장 실패: 공지 ID 또는 데이터가 누락되었습니다.");
-            setAlertMessage({ message: "필수 데이터가 누락되었습니다. (Mock ID 없음)", severity: "error" });
-            return;
+             console.error("저장 실패: 필수 데이터가 준비되지 않았습니다.");
+             return; 
         }
         
-        // 2. 에디터 준비 상태 최종 확인 
-        if (!isEditorReady) {
-            console.error("저장 실패: SmartEditor가 아직 준비되지 않았습니다.");
-            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
-            return; 
-        }
-
         const trimmedTitle = title.trim();
-        const currentContent = content || ""; 
-        
-        // 3. 제목 유효성 검사
+        const currentContent = content; // content 상태 사용
+
+        // 2. 제목 유효성 검사
         if (!trimmedTitle) { 
             setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" }); 
             return; 
         }
         
-        // 4. 내용 유효성 검사
+        // 3. 내용 유효성 검사
         if (isContentEmpty(currentContent)) {
             setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" }); 
             return; 
+        }
+
+        // 4. 에디터가 아직 로드되지 않은 상태에서 저장을 시도하는 경우 경고 (이중 확인)
+        if (!isEditorReady) {
+            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
+            return;
         }
 
         setIsProcessing(true);
         setAlertMessage(null);
 
         try {
-            // Mock API 호출로 대체
-            await mockApi.put(`/api/notice/${id}`, { type, title: trimmedTitle, content: currentContent }); 
+            // API 호출 시 content 상태 사용
+            await api.put(`/api/notice/${id}`, { type, title: trimmedTitle, content: currentContent }); 
             
-            setAlertMessage({ message: "수정 완료! (Mock API)", severity: "success" });
-            // UI를 위해 상태 업데이트 (실제로는 서버 응답에 기반해야 함)
+            setAlertMessage({ message: "수정 완료!", severity: "success" });
+            // 저장 성공 후 notice 객체 업데이트
             setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type, content: currentContent } : null);
 
         } catch (err: any) {
             console.error("공지사항 수정 실패:", err);
-            setAlertMessage({ message: extractErrorMessage(err, "수정 실패 (Mock)"), severity: "error" });
+            setAlertMessage({ message: extractErrorMessage(err, "수정 실패"), severity: "error" });
         } finally { setIsProcessing(false); }
     };
     
-    // 삭제 실행 함수 (Mock API 사용)
+    // 실제 삭제 실행 함수
     const executeDelete = async () => {
         setShowDeleteConfirm(false); // 모달 닫기
         if (!id || isProcessing) return; 
 
         setIsProcessing(true);
-        setAlertMessage({ message: "삭제 중... (Mock API)", severity: "info" });
+        setAlertMessage({ message: "삭제 중...", severity: "info" });
 
         try {
-            // Mock API 호출로 대체
-            await mockApi.delete(`/api/notice/${id}`);
+            await api.delete(`/api/notice/${id}`);
             
-            setAlertMessage({ message: "삭제 완료! 목록으로 이동합니다. (Mock API)", severity: "success" });
+            setAlertMessage({ message: "삭제 완료! 목록으로 이동합니다.", severity: "success" });
             
-            // Mock 라우터 사용
             setTimeout(() => router.push("/notice"), 1500); 
         } catch (err: any) {
             console.error("공지사항 삭제 실패:", err);
-            setAlertMessage({ message: extractErrorMessage(err, "삭제 실패 (Mock)"), severity: "error" });
+            setAlertMessage({ message: extractErrorMessage(err, "삭제 실패"), severity: "error" });
             setIsProcessing(false);
         }
     };
@@ -308,17 +206,18 @@ export default function NoticeDetail() {
             <Layout>
                 <Box display="flex" justifyContent="center" alignItems="center" py={8} flexDirection="column">
                     <CircularProgress />
-                    <Typography mt={2}>데이터 로딩 중...</Typography>
+                    <Typography mt={2}>로딩 중...</Typography>
                 </Box>
             </Layout>
         );
     }
 
-    // 에러/데이터 없음 UI
+    // 데이터 없음/오류 UI
     if (!id || !notice) { 
         return (
             <Layout>
                 <Box p={4}>
+                    {/* 로드 실패 시 alertMessage가 이미 설정되어 있을 수 있음 */}
                     {!alertMessage && <Alert severity="warning">공지사항을 찾을 수 없거나 접근 경로가 잘못되었습니다.</Alert>}
                     {alertMessage && alertMessage.severity !== "success" && (
                         <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>
@@ -377,10 +276,10 @@ export default function NoticeDetail() {
                             {!isEditorReady && (
                                 <Box display="flex" justifyContent="center" alignItems="center" height="400px" flexDirection="column">
                                     <CircularProgress />
-                                    <Typography mt={2}>에디터 로딩 중...</Typography>
+                                    <Typography mt={1}>에디터 로딩 중...</Typography>
                                 </Box>
                             )}
-                            {/* 에디터 로드 후 표시 */}
+                            {/* isEditorReady가 true일 때만 에디터 표시 */}
                             <Box sx={{ display: isEditorReady ? 'block' : 'none', height: '100%' }}>
                                 <SmartEditor 
                                     ref={editorRef} 
@@ -438,7 +337,7 @@ export default function NoticeDetail() {
                             color="success" 
                             size="large"
                             onClick={handleSave} 
-                            // 저장 버튼 disabled 조건
+                            // 저장 버튼 disabled 조건:
                             disabled={
                                 isProcessing || 
                                 !title.trim() || 
@@ -464,7 +363,7 @@ export default function NoticeDetail() {
                 <DialogTitle id="alert-dialog-title">{"삭제 확인"}</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        삭제하시겠습니까?
+                        삭제하시겠습니까? 
                     </Typography>
                 </DialogContent>
                 <DialogActions>
