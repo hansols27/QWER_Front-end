@@ -18,7 +18,12 @@ import {
     Alert,
     CircularProgress,
     Card, 
-    Divider 
+    Divider,
+    // 💡 window.confirm을 대체하기 위해 Dialog 컴포넌트 추가
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material";
 
@@ -53,6 +58,8 @@ export default function NoticeDetail() {
     const [initialContent, setInitialContent] = useState(""); 
     const [isEditorReady, setIsEditorReady] = useState(false); // 에디터 준비 상태
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
+    // 💡 삭제 확인 모달 상태 추가
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // 데이터 로딩 함수
     const fetchNotice = useCallback(async () => {
@@ -91,19 +98,6 @@ export default function NoticeDetail() {
         // console.log("SmartEditor: 준비 완료. 저장 버튼 활성화.");
     }, []);
 
-
-    // 이 함수는 버튼 비활성화에 사용되지 않지만, 최종 제출 시 유효성 검사 로직을 명확히 함
-    const isContentValid = useCallback((): boolean => {
-        if (!isEditorReady || !editorRef.current || typeof editorRef.current.getContent !== 'function') {
-            return false; 
-        }
-        
-        const content = editorRef.current.getContent() || "";
-        const textContent = content.replace(/<[^>]*>?/gm, '').trim();
-        const isQuillEmpty = content === '<p><br></p>' || content === '';
-        
-        return textContent.length > 0 && !isQuillEmpty;
-    }, [isEditorReady]);
 
     // 저장 핸들러
     const handleSave = async () => {
@@ -159,9 +153,10 @@ export default function NoticeDetail() {
         } finally { setIsProcessing(false); }
     };
     
-    // 삭제 및 목록 이동 핸들러 (동일)
-    const handleDelete = async () => {
-        if (!id || isProcessing || !window.confirm("정말로 공지사항을 삭제하시겠습니까?")) return; 
+    // 💡 커스텀 모달을 통한 실제 삭제 실행 함수
+    const executeDelete = async () => {
+        setShowDeleteConfirm(false); // 모달 닫기
+        if (!id || isProcessing) return; 
 
         setIsProcessing(true);
         setAlertMessage({ message: "삭제 중...", severity: "info" });
@@ -177,6 +172,12 @@ export default function NoticeDetail() {
             setAlertMessage({ message: extractErrorMessage(err, "삭제 실패"), severity: "error" });
             setIsProcessing(false);
         }
+    };
+
+    // 💡 삭제 버튼 클릭 시 모달만 열도록 변경
+    const handleDelete = () => {
+        if (isProcessing) return;
+        setShowDeleteConfirm(true); 
     };
     
     const handleListMove = () => {
@@ -216,7 +217,7 @@ export default function NoticeDetail() {
         <Layout>
             <Box p={4}>
                 <Typography variant="h4" mb={2} fontWeight="bold">
-                    공지사항 상세
+                    공지사항 상세/수정
                 </Typography>
 
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
@@ -253,13 +254,21 @@ export default function NoticeDetail() {
                             borderRadius: 1, 
                             overflow: 'hidden',
                         }}> 
-                            <SmartEditor 
-                                ref={editorRef} 
-                                height="400px" 
-                                initialContent={initialContent} 
-                                disabled={isProcessing} 
-                                onReady={handleEditorReady} 
-                            />
+                            {/* isEditorReady가 false일 때 로딩 인디케이터를 보여줄 수도 있습니다. */}
+                            {!isEditorReady && (
+                                <Box display="flex" justifyContent="center" alignItems="center" height="400px">
+                                    <CircularProgress />
+                                </Box>
+                            )}
+                            <Box sx={{ display: isEditorReady ? 'block' : 'none', height: '100%' }}>
+                                <SmartEditor 
+                                    ref={editorRef} 
+                                    height="400px" 
+                                    initialContent={initialContent} 
+                                    disabled={isProcessing} 
+                                    onReady={handleEditorReady} 
+                                />
+                            </Box>
                         </Box>
                         
                         {/* 등록일시 정보 */}
@@ -280,12 +289,12 @@ export default function NoticeDetail() {
                             variant="outlined" 
                             color="error" 
                             size="large"
-                            onClick={handleDelete} 
+                            onClick={handleDelete} // 모달 열기
                             disabled={isProcessing}
                             startIcon={isProcessing && alertMessage?.severity === "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
                             sx={{ py: 1.5, px: 4, borderRadius: 2, marginRight: 'auto' }} 
                         >
-                            {isProcessing && alertMessage?.severity === "info" ? "삭제 중..." : "삭제"}
+                            삭제
                         </Button>
                         
                         {/* 목록 버튼 */}
@@ -316,6 +325,36 @@ export default function NoticeDetail() {
                     </Stack>
                 </Box>
             </Box>
+            
+            {/* 💡 삭제 확인 커스텀 모달 */}
+            <Dialog
+                open={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"공지사항 삭제 확인"}</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        정말로 이 공지사항을 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setShowDeleteConfirm(false)} color="primary" disabled={isProcessing}>
+                        취소
+                    </Button>
+                    <Button 
+                        onClick={executeDelete} 
+                        color="error" 
+                        variant="contained" 
+                        autoFocus
+                        disabled={isProcessing}
+                        startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
+                    >
+                        삭제 확인
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Layout>
     );
 }
