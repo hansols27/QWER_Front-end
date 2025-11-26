@@ -159,9 +159,12 @@ export default function NoticeDetail() {
             // API 호출 시 content 상태 사용
             await api.put(`/api/notice/${id}`, { type, title: trimmedTitle, content: currentContent }); 
             
-            setAlertMessage({ message: "수정 완료!", severity: "success" });
+            setAlertMessage({ message: "수정 완료! 목록으로 이동합니다.", severity: "success" });
             // 저장 성공 후 notice 객체 업데이트
             setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type, content: currentContent } : null);
+            
+            // ✅ 요청 사항: 저장 완료 후 목록 페이지로 이동
+            setTimeout(() => router.push("/notice"), 1500);
 
         } catch (err: any) {
             console.error("공지사항 수정 실패:", err);
