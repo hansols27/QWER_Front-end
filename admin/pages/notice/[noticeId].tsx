@@ -107,7 +107,7 @@ export default function NoticeDetail() {
     }, []);
 
 
-    // 저장 핸들러
+    // 저장 핸들러 (오류 해결 로직 적용)
     const handleSave = async () => {
         
         if (!id || !notice) {
@@ -116,21 +116,21 @@ export default function NoticeDetail() {
             return; 
         }
 
-        // 1. 에디터 준비 상태 최종 확인 (Ref 오류 방지)
-        if (!isEditorReady || !editorRef.current) {
-            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요. (Ref Not Ready)", severity: "warning" });
+        // 1. 에디터 준비 상태 최종 확인 (가장 먼저 체크)
+        if (!isEditorReady) {
+            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요. (Editor Not Ready)", severity: "warning" });
             return;
         }
 
-        // 💡 핵심: Ref가 유효하고 isEditorReady가 true일 때만 호출
-        if (typeof editorRef.current?.getContent !== 'function') {
-            // 타이밍 문제 발생 시 최종 방어벽 (이 메시지가 보이면 SmartEditor 구현을 재확인해야 함)
+        // 💡 핵심: Ref가 유효하고 getContent 함수가 있는지 확인 (타이밍 문제 방지)
+        if (!editorRef.current || typeof editorRef.current?.getContent !== 'function') {
             console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
             setAlertMessage({ message: "에디터 인스턴스 초기화 오류. 새로고침 후 시도해주세요.", severity: "error" });
             return; 
         }
 
         const trimmedTitle = title.trim();
+        // Ref가 유효함을 확인했으므로 getContent 호출
         const content = editorRef.current.getContent() || "";
         
         // 2. 제목 유효성 검사 (필수)
