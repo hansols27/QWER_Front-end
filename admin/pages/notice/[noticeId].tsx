@@ -1,368 +1,357 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { api } from "@shared/services/axios";
-import Layout from "@components/common/layout";
+import { api } from "@shared/services/axios"; 
 import type { SmartEditorHandle } from "@components/common/SmartEditor"; 
-import type { NoticeType } from "@shared/types/notice"; 
+import Layout from "@components/common/layout";
+import type { Notice, NoticeType } from "@shared/types/notice"; 
 import {
     Box,
     Button,
+    Typography,
+    Stack,
     Select,
     MenuItem,
     TextField,
-    Typography,
-    Stack,
     Alert,
     CircularProgress,
     Card, 
     Divider,
-    Dialog,        
-    DialogTitle,  
-    DialogContent, 
-    DialogActions, 
-    Skeleton,      
+    // 💡 window.confirm을 대체하기 위해 Dialog 컴포넌트 추가
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from "@mui/material";
-import { SelectChangeEvent } from "@mui/material"; 
+import { SelectChangeEvent } from "@mui/material";
 
-// SmartEditor는 SSR 제외하고 동적 로딩
+// 클라이언트 사이드 전용 에디터 동적 로딩
 const SmartEditor = dynamic(() => import("@components/common/SmartEditor"), { ssr: false });
 
-type AlertSeverity = "success" | "error" | "info";
-
-interface NoticeData {
-    id: string;
-    type: NoticeType;
-    title: string;
-    content: string; // HTML 콘텐츠
-    // 필요한 다른 필드 (예: createdAt, updatedAt)
-}
+type AlertSeverity = "success" | "error" | "info" | "warning"; 
 
 interface NoticeResponse {
     success: boolean;
-    data: NoticeData;
+    data: Notice; 
 }
 
-interface ApiStatusResponse {
-    success: boolean;
-    message?: string;
-}
-
+// 헬퍼: 에러 메시지 추출
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
     if (error?.response?.data?.message) return error.response.data.message;
     if (error?.message) return error.message;
     return defaultMsg;
 };
 
-// 컴포넌트 이름 변경: NoticeCreate -> NoticeDetail
 export default function NoticeDetail() {
-    // URL에서 noticeId를 가져옵니다.
     const params = useParams();
-    const noticeId = params.noticeId as string;
-
-    const [type, setType] = useState<NoticeType>("공지"); 
-    const [title, setTitle] = useState("");
-    const [contentHtml, setContentHtml] = useState(""); // 에디터의 내용을 직접 관리할 상태
-    
-    const [isProcessing, setIsProcessing] = useState(false); // 저장/삭제 처리 중 상태
-    const [isLoading, setIsLoading] = useState(true); // 데이터 로딩 중 상태
-    const [editorLoaded, setEditorLoaded] = useState(false); 
-    
-    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // 삭제 확인 모달 상태
-
-    // 에디터의 ref는 setContent/setReadOnly와 같은 메서드 호출에만 사용합니다.
-    const editorRef = useRef<SmartEditorHandle>(null);
+    const id = params?.noticeId as string | undefined; 
     const router = useRouter();
+    const editorRef = useRef<SmartEditorHandle>(null);
 
-    /**
-     * 공지사항 데이터 로드
-     */
-    useEffect(() => {
-        if (!noticeId) return;
+    const [notice, setNotice] = useState<Notice | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false); 
+    const [title, setTitle] = useState("");
+    const [type, setType] = useState<NoticeType>("공지"); 
+    const [initialContent, setInitialContent] = useState(""); 
+    const [isEditorReady, setIsEditorReady] = useState(false); // 에디터 준비 상태
+    const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
+    // 💡 삭제 확인 모달 상태 추가
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-        const fetchNotice = async () => {
-            setIsLoading(true);
-            try {
-                // GET 요청으로 공지사항 상세 데이터 로드
-                const res = await api.get<NoticeResponse>(`/api/notice/${noticeId}`);
-                
-                if (res.data.success) {
-                    const notice = res.data.data;
-                    setType(notice.type);
-                    setTitle(notice.title);
-                    setContentHtml(notice.content);
-                } else {
-                    setAlertMessage({ message: "공지사항 데이터를 로드하는 데 실패했습니다.", severity: "error" });
-                }
-            } catch (err: any) {
-                console.error("공지사항 로드 실패:", err);
-                setAlertMessage({ message: extractErrorMessage(err, "공지사항 로드 중 오류가 발생했습니다."), severity: "error" }); 
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    // 데이터 로딩 함수
+    const fetchNotice = useCallback(async () => {
+        if (!id) {
+            setLoading(false);
+            return; 
+        }
 
-        fetchNotice();
-    }, [noticeId]); // noticeId가 변경될 때마다 실행
-
-    // SmartEditor가 로드 완료 시 호출되는 콜백
-    const handleEditorReady = () => {
-        setEditorLoaded(true);
-        // 에디터 로드 후 초기 콘텐츠 설정 (useEffect에서 contentHtml이 업데이트되면 SmartEditor 컴포넌트가 알아서 처리할 것임)
-    };
-    
-    // 내용 변경 시 contentHtml 상태 업데이트
-    const handleContentChange = (value: string) => {
-        setContentHtml(value); 
-    };
-
-    /**
-     * 공지사항 수정 (저장) 처리
-     */
-    const handleUpdate = async () => {
+        setLoading(true);
         setAlertMessage(null);
-        
-        // 제출 시점의 최종 유효성 검사 (등록 페이지와 동일)
-        const rawContentHTML = contentHtml || ""; 
-        const trimmedTitle = title.trim();
-        const trimmedContentText = rawContentHTML.replace(/<[^>]*>?/gm, '').trim(); 
-        const isEmptyQuillContent = rawContentHTML.trim() === "<p><br></p>" || rawContentHTML.trim() === "";
+        try {
+            const res = await api.get<NoticeResponse>(`/api/notice/${id}`); 
+            const data = res.data.data;
 
-        if (!trimmedTitle) {
-            setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" });
-            return;
+            setNotice(data);
+            setTitle(data.title);
+            setType(data.type);
+            setInitialContent(data.content); 
+            
+        } catch (err: any) {
+            console.error("공지사항 로드 실패:", err);
+            setAlertMessage({ message: extractErrorMessage(err, "공지사항 로드 실패"), severity: "error" });
+            setNotice(null); 
+        } finally {
+            setLoading(false);
+        }
+    }, [id]);
+
+    useEffect(() => { 
+        fetchNotice(); 
+    }, [fetchNotice]);
+
+    // 에디터 준비 완료 핸들러
+    const handleEditorReady = useCallback(() => {
+        setIsEditorReady(true);
+        // console.log("SmartEditor: 준비 완료. 저장 버튼 활성화.");
+    }, []);
+
+
+    // 저장 핸들러
+    const handleSave = async () => {
+        
+        if (!id || !notice || !editorRef.current) {
+             console.error("저장 실패: 필수 데이터 또는 에디터 Ref가 준비되지 않았습니다.");
+             return; 
         }
         
-        if (!trimmedContentText || isEmptyQuillContent) {
-            setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" });
+        // 1. 에디터 준비 상태 최종 확인 (Ref 오류 방지)
+        if (!isEditorReady) {
+            setAlertMessage({ message: "에디터 로딩 중입니다. 잠시 후 다시 시도해주세요.", severity: "warning" });
             return;
+        }
+
+        if (typeof editorRef.current.getContent !== 'function') {
+             // 이 로그는 사용자가 로딩 직후 너무 빨리 클릭했을 때 발생하며, API 호출을 막아줌
+             console.error("저장 실패: SmartEditor 인스턴스가 getContent 함수를 제공하지 않습니다.");
+             setAlertMessage({ message: "에디터 인스턴스 오류. 새로고침 후 시도해주세요.", severity: "error" });
+             return; 
+        }
+
+        const trimmedTitle = title.trim();
+        const content = editorRef.current.getContent() || "";
+        
+        // 2. 제목 유효성 검사 (필수)
+        if (!trimmedTitle) { 
+            setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" }); 
+            return; 
+        }
+        
+        // 3. 내용 유효성 검사 (최종 제출 시, 사용자가 내용을 비웠는지 확인)
+        const textContent = content.replace(/<[^>]*>?/gm, '').trim();
+        const isQuillEmpty = content === '<p><br></p>' || content === '';
+
+        if (textContent.length === 0 || isQuillEmpty) {
+            setAlertMessage({ message: "내용을 입력해주세요.", severity: "error" }); 
+            return; 
         }
 
         setIsProcessing(true);
+        setAlertMessage(null);
 
         try {
-            // PUT/PATCH 요청으로 공지사항 수정
-            const res = await api.patch<ApiStatusResponse>(`/api/notice/${noticeId}`, { 
-                type, 
-                title: trimmedTitle, 
-                content: rawContentHTML 
-            });
+            await api.put(`/api/notice/${id}`, { type, title: trimmedTitle, content }); 
             
-            if (res.data.success) {
-                setAlertMessage({ message: "저장 (수정) 완료!", severity: "success" });
-                // 수정 완료 후 목록으로 이동하지 않고 현재 페이지에 머무르거나, 1초 후 메시지 초기화
-                setTimeout(() => setAlertMessage(null), 1500);
-            } else {
-                setAlertMessage({ message: res.data.message || "저장에 실패했습니다. 응답을 확인하세요.", severity: "error" });
-            }
+            setAlertMessage({ message: "수정 완료!", severity: "success" });
+            setNotice(prev => prev ? { ...prev, title: trimmedTitle, type: type } : null);
+
         } catch (err: any) {
             console.error("공지사항 수정 실패:", err);
-            setAlertMessage({ message: extractErrorMessage(err, "저장 중 오류가 발생했습니다."), severity: "error" }); 
-        } finally {
-            setIsProcessing(false);
-        }
+            setAlertMessage({ message: extractErrorMessage(err, "수정 실패"), severity: "error" });
+        } finally { setIsProcessing(false); }
     };
     
-    /**
-     * 공지사항 삭제 처리
-     */
-    const handleDelete = async () => {
-        setIsDeleteDialogOpen(false); // 모달 닫기
-        setAlertMessage(null);
+    // 💡 커스텀 모달을 통한 실제 삭제 실행 함수
+    const executeDelete = async () => {
+        setShowDeleteConfirm(false); // 모달 닫기
+        if (!id || isProcessing) return; 
+
         setIsProcessing(true);
+        setAlertMessage({ message: "삭제 중...", severity: "info" });
 
         try {
-            // DELETE 요청으로 공지사항 삭제
-            const res = await api.delete<ApiStatusResponse>(`/api/notice/${noticeId}`);
+            await api.delete(`/api/notice/${id}`);
             
-            if (res.data.success) {
-                setAlertMessage({ message: "삭제 완료! 목록으로 이동합니다.", severity: "success" });
-                // 삭제 완료 후 목록 페이지로 이동
-                setTimeout(() => router.push("/notice"), 1000);
-            } else {
-                setAlertMessage({ message: res.data.message || "삭제에 실패했습니다. 응답을 확인하세요.", severity: "error" });
-            }
+            setAlertMessage({ message: "삭제 완료! 목록으로 이동합니다.", severity: "success" });
+            
+            setTimeout(() => router.push("/notice"), 1500); 
         } catch (err: any) {
             console.error("공지사항 삭제 실패:", err);
-            setAlertMessage({ message: extractErrorMessage(err, "삭제 중 오류가 발생했습니다."), severity: "error" }); 
-        } finally {
+            setAlertMessage({ message: extractErrorMessage(err, "삭제 실패"), severity: "error" });
             setIsProcessing(false);
         }
     };
 
-    /**
-     * 폼 유효성 검사 (버튼 비활성화 여부 결정) - 등록 페이지와 동일 로직 사용
-     * @returns {boolean} true이면 비활성화 (저장 불가능), false이면 활성화 (저장 가능)
-     */
-    const checkFormValidity = (): boolean => {
-        const titleValid = title.trim().length > 0;
-        const rawContentHTML = contentHtml || ""; 
-        
-        let contentValid = false;
-        let trimmedContentText = "";
-
-        if (editorLoaded) {
-            trimmedContentText = rawContentHTML.replace(/<[^>]*>?/gm, '').trim(); 
-            const isEmptyQuillContent = rawContentHTML.trim() === "<p><br></p>" || rawContentHTML.trim() === "";
-            contentValid = trimmedContentText.length > 0 && !isEmptyQuillContent; 
-        }
-        
-        const isInvalid = !editorLoaded || !titleValid || !contentValid;
-        return isInvalid; 
-    }
+    // 💡 삭제 버튼 클릭 시 모달만 열도록 변경
+    const handleDelete = () => {
+        if (isProcessing) return;
+        setShowDeleteConfirm(true); 
+    };
     
-    const isFormInValid = checkFormValidity();
-    const isActionDisabled = isProcessing || isLoading;
+    const handleListMove = () => {
+        router.push("/notice");
+    };
 
-    // 로딩 중일 때 스켈레톤 UI를 보여줍니다.
-    if (isLoading) {
+    // 로딩 / 에러 UI (동일)
+    if (loading) {
         return (
             <Layout>
-                <Box p={4}>
-                    <Typography variant="h4" mb={2} fontWeight="bold">공지사항 상세</Typography>
-                    <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-                        <Stack spacing={3}>
-                            <Skeleton variant="text" sx={{ fontSize: '2rem' }} width="40%" />
-                            <Stack direction="row" spacing={2} alignItems="center">
-                                <Skeleton variant="rectangular" width={150} height={56} />
-                                <Skeleton variant="rectangular" height={56} sx={{ flexGrow: 1 }} />
-                            </Stack>
-                            <Skeleton variant="rectangular" height={400} />
-                        </Stack>
-                    </Card>
-                    <Divider sx={{ mt: 4, mb: 4 }}/>
-                    <Stack direction="row" spacing={2} justifyContent="flex-end">
-                        <Skeleton variant="rectangular" width={100} height={50} />
-                        <Skeleton variant="rectangular" width={100} height={50} />
-                        <Skeleton variant="rectangular" width={100} height={50} />
-                    </Stack>
+                <Box display="flex" justifyContent="center" alignItems="center" py={8} flexDirection="column">
+                    <CircularProgress />
+                    <Typography mt={2}>로딩 중...</Typography>
                 </Box>
             </Layout>
         );
     }
 
+    if (!id || !notice) { 
+        return (
+            <Layout>
+                <Box p={4}>
+                    {!alertMessage && <Alert severity="warning">공지사항을 찾을 수 없거나 접근 경로가 잘못되었습니다.</Alert>}
+                    {alertMessage && alertMessage.severity !== "success" && (
+                        <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>
+                            {alertMessage.message}
+                        </Alert>
+                    )}
+                    <Button onClick={handleListMove} variant="contained" sx={{ mt: 2 }}>목록으로 이동</Button>
+                </Box>
+            </Layout>
+        );
+    }
 
+    // 메인 상세/수정 UI
     return (
         <Layout>
             <Box p={4}>
-                <Typography variant="h4" mb={2} fontWeight="bold">공지사항 상세/수정 ({noticeId})</Typography>
+                <Typography variant="h4" mb={2} fontWeight="bold">
+                    공지사항 상세/수정
+                </Typography>
 
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
-                
+
                 <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                     <Stack spacing={3}>
-                        <Typography variant="h6" borderBottom="1px solid #eee" pb={1}>공지 내용</Typography>
-
+                        
+                        {/* 제목/타입 영역 */}
                         <Stack direction="row" spacing={2} alignItems="center">
-                            {/* 타입 선택 */}
                             <Select 
                                 value={type} 
                                 onChange={(e: SelectChangeEvent<NoticeType>) => setType(e.target.value as NoticeType)} 
-                                disabled={isActionDisabled} 
+                                disabled={isProcessing} 
                                 sx={{ width: 150 }} 
                             >
                                 <MenuItem value="공지">공지</MenuItem>
                                 <MenuItem value="이벤트">이벤트</MenuItem>
                             </Select>
-                            
-                            {/* 제목 입력 */}
                             <TextField 
                                 label="제목" 
                                 value={title} 
                                 onChange={(e) => setTitle(e.target.value)} 
-                                disabled={isActionDisabled} 
-                                fullWidth
+                                disabled={isProcessing} 
+                                fullWidth 
+                                error={!title.trim()}
+                                helperText={!title.trim() ? "제목은 필수입니다." : undefined}
                             />
                         </Stack>
 
                         {/* 에디터 영역 */}
-                        <Box sx={{ minHeight: '400px', border: '1px solid #ddd', borderRadius: 1, overflow: 'hidden', position: 'relative' }}>
-                            <SmartEditor 
-                                ref={editorRef} 
-                                height="400px" 
-                                onReady={handleEditorReady}
-                                onChange={handleContentChange} 
-                                initialContent={contentHtml} // 로드된 내용으로 초기화
-                            />
-                            {!editorLoaded && (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255, 255, 255, 0.9)', zIndex: 10 }}>
+                        <Box sx={{ 
+                            minHeight: '400px', 
+                            border: '1px solid #ddd', 
+                            borderRadius: 1, 
+                            overflow: 'hidden',
+                        }}> 
+                            {/* isEditorReady가 false일 때 로딩 인디케이터를 보여줄 수도 있습니다. */}
+                            {!isEditorReady && (
+                                <Box display="flex" justifyContent="center" alignItems="center" height="400px">
                                     <CircularProgress />
-                                    <Typography sx={{ ml: 2, color: 'text.secondary' }}>에디터 로딩 중...</Typography>
                                 </Box>
                             )}
+                            <Box sx={{ display: isEditorReady ? 'block' : 'none', height: '100%' }}>
+                                <SmartEditor 
+                                    ref={editorRef} 
+                                    height="400px" 
+                                    initialContent={initialContent} 
+                                    disabled={isProcessing} 
+                                    onReady={handleEditorReady} 
+                                />
+                            </Box>
                         </Box>
+                        
+                        {/* 등록일시 정보 */}
+                        <Typography variant="caption" color="textSecondary" alignSelf="flex-end">
+                            등록일: {new Date(notice.createdAt).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        </Typography>
+
                     </Stack>
                 </Card>
 
-                {/* 하단 버튼 영역: 삭제, 목록, 저장 순서 */}
+                {/* 액션 버튼 섹션 */}
                 <Divider sx={{ mt: 4, mb: 4 }}/>
-                <Stack direction="row" spacing={2} justifyContent="flex-end">
-                    
-                    {/* 1. 삭제 버튼 */}
-                    <Button 
-                        variant="outlined" 
-                        color="error" 
-                        size="large"
-                        onClick={() => setIsDeleteDialogOpen(true)} // 모달 열기
-                        disabled={isActionDisabled}
-                        sx={{ py: 1.5, px: 4, borderRadius: 2 }}
-                    >
-                        삭제
-                    </Button>
-
-                    {/* 2. 목록 버튼 */}
-                    <Button 
-                        variant="contained" 
-                        color="primary" 
-                        size="large"
-                        onClick={() => router.push("/notice")} 
-                        disabled={isActionDisabled}
-                        sx={{ py: 1.5, px: 4, borderRadius: 2 }}
-                    >
-                        목록
-                    </Button>
-
-                    {/* 3. 저장 (수정) 버튼 */}
-                    <Button 
-                        variant="contained" 
-                        color="success" 
-                        size="large"
-                        onClick={handleUpdate} // 수정 처리 함수 호출
-                        // isFormInValid가 false일 때만 활성화 (disabled = false)
-                        disabled={isActionDisabled || isFormInValid} 
-                        startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
-                        sx={{ py: 1.5, px: 4, borderRadius: 2 }}
-                    >
-                        {isProcessing ? "저장 중..." : "저장"}
-                    </Button>
-                </Stack>
+                <Box>
+                    <Stack direction="row" spacing={2} justifyContent="flex-end">
+                        
+                        {/* 삭제 버튼 */}
+                        <Button 
+                            variant="outlined" 
+                            color="error" 
+                            size="large"
+                            onClick={handleDelete} // 모달 열기
+                            disabled={isProcessing}
+                            startIcon={isProcessing && alertMessage?.severity === "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2, marginRight: 'auto' }} 
+                        >
+                            삭제
+                        </Button>
+                        
+                        {/* 목록 버튼 */}
+                        <Button 
+                            variant="contained" 
+                            color="primary" 
+                            size="large"
+                            onClick={handleListMove} 
+                            disabled={isProcessing}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
+                        >
+                            목록
+                        </Button>
+                        
+                        {/* 저장 (수정) 버튼 */}
+                        <Button 
+                            variant="contained" 
+                            color="success" 
+                            size="large"
+                            onClick={handleSave} 
+                            // ⭐️ 에디터 준비와 제목만 유효하면 활성화
+                            disabled={isProcessing || !title.trim() || !isEditorReady} 
+                            startIcon={isProcessing && alertMessage?.severity !== "info" ? <CircularProgress size={20} color="inherit" /> : undefined}
+                            sx={{ py: 1.5, px: 4, borderRadius: 2 }}
+                        >
+                            {isProcessing && alertMessage?.severity !== "info" ? "저장 중..." : "저장"}
+                        </Button>
+                    </Stack>
+                </Box>
             </Box>
-
-            {/* 삭제 확인 모달 */}
+            
+            {/* 💡 삭제 확인 커스텀 모달 */}
             <Dialog
-                open={isDeleteDialogOpen}
-                onClose={() => setIsDeleteDialogOpen(false)}
+                open={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
             >
-                <DialogTitle>{"삭제 확인"}</DialogTitle>
+                <DialogTitle id="alert-dialog-title">{"삭제 확인"}</DialogTitle>
                 <DialogContent>
-                    <Typography>삭제하시겠습니까?</Typography>
+                    <Typography>
+                        삭제하시겠습니까? 
+                    </Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setIsDeleteDialogOpen(false)} color="primary" disabled={isProcessing}>
+                    <Button onClick={() => setShowDeleteConfirm(false)} color="primary" disabled={isProcessing}>
                         취소
                     </Button>
                     <Button 
-                        onClick={handleDelete} 
+                        onClick={executeDelete} 
                         color="error" 
-                        autoFocus 
-                        variant="contained"
+                        variant="contained" 
+                        autoFocus
                         disabled={isProcessing}
                         startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : undefined}
                     >
-                        확인 
+                        확인
                     </Button>
                 </DialogActions>
             </Dialog>
