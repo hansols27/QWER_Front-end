@@ -45,7 +45,8 @@ export default function NoticeDetail() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [title, setTitle] = useState("");
     const [type, setType] = useState<NoticeType>("공지");
-    const [initialContent, setInitialContent] = useState("");
+    // initialContent는 DB에서 로드 후 SmartEditor로 전달됩니다.
+    const [initialContent, setInitialContent] = useState(""); 
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -61,6 +62,7 @@ export default function NoticeDetail() {
             setNotice(data);
             setTitle(data.title);
             setType(data.type);
+            // 데이터 로드 완료 시 initialContent 업데이트 (SmartEditor가 이 변경을 감지합니다)
             setInitialContent(data.content); 
         } catch (err: any) {
             setAlertMessage({ message: extractErrorMessage(err, "공지사항 로드 실패"), severity: "error" });
@@ -70,26 +72,21 @@ export default function NoticeDetail() {
 
     useEffect(() => { fetchNotice(); }, [fetchNotice]);
 
-    // ⭐ 수정 사항: 에디터 준비 완료 시 setContent 호출 로직 추가
+    // ⭐ 수정 사항: setContent 호출 로직을 제거하고, ready 상태만 설정합니다.
     const handleEditorReady = useCallback(() => {
         setIsEditorReady(true);
-        
-        // 에디터가 준비되었고 초기 콘텐츠가 있으면 설정
-        if (editorRef.current && initialContent) {
-            editorRef.current.setContent(initialContent);
-        }
-    }, [initialContent]); // initialContent가 변경되면 콜백도 새로 만듭니다.
+        // SmartEditor 컴포넌트가 initialContent Prop 변경을 감지하여 내용을 자체적으로 설정합니다.
+    }, []); 
 
     const handleSave = async () => {
         if (!id || !notice) return setAlertMessage({ message: "수정할 공지사항 정보가 없습니다.", severity: "error" });
         if (!isEditorReady) return setAlertMessage({ message: "에디터 로딩 중입니다.", severity: "warning" });
-        // SmartEditor.tsx 수정으로 인해 이 검사는 이제 성공적으로 통과될 것입니다.
         if (!editorRef.current) return setAlertMessage({ message: "에디터 인스턴스 초기화 오류.", severity: "error" });
 
         const trimmedTitle = title.trim();
         const content = editorRef.current.getContent() || "";
 
-        // ⭐ 보강: 공백 HTML 값도 체크
+        // 공백 HTML 값 체크
         const isContentEmpty = content === "" || content === "<p><br></p>" || content.trim() === "";
 
         if (!trimmedTitle) return setAlertMessage({ message: "제목을 입력해주세요.", severity: "error" });
@@ -164,7 +161,7 @@ export default function NoticeDetail() {
                     <Button 
                         variant="contained" color="success" size="large" 
                         onClick={handleSave} 
-                        disabled={isProcessing || !title.trim() || !isEditorReady || !editorRef.current} 
+                        disabled={isProcessing || !title.trim() || !isEditorReady} 
                         sx={{ py:1.5, px:4, borderRadius:2 }}
                     >
                         {isProcessing ? "저장 중..." : "저장"}

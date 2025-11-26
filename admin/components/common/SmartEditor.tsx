@@ -26,7 +26,23 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
     const [content, setContent] = useState(initialContent);
     const [readOnly, setReadOnlyState] = useState(disabled);
 
-    // ⭐ 수정 사항: useImperativeHandle의 의존성 배열에 [quillRef] 추가 
+    // [1] Prop 변경 시 내부 상태 동기화 및 에디터 내용 설정
+    useEffect(() => {
+        // initialContent가 Prop으로 변경될 때 (데이터 로드 완료 시) 내부 상태와 에디터 업데이트
+        if (initialContent !== content) {
+            setContent(initialContent);
+            
+            // 이 시점에 quillRef.current가 유효하다면 즉시 에디터에 내용 설정
+            if (quillRef.current) {
+                const editor = quillRef.current.getEditor();
+                if (editor?.root) {
+                    editor.root.innerHTML = initialContent;
+                }
+            }
+        }
+    }, [initialContent]);
+
+    // [2] 외부 노출 API 정의 (setContent/getContent)
     useImperativeHandle(ref, () => ({
       getContent: () => {
         if (!quillRef.current) return "";
@@ -34,26 +50,22 @@ const SmartEditor = forwardRef<SmartEditorHandle, SmartEditorProps>(
         return editor?.root?.innerHTML || "";
       },
       setContent: (c: string) => {
-        // setContent state를 직접 변경하는 것은 충돌을 일으킬 수 있으므로
-        // 직접 에디터 DOM에 삽입하거나, Quill API의 setValue/setContents를 사용합니다.
+        setContent(c);
         if (quillRef.current) {
           const editor = quillRef.current.getEditor();
-          if (editor?.root) {
-            // 안전을 위해 state도 업데이트하고 DOM도 직접 업데이트합니다.
-            setContent(c);
-            editor.root.innerHTML = c; 
-          }
+          if (editor?.root) editor.root.innerHTML = c;
         }
       },
       setReadOnly: (r: boolean) => setReadOnlyState(r),
-    }), [quillRef]); // 👈 오류 해결 핵심: quillRef를 의존성으로 추가
+    }), [quillRef]); 
 
+    // [3] 에디터 준비 완료 시점 알림
     useEffect(() => {
-      // ⭐ 수정 사항: quillRef.current가 유효해졌을 때만 onReady 호출
-      if (onReady && quillRef.current) {
-        onReady();
-      }
-    }, [onReady, quillRef.current]); // 👈 quillRef.current가 null에서 인스턴스로 바뀔 때 감지
+        // quillRef.current가 유효해졌을 때 onReady 호출
+        if (onReady && quillRef.current) {
+            onReady();
+        }
+    }, [onReady, quillRef.current]);
 
     const modules = {
       toolbar: [
