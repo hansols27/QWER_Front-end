@@ -33,12 +33,7 @@ export default function Home() {
     };
 
     fetchMainImage();
-  }, []); // 빈 배열을 전달하여 컴포넌트 마운트 시 한 번만 실행
-
-  // 로딩 중일 때 표시할 내용 (선택 사항)
-  if (isLoading) {
-    return <div style={{ padding: '20px' }}>Loading...</div>;
-  }
+  }, []); // 빈 배열을 전달하여 컴포넌트 마운트 시 한 번만 실행  
 
   return (
     <div>
