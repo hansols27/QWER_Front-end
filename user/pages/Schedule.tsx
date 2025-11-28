@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+'use client'; // 클라이언트 컴포넌트로 유지
+
+import React, { useState, useEffect } from 'react';
 import {
     Calendar,
     dateFnsLocalizer,
@@ -9,23 +11,19 @@ import { ko } from 'date-fns/locale';
 import { CSSProperties } from 'react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '@front/ui/schedule.module.css';
-import { ScheduleEvent, EventType } from '@shared/types/schedule'; // EventType import 추가
+import { ScheduleEvent, EventType } from '@shared/types/schedule'; 
 import axios from 'axios';
-import Image from 'next/image';
-
 import btn_prev from '@front/assets/icons/bg-btn-prev.png';
 import btn_next from '@front/assets/icons/bg-btn-next.png';
 
 // -----------------------------
-// ⭐️ 고정 일정 데이터 및 헬퍼 함수 (추가)
+// ⭐️ 고정 일정 데이터 및 헬퍼 함수
 // -----------------------------
 
-// SchedulePage와 동일하게 StaticScheduleEvent 타입을 정의합니다.
 interface StaticScheduleEvent extends ScheduleEvent {
     isStatic: true;
 }
 
-// 매년 반복되는 고정 일정을 생성하는 헬퍼 함수
 const createYearlyEvent = (
     title: string, 
     type: EventType, 
@@ -33,7 +31,6 @@ const createYearlyEvent = (
     day: number,
     isBirthday: boolean = false
 ): StaticScheduleEvent => {
-    // 현재 연도 기준으로 일정을 생성하여 react-big-calendar에 전달합니다.
     const currentYear = new Date().getFullYear();
     const dateStr = `${currentYear}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     
@@ -43,11 +40,9 @@ const createYearlyEvent = (
         id: `static-${eventType}-${month}-${day}`, 
         title,
         type: eventType,
-        // Date 객체를 사용
         start: new Date(dateStr), 
         end: new Date(dateStr), 
         allDay: true,
-        // color 속성은 react-big-calendar의 eventPropGetter에서 사용되지 않지만 타입 일치를 위해 유지
         color: eventType === 'B' ? '#ff9800' : eventType === 'E' ? '#4caf50' : '#9e9e9e',
         isStatic: true,
     };
@@ -66,7 +61,6 @@ const getBirthdayEvents = MEMBERS.map(member =>
     createYearlyEvent(`${member.name} 생일`, 'B', member.month, member.day, true)
 );
 
-// ScheduleEvent[] 타입으로 Static Event 정의
 const STATIC_EVENTS: ScheduleEvent[] = [
     getDebutEvents, 
     ...getBirthdayEvents
@@ -85,7 +79,7 @@ const localizer = dateFnsLocalizer({
 });
 
 // ===========================
-// 커스텀 툴바
+// 커스텀 툴바 (수정됨: Image -> img)
 // ===========================
 const CustomToolbar = ({ date, onNavigate }: ToolbarProps<ScheduleEvent, object>) => {
     const handlePrev = () => {
@@ -102,8 +96,9 @@ const CustomToolbar = ({ date, onNavigate }: ToolbarProps<ScheduleEvent, object>
     return (
         <div className="rbc-toolbar-custom flex items-center justify-between">
             <button className="nav-btn" onClick={handlePrev}>
-                <Image 
-                    src={btn_prev} 
+                {/* 💡 [수정] Next.js Image 대신 <img> 태그와 .src 사용 */}
+                <img 
+                    src={btn_prev.src} 
                     alt="이전" 
                     width={36} 
                     height={36} 
@@ -113,8 +108,9 @@ const CustomToolbar = ({ date, onNavigate }: ToolbarProps<ScheduleEvent, object>
                 {format(date, 'yyyy년 M월', { locale: ko })}
             </span>
             <button className="nav-btn" onClick={handleNext}>
-                <Image 
-                    src={btn_next} 
+                {/* 💡 [수정] Next.js Image 대신 <img> 태그와 .src 사용 */}
+                <img 
+                    src={btn_next.src} 
                     alt="다음" 
                     width={36} 
                     height={36} 
@@ -144,10 +140,11 @@ export default function Schedule() {
     const [selectedEvents, setSelectedEvents] = useState<ScheduleEvent[]>([]);
 
     // ===========================
-    // Firebase/Back-End에서 이벤트 불러오기
+    // Back-End에서 이벤트 불러오기
     // ===========================
     const fetchEvents = async () => {
         try {
+            // 이 부분을 수정하지 않았으므로, 기존 로직을 유지
             const res = await axios.get<ScheduleEvent[]>('/api/schedule');
             const data: ScheduleEvent[] = res.data.map((e) => ({
                 ...e,
@@ -184,26 +181,7 @@ export default function Schedule() {
     // 달력 범위 변경 시
     // ===========================
     const handleRangeChange = (range: any) => {
-        // onRangeChange는 현재 보여지는 달의 이벤트를 불러오는 API를 호출하는 데 사용되어야 합니다.
-        // 하지만 현재 fetchEvents는 전체 이벤트를 불러오므로 이 로직은 주석 처리합니다.
-        /*
-        let start: Date;
-        let end: Date;
-        if (Array.isArray(range)) {
-            start = range[0];
-            end = range[range.length - 1];
-        } else {
-            start = range.start;
-            end = range.end;
-        }
-
-        // (주석 처리) 범위 안 이벤트 필터링을 여기서 하면 안 되고, 
-        // fetchEvents가 특정 기간의 이벤트를 불러오도록 수정되어야 합니다.
-        // const filtered = events.filter((e) =>
-        // 	 isWithinInterval(e.start, { start, end })
-        // );
-        // setEvents(filtered); 
-        */
+        // 이 로직은 주석 처리된 상태로 유지합니다.
     };
 
     // ===========================

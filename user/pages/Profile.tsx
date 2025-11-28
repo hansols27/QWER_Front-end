@@ -12,7 +12,7 @@ import '@front/ui/profile.module.css';
 import ImageSlider from '@front/components/common/ImageSlider';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material'; // 로딩/에러 표시를 위해 MUI 컴포넌트 추가
 
-// --- SNS 아이콘 임포트 (기존 유지) ---
+// --- SNS 아이콘 임포트 ---
 import youtubeIcon from '@front/assets/icons/youtube.svg';
 import instagramIcon from '@front/assets/icons/instagram.svg';
 import twitterIcon from '@front/assets/icons/twitter.png';
@@ -234,12 +234,12 @@ export default function Profile() {
 
                         {/* API 응답 데이터 selectedMember.texts를 사용합니다. */}
                         {selectedMember.texts.length > 0 ? (
-                             selectedMember.texts.map((item) => (
-                                // 줄바꿈을 위해 whiteSpace: 'pre-wrap'을 사용합니다.
-                                <p key={item.id} style={{ whiteSpace: 'pre-wrap' }}>
-                                    {item.content}
-                                </p>
-                            ))
+                               selectedMember.texts.map((item) => (
+                                 // 줄바꿈을 위해 whiteSpace: 'pre-wrap'을 사용합니다.
+                                 <p key={item.id} style={{ whiteSpace: 'pre-wrap' }}>
+                                     {item.content}
+                                 </p>
+                                ))
                         ) : (
                             <p>등록된 프로필 내용이 없습니다.</p>
                         )}
@@ -257,9 +257,12 @@ export default function Profile() {
                                             rel="noopener noreferrer"
                                         >
                                             <img
-                                                src={snsIcons[link.type as keyof typeof snsIcons]}
+                                                // ✅ 수정된 부분: 이미지 객체의 .src 속성을 명시적으로 사용
+                                                src={snsIcons[link.type as keyof typeof snsIcons].src}
                                                 alt={link.type}
                                                 className="sns-icon"
+                                                width={32}
+                                                height={32} // <img> 태그 사용 시 크기 지정
                                             />
                                         </a>
                                     ) : null
