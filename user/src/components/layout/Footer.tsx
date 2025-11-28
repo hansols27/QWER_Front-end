@@ -23,15 +23,8 @@ const Footer = () => {
                     opacity: url ? 1 : 0.5 
                   }}
                 >
-                  {/* 🚨 icon이 객체일 때, 실제 이미지 경로를 담고 있는 속성(src 또는 default)을 사용 */}
-                  {icon && (
-                        <img 
-                            src={icon.src || icon.default || icon} 
-                            alt={`${id} 아이콘`} 
-                            width={25} 
-                            height={25} 
-                        />
-                    )}
+                  {/* 🚨 수정: icon에는 이제 문자열 경로만 들어오므로 그대로 사용합니다. */}
+                  {icon && <img src={icon} alt={`${id} 아이콘`} width={25} height={25} />}
                 </li>
               ))}
             </ul>
