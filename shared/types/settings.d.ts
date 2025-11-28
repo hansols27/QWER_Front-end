@@ -1,10 +1,10 @@
 export interface SnsLink {
   id: "instagram" | "youtube" | "twitter" | "cafe" | "shop";
   url: string;
-  icon?: string; 
+  icon?: StaticImageData;
 }
 
 export interface SettingsData {
-  mainImage?: string; // 메인 이미지 URL
-  snsLinks: SnsLink[];
+  mainImage?: string;
+  snsLinks: SnsLink[]; // 백엔드에서 URL 데이터만 저장/로드
 }

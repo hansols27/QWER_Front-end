@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image'; 
 import close from '@front/assets/icons/close.png';
 import { Link } from 'react-router-dom';
 
@@ -19,7 +20,12 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, onClose }) => {
           type="button"
           aria-label="사이드메뉴 닫기"
         >
-          <img src={close} alt="닫기 아이콘" />
+          <Image 
+            src={close} 
+            alt="닫기 아이콘" 
+            width={30}   
+            height={30}  
+          />
         </button>
       </div>
 
@@ -54,13 +60,6 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, onClose }) => {
             NOTICE
           </Link>
         </li>
-        {/*
-        <li>
-          <Link to="/Community" onClick={onClose}>
-            COMMUNITY
-          </Link>
-        </li>
-        */}
       </ul>
     </nav>
   );

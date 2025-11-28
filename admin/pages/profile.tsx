@@ -8,7 +8,7 @@ import type {
     SNSLinkItem, 
     MemberProfileState, 
     MemberProfilePayload 
-} from "@shared/types/member/admin"; 
+} from "@shared/types/member"; 
 import Layout from "@components/common/layout";
 import {
     Box,

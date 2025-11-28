@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Image from 'next/image'; 
 import logo from '@front/assets/images/logo.svg';
 import menu from '@front/assets/icons/menu.png';
 import SideNav from '@components/layout/SideNav';
@@ -16,16 +17,23 @@ const Header = () => {
       <header id="header" className="main_hd">
         <div className="logo">
           <Link to="/">
-            <img src={logo} alt="Logo" />
+            <Image 
+                src={logo} 
+                alt="Logo" 
+                width={40} 
+                height={40} 
+            />
           </Link>
         </div>
 
         {/* isSideNavOpen이 false일 때만 메뉴 아이콘 전체 nav.menu 렌더링 */}
         {!isSideNavOpen && (
           <nav className="menu">
-            <img
+            <Image
               src={menu}
               alt="Menu"
+              width={40} 
+              height={40} 
               onClick={handleMenuOpen}
               role="button"
               tabIndex={0}
