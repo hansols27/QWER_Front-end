@@ -23,7 +23,7 @@ const Footer = () => {
                     opacity: url ? 1 : 0.5 
                   }}
                 >
-                  {icon && <img src={icon} alt={`${id} 아이콘`} width={25} height={25} />}
+                  {icon && <img src={url} alt={`${id} 아이콘`} width={25} height={25} />}
                 </li>
               ))}
             </ul>
