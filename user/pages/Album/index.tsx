@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { api } from '@shared/services/axios';
-import '@front/styles/album.module.css';
+import styles from '@front/styles/album.module.css';
 import Image from 'next/image';
 import { CircularProgress, Alert, Box, Typography } from '@mui/material';
 
@@ -72,17 +72,19 @@ export default function Album() {
   };
 
   return (
-    <div className="container">
-      <div id="side">
-        <div className="side2">
+    <div className={styles.container}>
+      {/* Side */}
+      <div id="side" className={styles.side}>
+        <div className={styles.side2}>
           02
-          <span className="s_line"></span>
+          <span className={styles.s_line}></span>
           DISCOGRAPHY
         </div>
       </div>
 
-      <div className="cont discography_view wow fadeInUp" data-wow-delay="0.2s">
-        <div className="title">DISCOGRAPHY</div>
+      {/* Main */}
+      <div className={`${styles.cont} ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">
+        <div className={styles.title}>DISCOGRAPHY</div>
 
         {loading && (
           <Box display="flex" justifyContent="center" py={8} flexDirection="column" alignItems="center">
@@ -101,11 +103,11 @@ export default function Album() {
 
         {!loading && allAlbums.length > 0 && (
           <>
-            <div className="release_list">
+            <div className={styles.release_list}>
               {currentAlbums.map((album) => (
-                <div className="album_cont" key={album.id}>
+                <div className={styles.album_cont} key={album.id}>
                   <Link href={`/album/${album.id}`}>
-                    <div className="album_img" style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <div className={styles.album_img} style={{ position: 'relative', width: '100%', height: '100%' }}>
                       <Image
                         alt={album.title}
                         src={getCoverImageUrl(album)}
@@ -113,7 +115,7 @@ export default function Album() {
                         style={{ objectFit: 'cover' }}
                         unoptimized
                       />
-                      <div className="list-hover">
+                      <div className={styles['list-hover']}>
                         <Image
                           alt="자세히보기"
                           src={more_view}
@@ -123,7 +125,7 @@ export default function Album() {
                       </div>
                     </div>
                   </Link>
-                  <div className="txt">
+                  <div className={styles.txt}>
                     <p>{album.title}</p>
                     <span>{album.date ? album.date.split('T')[0] : '날짜 미정'}</span>
                   </div>
@@ -132,15 +134,15 @@ export default function Album() {
             </div>
 
             {allAlbums.length > itemsPerPage && (
-              <div className="page-btn-box">
-                <button type="button" className="prev-btn" onClick={goPrev} disabled={currentPage <= 1}>
+              <div className={styles['page-btn-box']}>
+                <button type="button" className={styles['prev-btn']} onClick={goPrev} disabled={currentPage <= 1}>
                   <Image alt="이전" src={btn_prev} width={36} height={36} />
                   이전
                 </button>
-                <span className="page-number">
+                <span className={styles['page-number']}>
                   <strong>{currentPage}</strong> / <em>{totalPages}</em>
                 </span>
-                <button type="button" className="next-btn" onClick={goNext} disabled={currentPage >= totalPages}>
+                <button type="button" className={styles['next-btn']} onClick={goNext} disabled={currentPage >= totalPages}>
                   <Image alt="이후" src={btn_next} width={36} height={36} />
                   이후
                 </button>

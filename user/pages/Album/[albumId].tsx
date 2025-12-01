@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
 import { api } from "@shared/services/axios";
-import '@front/styles/albumdetail.module.css';
+import styles from '@front/styles/albumdetail.module.css';
 import { CircularProgress, Alert, Box, Typography, Button } from '@mui/material';
 import { AlbumItem } from '@shared/types/album';
 
@@ -62,7 +62,7 @@ export default function AlbumDetail() {
                 <Alert severity={error ? 'error' : 'warning'} sx={{ mb: 2 }}>
                     {error || "요청하신 앨범 정보를 찾을 수 없습니다."}
                 </Alert>
-                <Link href="/album">
+                <Link href="/album" passHref>
                     <Button variant="contained">목록으로 돌아가기</Button>
                 </Link>
             </Box>
@@ -70,24 +70,24 @@ export default function AlbumDetail() {
     }
 
     return (
-        <div className="container">
+        <div className={styles.container}>
             <div id="side">
-                <div className="side2">
+                <div className={styles.side2}>
                     02
-                    <span className="s_line"></span>
+                    <span className={styles.s_line}></span>
                     DISCOGRAPHY
                 </div>
             </div>
 
-            <div className="cont discography wow fadeInUp" data-wow-delay="0.2s">
-                <div className="dis_left">
-                    <div className="dis_bt_top">
-                        <p className="back">
+            <div className={`${styles.cont} ${styles.discography}`}>
+                <div className={styles.dis_left}>
+                    <div className={styles.dis_bt_top}>
+                        <p className={styles.back}>
                             <Link href="/album">&lt; BACK</Link>
                         </p>
                     </div>
 
-                    <div className="onlin_cover" style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <div className={styles.onlin_cover}>
                         <Image 
                             alt={album.title} 
                             src={album.coverImageUrl || 'https://via.placeholder.com/400x400?text=No+Image'} 
@@ -97,12 +97,12 @@ export default function AlbumDetail() {
                         />
                     </div>
 
-                    <div className="dis_bt_bottom">
-                        <p className="dis_date">{album.date ? album.date.split('T')[0] : '날짜 미정'}</p>
+                    <div className={styles.dis_bt_bottom}>
+                        <p className={styles.dis_date}>{album.date ? album.date.split('T')[0] : '날짜 미정'}</p>
                     </div>
 
                     {album.tracks && album.tracks.length > 0 && (
-                        <div className="tracklist">
+                        <div className={styles.tracklist}>
                             <div className="card-bare-text release-playlist text-tall">
                                 {album.tracks.map((track, index) => (
                                     <p key={index}>{index + 1}. {track}</p>
@@ -112,27 +112,29 @@ export default function AlbumDetail() {
                     )}
                 </div>
 
-                <div className="dis_right">
-                    <div className="discography_inner">
-                        <div className="dis_txt_top">
-                            <p className="album_name EN">{album.title}</p>
+                <div className={styles.dis_right}>
+                    <div className={styles.discography_inner}>
+                        <div className={styles.dis_txt_top}>
+                            <p className={`${styles.album_name} EN`}>{album.title}</p>
                         </div>
 
                         {album.description && (
-                            <div className="dis_more_cont" style={{ whiteSpace: 'pre-line' }}>
+                            <div className={styles.dis_more_cont} style={{ whiteSpace: 'pre-line' }}>
                                 {album.description}
                             </div>
                         )}
 
                         {album.videoUrl && (
-                            <div className="video">
-                                <iframe
-                                    src={album.videoUrl}
-                                    title={album.title}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                ></iframe>
+                            <div className={styles.video}>
+                                <div className={styles.videoWrapper}>
+                                    <iframe
+                                        src={album.videoUrl}
+                                        title={album.title}
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    ></iframe>
+                                </div>
                             </div>
                         )}
                     </div>

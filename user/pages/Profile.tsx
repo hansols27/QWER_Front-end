@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { api } from "@shared/services/axios";
 import ImageSlider from "@front/components/common/ImageSlider";
-import '@front/styles/profile.module.css';
+import styles from '@front/styles/profile.module.css';
 
 import youtubeIcon from '@front/assets/icons/youtube.svg';
 import instagramIcon from '@front/assets/icons/instagram.svg';
@@ -21,7 +22,6 @@ const snsIcons = {
   cafe: cafeIcon,
 };
 
-// All 멤버 포함
 export type MemberType = {
   id: string;
   name: string;
@@ -31,14 +31,12 @@ export type MemberType = {
 
 export default function Profile() {
   const [members, setMembers] = useState<MemberType[]>([]);
-  const [selectedId, setSelectedId] = useState("All");
-  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string>("All");
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // API에서 멤버 데이터 불러오기
   const fetchMembers = useCallback(async () => {
     try {
       const res = await api.get<{ success: boolean; data: MemberType[] }>("/api/members");
-      // All 멤버를 기본 추가
       const allMember: MemberType = { id: "All", name: "QWER", contents: [], sns: {} };
       setMembers([allMember, ...res.data.data]);
     } catch (err) {
@@ -52,26 +50,27 @@ export default function Profile() {
     fetchMembers();
   }, [fetchMembers]);
 
-  if (loading) return <div className="container">로딩 중...</div>;
+  // 선택 멤버 기본값 설정
+  const selectedMember = members.find((m) => m.id === selectedId) || members[0];
 
-  const selectedMember = members.find((m) => m.id === selectedId);
-  if (!selectedMember) return null;
+  if (loading) return <div className={styles.container}>로딩 중...</div>;
+  if (!selectedMember) return <div className={styles.container}>멤버 데이터 없음</div>;
 
   return (
-    <div className="container">
+    <div className={styles.container}>
       {/* Side */}
-      <div id="side">
-        <div className="side2">
+      <div id="side" className={styles.side}>
+        <div className={styles.side2}>
           01
-          <span className="s_line"></span>
+          <span className={styles.s_line}></span>
           PROFILE
         </div>
       </div>
 
       {/* Main */}
-      <div className="cont profile">
+      <div className={`${styles.cont} ${styles.profile}`}>
         {/* Member Selector */}
-        <div className="member_name">
+        <div className={styles.member_name}>
           {members.map((member) => (
             <p key={member.id}>
               <button
@@ -80,15 +79,14 @@ export default function Profile() {
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  ...(member.id !== 'All' ? {} : {}),
                 }}
               >
                 {member.id === 'All' ? (
                   <>
-                    <span className="q">Q</span>
-                    <span className="w">W</span>
-                    <span className="e">E</span>
-                    <span className="r">R</span>
+                    <span className={styles.q}>Q</span>
+                    <span className={styles.w}>W</span>
+                    <span className={styles.e}>E</span>
+                    <span className={styles.r}>R</span>
                   </>
                 ) : (
                   member.name
@@ -99,9 +97,9 @@ export default function Profile() {
         </div>
 
         {/* Profile Info */}
-        <div className="pf_inner">
+        <div className={styles.pf_inner}>
           {/* 이미지 */}
-          <div className="profile_img">
+          <div className={styles.profile_img}>
             {selectedMember.contents
               .filter((item) => item.type === "image")
               .map((item, idx) => {
@@ -118,8 +116,8 @@ export default function Profile() {
           </div>
 
           {/* 텍스트 + SNS */}
-          <div className="profile_txt">
-            <div className="name_tt">{selectedMember.name}</div>
+          <div className={styles.profile_txt}>
+            <div className={styles.name_tt}>{selectedMember.name}</div>
 
             {selectedMember.contents
               .filter((item) => item.type === "text")
@@ -131,14 +129,16 @@ export default function Profile() {
 
             {/* SNS */}
             {selectedMember.sns && (
-              <div className="sns_area">
+              <div className={styles.sns_area}>
                 {Object.entries(selectedMember.sns).map(([key, url]) =>
-                  url ? (
+                  url && snsIcons[key as keyof typeof snsIcons] ? (
                     <a key={key} href={url} target="_blank" rel="noopener noreferrer">
-                      <img
+                      <Image
                         src={snsIcons[key as keyof typeof snsIcons]}
                         alt={key}
-                        className="sns-icon"
+                        width={24}
+                        height={24}
+                        className={styles["sns-icon"]}
                       />
                     </a>
                   ) : null
