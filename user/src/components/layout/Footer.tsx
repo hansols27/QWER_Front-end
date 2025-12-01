@@ -1,46 +1,43 @@
+'use client';
+
 import { useSocialLinks } from '@front/components/common/snsLinks';
 import { openInNewTab } from '@utils/openInNewTab';
 
 const Footer = () => {
-  const { socialLinks, isLoading, error } = useSocialLinks(); 
-  const shouldRenderSns = !isLoading && socialLinks.length > 0 && !error;
+  const { snsLinks, isLoading } = useSocialLinks(); // SettingsPage에서 등록한 URL 반영
+  const shouldRenderSns = !isLoading && snsLinks.length > 0;
 
-  return (
-    <footer id="footer">
-      <div className="footer-inner">
-        {/* SNS 메뉴 */}
-        {shouldRenderSns && (
-          <aside className="sns-menu">
-            <ul>
-              {socialLinks.map(({ id, icon, url }) => (
-                <li
-                  key={id}
-                  // 유효한 URL이 있을 때만 클릭 가능하도록 처리
-                  onClick={() => url && openInNewTab(url)}
-                  title={id}
-                  style={{ 
-                    cursor: url ? 'pointer' : 'default', 
-                    opacity: url ? 1 : 0.5 
-                  }}
-                >
-                  {/* 🚨 수정: icon에는 이제 문자열 경로만 들어오므로 그대로 사용합니다. */}
-                  {icon && <img src={icon} alt={`${id} 아이콘`} width={25} height={25} />}
-                </li>
-              ))}
-            </ul>
-          </aside>
-        )}
-        
-        {/* Copyright */}
-        <div className="copyright">
-          Copyright © <span className="q">Q</span>
-          <span className="w">W</span>
-          <span className="e">E</span>
-          <span className="r">R</span> Fansite
-        </div>
-      </div>
-    </footer>
-  );
+  return (
+    <footer id="footer">
+      <div className="footer-inner">
+        {/* SNS 메뉴 */}
+        {shouldRenderSns && (
+          <aside className="sns-menu">
+            <ul>
+              {snsLinks.map(({ id, icon, url }) => (
+                <li
+                  key={id}
+                  onClick={() => url && openInNewTab(url)}
+                  title={id}
+                  style={{ cursor: url ? 'pointer' : 'default', opacity: url ? 1 : 0.5 }}
+                >
+                  {icon && <img src={icon.src} alt={`${id} 아이콘`} width={25} height={25} />}
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )}
+
+        {/* Copyright */}
+        <div className="copyright">
+          Copyright © <span className="q">Q</span>
+          <span className="w">W</span>
+          <span className="e">E</span>
+          <span className="r">R</span> Fansite
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;
