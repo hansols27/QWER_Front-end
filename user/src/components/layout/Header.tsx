@@ -27,15 +27,9 @@ const Header = () => {
             <Image
               src={menu}
               alt="Menu"
+              width={40}
+              height={40}
               onClick={handleMenuOpen}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleMenuOpen();
-                }
-              }}
               style={{ cursor: 'pointer' }}
             />
           </nav>

@@ -25,43 +25,37 @@ const SideNav: React.FC<SideNavProps> = ({ isOpen, onClose }) => {
 
       <ul className="gnb_list">
         <li>
-          <Link href="/Profile" passHref>
-            <a onClick={onClose}>PROFILE</a>
+          <Link href="/Profile" onClick={onClose}>
+            PROFILE
           </Link>
         </li>
         <li>
-          <Link href="/Album" passHref>
-            <a onClick={onClose}>DISCOGRAPHY</a>
+          <Link href="/Album" onClick={onClose}>
+            DISCOGRAPHY
           </Link>
         </li>
         <li>
-          <Link href="/Gallery" passHref>
-            <a onClick={onClose}>GALLERY</a>
+          <Link href="/Gallery" onClick={onClose}>
+            GALLERY
           </Link>
         </li>
         <li>
-          <Link href="/Video" passHref>
-            <a onClick={onClose}>VIDEO</a>
+          <Link href="/Video" onClick={onClose}>
+            VIDEO
           </Link>
         </li>
         <li>
-          <Link href="/Schedule" passHref>
-            <a onClick={onClose}>SCHEDULE</a>
+          <Link href="/Schedule" onClick={onClose}>
+            SCHEDULE
           </Link>
         </li>
         <li>
-          <Link href="/Notice" passHref>
-            <a onClick={onClose}>NOTICE</a>
+          <Link href="/Notice" onClick={onClose}>
+            NOTICE
           </Link>
         </li>
-        {/*
-        <li>
-          <Link href="/Community" passHref>
-            <a onClick={onClose}>COMMUNITY</a>
-          </Link>
-        </li>
-        */}
       </ul>
+
     </nav>
   );
 };
