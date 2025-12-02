@@ -3,30 +3,26 @@
 import { useEffect, useState } from "react";
 import { api } from "@services/axios";
 
+interface SettingsResponse {
+  success: boolean;
+  data: {
+    mainImage: string;
+  };
+}
+
 export default function Home() {
   const [mainImageUrl, setMainImageUrl] = useState<string>("");
 
   useEffect(() => {
-
     const fetchMainImage = async () => {
       try {
-        const res = await api.get<{ success: boolean; data: { mainImage: string } }>("/api/settings");
+        const res = await api.get<SettingsResponse>("/api/settings"); // 🔥 타입 추가
 
         if (res.data.success) {
-          const img = res.data.data.mainImage;
-
-          console.log("📌 API에서 받은 mainImage :", img);
-
-          // 이미지가 상대경로라면 절대 URL로 자동 변환
-          const fullUrl = img?.startsWith("http")
-            ? img
-            : `${process.env.NEXT_PUBLIC_API_URL}${img}`;
-
-          console.log("👉 최종 mainImageUrl :", fullUrl);
-
-          setMainImageUrl(fullUrl || "");
+          const url = res.data.data.mainImage?.trim() || "";
+          console.log("Main Image URL:", url);
+          setMainImageUrl(url);
         }
-
       } catch (err) {
         console.error("메인 이미지 불러오기 실패:", err);
       }
@@ -38,14 +34,14 @@ export default function Home() {
   return (
     <div
       style={{
-        width: '100vw',
-        height: '100vh',
-        backgroundImage: mainImageUrl ? `url(${mainImageUrl})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "#000",
+        backgroundImage: mainImageUrl ? `url("${mainImageUrl}")` : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
-    >
-    </div>
+    ></div>
   );
 }
