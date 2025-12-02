@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@services/axios";
+import React from "react"; // React를 명시적으로 import
 
 interface SettingsResponse {
   success: boolean;
@@ -16,11 +17,11 @@ export default function Home() {
   useEffect(() => {
     const fetchMainImage = async () => {
       try {
-        const res = await api.get<SettingsResponse>("/api/settings"); // 🔥 타입 추가
+        const res = await api.get<SettingsResponse>("/api/settings");
 
         if (res.data.success) {
+          // trim() 및 빈 문자열 처리
           const url = res.data.data.mainImage?.trim() || "";
-          console.log("Main Image URL:", url);
           setMainImageUrl(url);
         }
       } catch (err) {
@@ -31,17 +32,14 @@ export default function Home() {
     fetchMainImage();
   }, []);
 
+  // mainImageUrl이 있을 경우 background-image 스타일을 적용합니다.
+  const backgroundStyle = mainImageUrl
+    ? { backgroundImage: `url(${mainImageUrl})` }
+    : {};
+
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "#000",
-        backgroundImage: mainImageUrl ? `url("${mainImageUrl}")` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    ></div>
+      <div className="main_bgimg" style={backgroundStyle}>
+     
+    </div>
   );
 }
