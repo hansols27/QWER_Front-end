@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { api } from "@shared/services/axios";
-import styles from "@front/styles/gallery.module.css";
+import styles from "@front/styles/gallery.module.css"; // styles는 다른 부분에 여전히 사용됨
 
 // Yet Another React Lightbox
 import Lightbox from "yet-another-react-lightbox";
@@ -33,9 +33,8 @@ export default function GalleryPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentImages = galleryItems.slice(startIndex, startIndex + itemsPerPage);
 
-  // ===========================
-  // API 호출
-  // ===========================
+  // API 호출 함수 생략...
+
   const fetchGalleryItems = useCallback(async () => {
     setLoading(true);
     try {
@@ -61,19 +60,21 @@ export default function GalleryPage() {
   }));
 
   return (
-    <div className={styles.container}>
-      {/* Side */}
-      <div id="side" className={styles.side}>
-        <div className={styles.side2}>
+    // 최상위 래퍼에 global.css의 .cont 클래스 적용
+    <div className="cont">
+      {/* Side 영역: global.css의 #side 및 하위 클래스 사용 */}
+      <div id="side">
+        <div className="side2">
           03
-          <span className={styles.s_line}></span>
+          <span className="s_line"></span>
           GALLERY
         </div>
-      </div> {/* <--- Line 75 근처의 불필요한 닫는 태그를 제거했습니다. */}
+      </div>
 
-      {/* Main: .cont.gallery 클래스 적용 */}
-      <div className={`${styles.cont} ${styles.gallery}`}>
-        <div className={styles.title}>GALLERY</div>
+      {/* Main: global.css의 .cont와 gallery.module.css의 .gallery 클래스 혼용 */}
+      <div className={`cont ${styles.gallery}`}>
+        {/* 타이틀: global.css의 .title 클래스 사용 */}
+        <div className="title">GALLERY</div>
 
         {loading ? (
           <div style={{ textAlign: "center", padding: "50px 0" }}>갤러리 로딩 중...</div>
@@ -81,7 +82,7 @@ export default function GalleryPage() {
           <div style={{ textAlign: "center", padding: "50px 0" }}>등록된 이미지가 없습니다.</div>
         ) : (
           <>
-            {/* 이미지 목록: .galleryList 클래스 적용 */}
+            {/* 이미지 목록: .galleryList 클래스 적용 (모듈 CSS) */}
             <div className={styles.galleryList}>
               <ul>
                 {currentImages.map((item, index) => (
@@ -108,22 +109,22 @@ export default function GalleryPage() {
               </ul>
             </div>
 
-            {/* Pagination */}
-            <div className={styles['page-btn-box']}>
+            {/* 🛑 Pagination: 모듈 CSS 클래스 (styles['...']) 대신 전역 클래스 사용으로 수정 */}
+            <div className="page-btn-box">
               <button
                 type="button"
-                className={styles['prev-btn']}
+                className="prev-btn"
                 onClick={goPrev}
                 disabled={currentPage <= 1}
               >
                 이전
               </button>
-              <span className={styles['page-number']}>
+              <span className="page-number">
                 <strong>{currentPage}</strong> / <em>{totalPages}</em>
               </span>
               <button
                 type="button"
-                className={styles['next-btn']}
+                className="next-btn"
                 onClick={goNext}
                 disabled={currentPage >= totalPages}
               >

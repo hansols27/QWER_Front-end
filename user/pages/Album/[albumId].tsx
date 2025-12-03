@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
 import { api } from "@shared/services/axios";
-import styles from '@front/styles/albumdetail.module.css';
+import styles from '@front/styles/albumdetail.module.css'; // 모듈 CSS
 import { CircularProgress, Alert, Box, Typography, Button } from '@mui/material';
 import { AlbumItem } from '@shared/types/album';
 
@@ -17,7 +17,8 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
 
 export default function AlbumDetail() {
     const router = useRouter();
-    const albumId = router.query.albumId as string | undefined; 
+    // router.query.albumId가 배열일 경우 첫 번째 요소를 사용
+    const albumId = Array.isArray(router.query.albumId) ? router.query.albumId[0] : router.query.albumId; 
 
     const [album, setAlbum] = useState<AlbumItem | null>(null);
     const [loading, setLoading] = useState(true);
@@ -70,20 +71,24 @@ export default function AlbumDetail() {
     }
 
     return (
-        <div className={styles.container}>
-            {/* Side 영역은 .side 클래스 정의가 없으므로 그대로 둠 */}
+        // 1. 최상위 래퍼: global.css의 .cont 클래스 적용 (전체 레이아웃)
+        <div className="cont"> 
+            
+            {/* 2. Side 영역: global.css의 #side 및 하위 클래스 적용 */}
             <div id="side">
-                <div className={styles.side2}>
+                <div className="side2"> {/* global.css 클래스 */}
                     02
-                    <span className={styles.s_line}></span>
+                    <span className="s_line"></span> {/* global.css 클래스 */}
                     DISCOGRAPHY
                 </div>
             </div>
 
-            {/* 메인 상세 컨테이너: .cont .discography */}
-            <div className={`${styles.cont} ${styles.discography}`}>
+            {/* 3. 메인 상세 컨테이너: global.css의 .cont와 module.css의 .discography 스타일 결합 */}
+            <div className={`cont ${styles.discography} wow fadeInUp`} data-wow-delay="0.2s"> 
+                
                 {/* 좌측 섹션: .dis_left */}
                 <div className={styles.dis_left}>
+                    {/* .dis_bt_top */}
                     <div className={styles.dis_bt_top}>
                         {/* Link를 <p>로 감싸고 .back 클래스 적용 */}
                         <p className={styles.back}>
@@ -95,7 +100,7 @@ export default function AlbumDetail() {
                     <div className={styles.onlin_cover}>
                         <Image 
                             alt={album.title} 
-                            src={album.coverImageUrl || 'https://via.placeholder.com/400x400?text=No+Image'} 
+                            src={album.coverImageUrl || 'https://via.placeholder.com/455x455?text=No+Image'} 
                             fill 
                             style={{ objectFit: 'cover' }} 
                             unoptimized 
@@ -140,7 +145,6 @@ export default function AlbumDetail() {
                         {/* 뮤직비디오: .video (16:9 비율 유지) */}
                         {album.videoUrl && (
                             <div className={styles.video}>
-                                {/* CSS에 videoWrapper 클래스가 없으므로 제거 */}
                                 <iframe
                                     src={album.videoUrl}
                                     title={album.title}

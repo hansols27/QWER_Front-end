@@ -85,25 +85,26 @@ export default function Notice() {
   }, [fetchNotices]);
 
   return (
-    <div className={styles.container}>
-      {/* Side */}
-      <div id="side" className={styles.side}>
-        <div className={styles.side2}>
+    // 최상위 래퍼에 global.css의 .cont 클래스 적용
+    <div className="cont">
+      {/* Side 영역: global.css의 #side 및 하위 클래스 사용 */}
+      <div id="side">
+        <div className="side2">
           06
-          <span className={styles.s_line}></span>
+          <span className="s_line"></span>
           NOTICE
         </div>
       </div>
 
-      {/* Main: .cont.notice 클래스 적용 */}
-      <div className={`${styles.cont} ${styles.notice}`}>
-        {/* Left: .n_left 클래스 적용 */}
+      {/* Main: global.css의 .cont와 notice.module.css의 .notice 클래스 혼용 */}
+      <div className={`cont ${styles.notice}`}>
+        {/* Left: notice.module.css의 .n_left 적용 */}
         <div className={styles.n_left}>
-          {/* 타이틀: .n_tt 클래스 적용 */}
+          {/* 타이틀: notice.module.css의 .n_tt 적용 */}
           <div className={styles.n_tt}>NOTICE</div>
         </div>
 
-        {/* Right: .n_right 클래스 적용 */}
+        {/* Right: notice.module.css의 .n_right 적용 */}
         <div className={styles.n_right}>
           {alertMessage && (
             <Box py={2}>
@@ -120,18 +121,21 @@ export default function Notice() {
 
           {!loading && allNotices.length > 0 && (
             <>
-              {/* Notice List: .noticeList 클래스 적용 */}
+              {/* Notice List: .noticeList 클래스 적용 (모듈 CSS) */}
               <div className={styles.noticeList}>
                 <ul>
                   {currentNotices.map((noticeItem) => (
                     <li key={noticeItem.id}>
+                      {/* Link Wrapper */}
                       <Link href={`/notice/${noticeItem.id}`} className={styles['notice-item-link']}>
-                        {/* 카테고리: p.cate, float: left 적용 */}
+                        {/* 카테고리: .cate 적용 (모듈 CSS) */}
                         <p className={styles.cate}>{noticeItem.type}</p>
                         
-                        {/* 제목+날짜: p.nc_in 적용 (display: inline-block, width: 80%) */}
+                        {/* 제목+날짜: .nc_in 적용 (모듈 CSS) */}
                         <p className={styles.nc_in}>
+                          {/* 제목: .tit 적용 (모듈 CSS) */}
                           <span className={styles.tit}>{noticeItem.title}</span>
+                          {/* 날짜: .date 적용 (모듈 CSS) */}
                           <span className={styles.date}>{formatDate(noticeItem.createdAt)}</span>
                         </p>
                         
@@ -143,11 +147,11 @@ export default function Notice() {
                 </ul>
               </div>
 
-              {/* Pagination */}
-              <div className={`${styles['page-btn-box']} ${styles.nt_bt}`}>
+              {/* Pagination: global.css 클래스 사용 */}
+              <div className="page-btn-box">
                 <button
                   type="button"
-                  className={styles['prev-btn']}
+                  className="prev-btn"
                   onClick={handlePrev}
                   disabled={page === 1}
                 >
@@ -155,13 +159,13 @@ export default function Notice() {
                   이전
                 </button>
 
-                <span className={styles['page-number']}>
+                <span className="page-number">
                   <strong>{page}</strong> / <em>{totalPages}</em>
                 </span>
 
                 <button
                   type="button"
-                  className={styles['next-btn']}
+                  className="next-btn"
                   onClick={handleNext}
                   disabled={page >= totalPages}
                 >

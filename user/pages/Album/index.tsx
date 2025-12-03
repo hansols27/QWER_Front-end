@@ -72,18 +72,24 @@ export default function Album() {
   };
 
   return (
-    <div className={styles.container}>
-      {/* Side */}
-      <div id="side" className={styles.side}>
-        <div className={styles.side2}>
+    // 1. 최상위 래퍼: global.css의 .cont 클래스 적용
+    <div className="cont">
+      
+      {/* 2. Side 영역: global.css의 #side 및 하위 클래스 적용 */}
+      <div id="side">
+        {/* global.css 클래스 적용 */}
+        <div className="side2"> 
           02
-          <span className={styles.s_line}></span>
+          <span className="s_line"></span>
           DISCOGRAPHY
         </div>
       </div>
 
-      {/* Main */}
-      <div className={`${styles.cont} ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">
+      {/* 3. Main 영역: global.css의 .cont와 module.css의 추가 스타일 적용 */}
+      {/* .cont 클래스는 global.css 레이아웃에 의해 SideBar 옆 Main Content 영역을 구성합니다. */}
+      <div className={`cont ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">
+        
+        {/* Title: styles.title (모듈 CSS) */}
         <div className={styles.title}>DISCOGRAPHY</div>
 
         {loading && (
@@ -103,11 +109,13 @@ export default function Album() {
 
         {!loading && allAlbums.length > 0 && (
           <>
+            {/* 앨범 리스트: styles.release_list (모듈 CSS) */}
             <div className={styles.release_list}>
-              {/* .map() 함수의 화살표 함수 구문 수정: album 인자와 JSX 괄호 확인 */}
-              {currentAlbums.map((album) => (
+              {currentAlbums.map((album: AlbumItem) => (
+                // 화살표 함수의 암묵적 반환 (소괄호 사용)
                 <div className={styles.album_cont} key={album.id}>
                   <Link href={`/album/${album.id}`}>
+                    {/* 앨범 이미지: styles.album_img (모듈 CSS) */}
                     <div className={styles.album_img}>
                       <Image
                         alt={album.title}
@@ -116,6 +124,7 @@ export default function Album() {
                         style={{ objectFit: 'cover' }}
                         unoptimized
                       />
+                      {/* 호버 오버레이: styles['list-hover'] (모듈 CSS) */}
                       <div className={styles['list-hover']}>
                         <Image
                           alt="자세히보기"
@@ -126,6 +135,7 @@ export default function Album() {
                       </div>
                     </div>
                   </Link>
+                  {/* 앨범 텍스트: styles.txt (모듈 CSS) */}
                   <div className={styles.txt}>
                     <p>{album.title}</p>
                     <span>{album.date ? album.date.split('T')[0] : '날짜 미정'}</span>
@@ -134,16 +144,17 @@ export default function Album() {
               ))}
             </div>
 
+            {/* 페이지네이션: global.css 클래스 사용 */}
             {allAlbums.length > itemsPerPage && (
-              <div className={styles['page-btn-box']}>
-                <button type="button" className={styles['prev-btn']} onClick={goPrev} disabled={currentPage <= 1}>
+              <div className="page-btn-box">
+                <button type="button" className="prev-btn" onClick={goPrev} disabled={currentPage <= 1}>
                   <Image alt="이전" src={btn_prev} width={36} height={36} />
                   이전
                 </button>
-                <span className={styles['page-number']}>
+                <span className="page-number">
                   <strong>{currentPage}</strong> / <em>{totalPages}</em>
                 </span>
-                <button type="button" className={styles['next-btn']} onClick={goNext} disabled={currentPage >= totalPages}>
+                <button type="button" className="next-btn" onClick={goNext} disabled={currentPage >= totalPages}>
                   <Image alt="이후" src={btn_next} width={36} height={36} />
                   이후
                 </button>

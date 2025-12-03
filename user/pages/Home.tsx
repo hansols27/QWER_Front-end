@@ -51,7 +51,6 @@ export default function Home() {
   // 3. 최종 렌더링
   return (
     <div 
-      id="wrap" 
       className="main_wrap" 
       style={{ width: "100vw", height: "100vh", position: "relative" }}
     >

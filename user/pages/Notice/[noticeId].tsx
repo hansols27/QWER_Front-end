@@ -1,16 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { api } from "@shared/services/axios";
 import type { Notice } from "@shared/types/notice";
-import styles from "@front/styles/noticedetail.module.css";
-import { Box, Typography, Button, CircularProgress, Alert } from '@mui/material';
-import Link from 'next/link'; // 목록 버튼에 Next.js Link 사용을 고려하여 추가
+import styles from "@front/styles/noticedetail.module.css"; 
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
+import Link from 'next/link';
+// global.css의 클래스는 직접 문자열로 사용합니다.
 
 // ===========================
-// 유틸 함수
+// 타입 정의 및 유틸 함수 (이전과 동일)
 // ===========================
+
+type AlertSeverity = "success" | "error" | "info" | "warning";
+
 const formatDate = (dateString: string): string => {
   if (!dateString) return '날짜 미정';
   const date = new Date(dateString);
@@ -29,13 +33,13 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
 // ===========================
 export default function NoticeDetail() {
   const router = useRouter();
-  const noticeId = router.query.noticeId as string | undefined;
+  const noticeId = router.query.id as string | undefined;
 
   const [noticeDetail, setNoticeDetail] = useState<Notice | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNoticeDetail = async (id: string) => {
+  const fetchNoticeDetail = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -48,7 +52,7 @@ export default function NoticeDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (router.isReady) {
@@ -59,19 +63,16 @@ export default function NoticeDetail() {
         setError("잘못된 접근입니다. 공지사항 ID가 누락되었습니다.");
       }
     }
-  }, [router.isReady, noticeId]);
+  }, [router.isReady, noticeId, fetchNoticeDetail]);
 
-  const handleListClick = () => {
-    router.push('/notice');
-  };
 
   // ===========================
-  // 렌더링
+  // 렌더링 - 상세 내용 (mainContent)
   // ===========================
-  let content;
+  let mainContent;
 
   if (loading) {
-    content = (
+    mainContent = (
       <Box display="flex" justifyContent="center" alignItems="center" py={8} flexDirection="column">
         <CircularProgress size={40} />
         <Typography mt={2}>공지사항 상세 정보 로딩 중...</Typography>
@@ -81,30 +82,30 @@ export default function NoticeDetail() {
     const message = error || "요청하신 공지사항을 찾을 수 없습니다.";
     const severity = error ? "error" : "warning";
 
-    content = (
+    mainContent = (
       <Box py={4} textAlign="center">
         <Alert severity={severity}>{message}</Alert>
         <Box mt={2}>
-          {/* 목록 이동 버튼 */}
-          <Button variant="contained" color="primary" onClick={handleListClick}>
+          {/* 목록 이동 버튼: global.css의 .btn_list 클래스 사용 */}
+          <Link href="/notice" className="btn_list">
             목록으로 돌아가기
-          </Button>
+          </Link>
         </Box>
       </Box>
     );
   } else {
-    content = (
-      // CSS 클래스 적용 시작
+    // 상세 내용 렌더링
+    mainContent = (
       <div className={styles.boardView}>
         {/* 1. 헤더: 카테고리, 제목, 날짜 */}
         <div className={styles.boardView_header}>
-          {/* 카테고리 */}
+          {/* 카테고리: float: left */}
           <p className={styles.cate}>{noticeDetail.type || '공지'}</p>
           
-          {/* 제목 */}
+          {/* 제목: float: left, width: 82% */}
           <p className={styles.tit}>{noticeDetail.title}</p>
           
-          {/* 날짜 */}
+          {/* 날짜: float: right */}
           <p className={styles.date}>{formatDate(noticeDetail.createdAt)}</p>
           
           {/* float 해제를 위한 클리어 */}
@@ -113,45 +114,50 @@ export default function NoticeDetail() {
 
         {/* 2. 본문 내용 */}
         <div className={styles.boardView_cont}>
-          {/* 서버에서 받아온 HTML 콘텐츠 삽입 */}
           <div dangerouslySetInnerHTML={{ __html: noticeDetail.content }} />
-
-          {/* 참고: .bd_img, .bd_txt 클래스는 content 내부의 HTML에 포함되어야 함 */}
         </div>
 
-        {/* 3. 목록 버튼 및 다음/이전 글 링크 영역 */}
-        {/* .boardView_next 클래스는 보통 다음/이전 글 링크에 사용되나, 여기서는 목록 버튼을 배치 */}
+        {/* 3. boardView_next 영역: 다음/이전 글이 없으므로 빈 상태로 닫습니다. */}
         <div className={styles.boardView_next}>
-          <Box display="flex" justifyContent="center" width="100%">
-            <Button variant="contained" color="primary" onClick={handleListClick}>
-              목록
-            </Button>
-          </Box>
-          {/* float 해제를 위한 클리어 */}
+          {/* 다음/이전 글 영역 */}
           <div style={{ clear: 'both' }}></div>
         </div>
-        {/* CSS 클래스 적용 종료 */}
+
+        {/* 4. 목록 버튼 영역: 중앙에 목록 버튼만 배치 */}
+        <Box display="flex" justifyContent="center" width="100%" py={5}>
+          {/* global.css의 .btn_list 클래스 사용 */}
+          <Link href="/notice" className="btn_list">
+            목록
+          </Link>
+        </Box>
+
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <div id="side" className={styles.side}>
-        <div className={styles.side2}>
+    // 1. 최상위 래퍼: global.css의 .cont 클래스 적용
+    <div className="cont"> 
+      
+      {/* 2. Side 영역: global.css의 #side 및 하위 클래스 적용 */}
+      <div id="side">
+        <div className="side2">
           06
-          <span className={styles.s_line}></span>
+          <span className="s_line"></span>
           NOTICE
         </div>
       </div>
 
-      {/* Main 영역: .cont + n_right, n_left 레이아웃 유지 */}
-      <div className={`${styles.cont} ${styles['notice-detail-area']}`}>
+      {/* 3. Main 영역: global.css의 .cont와 notice.module.css의 .notice를 목록 페이지와 동일하게 적용 */}
+      <div className={`cont ${styles.notice}`}> 
+        {/* Left Title Area (모듈 CSS 유지) */}
         <div className={styles.n_left}>
           <div className={styles.n_tt}>NOTICE</div>
         </div>
+        
+        {/* Right Content Area (모듈 CSS 유지) */}
         <div className={styles.n_right}>
-          {content}
+          {mainContent}
         </div>
       </div>
     </div>

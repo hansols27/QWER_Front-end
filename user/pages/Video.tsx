@@ -58,28 +58,33 @@ export default function Video() {
 
   const selectedVideo = videos[selectedIndex];
 
+  // 💡 global.css의 .cont 클래스 사용
   if (loading) return (
-    <div className={`${styles.container} loading-container`}>
+    <div className="cont loading-container">
       <CircularProgress />
       <Typography variant="h6" mt={2}>영상 목록 로딩 중...</Typography>
     </div>
   );
 
   if (error) return (
-    <div className={`${styles.container} error-container`}>
+    <div className="cont error-container">
       <Typography color="error" variant="h6">🚫 오류 발생: {error}</Typography>
       <Typography variant="body1" mt={1}>관리자 페이지 및 API 설정을 확인해주세요.</Typography>
     </div>
   );
 
   return (
-    <div className={styles.container}>
-      <div id="side" className={styles.side}>
-        <div className={styles.side2}>04<span className={styles.s_line}></span>VIDEO</div>
-      </div>
+    // 💡 최상위 래퍼에 global.css의 .cont 클래스 적용
+    <div className="cont">
+      {/* Side 영역: global.css의 #side 및 하위 클래스 사용 */}
+      <div id="side">
+        <div className="side2">04<span className="s_line"></span>VIDEO</div>
+        </div>
 
-      <div className={`${styles.cont} ${styles.video_ct}`}>
-        <div className={`${styles.title} ${styles.v_tt}`}>VIDEO</div>
+      {/* 메인 컨텐츠: global.css의 .cont와 video.module.css의 .video_ct 혼용 */}
+      <div className={`cont ${styles.video_ct}`}>
+        {/* 타이틀: global.css의 .title과 video.module.css의 .v_tt 혼용 */}
+        <div className={`title ${styles.v_tt}`}>VIDEO</div>
 
         {videos.length === 0 ? (
           <div className="no-videos">
@@ -87,31 +92,34 @@ export default function Video() {
           </div>
         ) : (
           <div className={styles.video_list}>
+            {/* 왼쪽 큰 영상: styles.select_video 클래스 사용 */}
             <div className={styles.select_video}>
               <iframe
                 src={`https://www.youtube.com/embed/${getYoutubeVideoId(selectedVideo.src)}`}
                 title={selectedVideo.title}
                 frameBorder="0"
                 allowFullScreen
-                // CSS .select_video iframe {} 규칙이 적용됩니다.
+                // iframe은 styles.select_video iframe {} CSS 규칙이 적용됩니다.
               ></iframe>
               <div className={styles.video_title_overlay}>{selectedVideo.title}</div>
             </div>
 
+            {/* 오른쪽 썸네일 박스: styles.thumb_box 클래스 사용 */}
             <div className={styles.thumb_box}>
               <div className={styles['thumb-list']}>
                 {videos.map((video, idx) => (
                   <div
                     key={video.id}
+                    // styles.thumb-item 및 styles.active 클래스 사용
                     className={`${styles['thumb-item']} ${selectedIndex === idx ? styles.active : ''}`}
                     onClick={() => setSelectedIndex(idx)}
                   >
-                    {/* 썸네일 이미지를 부모 div에 꽉 채우도록 'fill' 속성 사용 */}
+                    {/* Image 컴포넌트는 fill 속성을 통해 styles.thumb-item img {} CSS를 따릅니다. */}
                     <Image 
                       src={getThumbnail(video.src) || "https://via.placeholder.com/128x72?text=No+Thumb"}
                       alt={video.title}
-                      fill // 부모 요소 (.thumb-item) 크기에 맞춰 이미지를 채웁니다.
-                      style={{ objectFit: 'cover' }} // CSS의 object-fit: cover와 동일한 역할
+                      fill 
+                      style={{ objectFit: 'cover' }} 
                     />
                     <div className={styles['thumb-title']} title={video.title}>{video.title}</div>
                   </div>
