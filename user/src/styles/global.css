@@ -328,19 +328,6 @@ body.active {
   letter-spacing: 0.05em;
 }
 
-.cont.notice .n_left {
-  width: 25%;
-  height: auto;
-  margin-right: 5%;
-}
-
-.cont.schedule .title {
-  width: 100%;
-  text-align: left;
-  padding-bottom: 40px;
-  border-bottom: 1px solid #fff;
-}
-
 /* common - pagenation */
 .page-btn-box {
   position: relative;
@@ -488,16 +475,6 @@ body.active {
   width: 100%;
 }
 
-.cont {
-  position: relative;
-  width: 1400px;
-  height: auto;
-  overflow: hidden;
-  margin: 120px auto;
-  z-index: 111;
-  padding: 0 0;
-}
-
 /* main-right album text */
 .right_cont {
   position: absolute;
@@ -643,7 +620,7 @@ body.active {
 }
 
 /* 에러페이지 */
-.cont.errorpage {
+.errorpage {
   position: absolute;
   width: 1000px;
   top: 50%;
@@ -1096,14 +1073,6 @@ body.active {
     height: 100%;
     min-height: 100vh;
     box-sizing: border-box;
-  }
-
-  .cont_m {
-    position: relative;
-    width: 100%;
-    height: auto;
-    overflow: hidden;
-    padding: 40px 0% 95px 0;
   }
 
   .m_title {

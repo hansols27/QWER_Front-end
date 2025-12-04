@@ -1,4 +1,14 @@
 /* ===== Discography List ===== */
+.cont {
+  position: relative;
+  width: 1400px;
+  height: auto;
+  overflow: hidden;
+  margin: 120px auto; 
+  z-index: 111;
+  padding: 0 0;
+}
+
 .cont.discography_view .release_list {
   display: flex;
   gap: 0;

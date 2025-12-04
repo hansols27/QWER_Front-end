@@ -1,3 +1,13 @@
+.cont {
+  position: relative;
+  width: 1400px;
+  height: auto;
+  overflow: hidden;
+  margin: 120px auto; 
+  z-index: 111;
+  padding: 0 0;
+}
+
 .cont.profile {
   display: flex;
   justify-content: flex-start;

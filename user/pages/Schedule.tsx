@@ -174,10 +174,8 @@ export default function ScheduleView() {
         return { style };
     };
 
-    return (
-        // 💡 최상위 래퍼: global.css의 .container 클래스 사용
+    return (        
         <div className="container"> 
-            {/* 왼쪽 사이드: global.css의 #side 및 하위 클래스 사용 */}
             <div id="side">
                 <div className="side2"> 
                     05
@@ -185,13 +183,11 @@ export default function ScheduleView() {
                     SCHEDULE
                 </div>
             </div>
-
-            {/* 본문: global.css의 .cont와 schedule.module.css의 .schedule 클래스를 혼용 */}
-            <div className={`cont ${styles.schedule}`}>
+            <div className={`${styles.cont} ${styles.schedule} wow fadeInUp`} data-wow-delay="0.2s">                       
                 {/* 좌측 상세 목록 영역: .n_left 클래스 적용 (모듈 CSS) */}
                 <div className={styles.n_left}>
                     {/* 타이틀: global.css의 .title 클래스를 사용 */}
-                    <div className="title">SCHEDULE</div>
+                    <div className={styles.title}>SCHEDULE</div>
                     
                     <div className={styles.sch_cont}>
                         {/* 상세 날짜: .dt_date 클래스 적용 (schedule.module.css에 독립적으로 정의되어 있음) */}

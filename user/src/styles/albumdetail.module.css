@@ -1,4 +1,14 @@
 /* Album Detail Layout */
+.cont {
+  position: relative;
+  width: 1400px;
+  height: auto;
+  overflow: hidden;
+  margin: 120px auto; 
+  z-index: 111;
+  padding: 0 0;
+}
+
 .cont.discography {
   display: flex;
   justify-content: center; /* 좌우 가운데 정렬 */

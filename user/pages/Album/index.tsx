@@ -72,12 +72,8 @@ export default function Album() {
   };
 
   return (
-    // 1. 최상위 래퍼: global.css의 .container 클래스 적용
     <div className="container">
-      
-      {/* 2. Side 영역: global.css의 #side 및 하위 클래스 적용 */}
       <div id="side">
-        {/* global.css 클래스 적용 */}
         <div className="side2"> 
           02
           <span className="s_line"></span>
@@ -85,10 +81,7 @@ export default function Album() {
         </div>
       </div>
 
-      {/* 3. Main 영역: global.css의 .cont와 module.css의 추가 스타일 적용 */}
-      {/* .cont 클래스는 global.css 레이아웃에 의해 SideBar 옆 Main Content 영역을 구성합니다. */}
-      <div className={`cont ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">
-        
+      <div className={`${styles.cont} ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">         
         {/* Title: styles.title (모듈 CSS) */}
         <div className={styles.title}>DISCOGRAPHY</div>
 

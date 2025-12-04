@@ -136,10 +136,7 @@ export default function NoticeDetail() {
   }
 
   return (
-    // 1. 최상위 래퍼: global.css의 .container 클래스 적용
     <div className="container"> 
-      
-      {/* 2. Side 영역: global.css의 #side 및 하위 클래스 적용 */}
       <div id="side">
         <div className="side2">
           06
@@ -148,8 +145,7 @@ export default function NoticeDetail() {
         </div>
       </div>
 
-      {/* 3. Main 영역: global.css의 .cont와 notice.module.css의 .notice를 목록 페이지와 동일하게 적용 */}
-      <div className={`cont ${styles.notice}`}> 
+      <div className={`${styles.cont} ${styles.notice} wow fadeInUp`} data-wow-delay="0.2s"> 
         {/* Left Title Area (모듈 CSS 유지) */}
         <div className={styles.n_left}>
           <div className={styles.n_tt}>NOTICE</div>

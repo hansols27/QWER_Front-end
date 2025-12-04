@@ -60,9 +60,7 @@ export default function GalleryPage() {
   }));
 
   return (
-    // 최상위 래퍼에 global.css의 .container 클래스 적용
     <div className="container">
-      {/* Side 영역: global.css의 #side 및 하위 클래스 사용 */}
       <div id="side">
         <div className="side2">
           03
@@ -71,10 +69,8 @@ export default function GalleryPage() {
         </div>
       </div>
 
-      {/* Main: global.css의 .cont와 gallery.module.css의 .gallery 클래스 혼용 */}
-      <div className={`cont ${styles.gallery}`}>
-        {/* 타이틀: global.css의 .title 클래스 사용 */}
-        <div className="title">GALLERY</div>
+      <div className={`${styles.cont} ${styles.gallery} wow fadeInUp`} data-wow-delay="0.2s"> 
+        <div className={styles.title}>GALLERY</div>
 
         {loading ? (
           <div style={{ textAlign: "center", padding: "50px 0" }}>갤러리 로딩 중...</div>
@@ -108,8 +104,6 @@ export default function GalleryPage() {
                 ))}
               </ul>
             </div>
-
-            {/* 🛑 Pagination: 모듈 CSS 클래스 (styles['...']) 대신 전역 클래스 사용으로 수정 */}
             <div className="page-btn-box">
               <button
                 type="button"

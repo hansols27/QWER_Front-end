@@ -85,9 +85,7 @@ export default function Notice() {
   }, [fetchNotices]);
 
   return (
-    // 최상위 래퍼에 global.css의 .container 클래스 적용
     <div className="container">
-      {/* Side 영역: global.css의 #side 및 하위 클래스 사용 */}
       <div id="side">
         <div className="side2">
           06
@@ -96,8 +94,7 @@ export default function Notice() {
         </div>
       </div>
 
-      {/* Main: global.css의 .cont와 notice.module.css의 .notice 클래스 혼용 */}
-      <div className={`cont ${styles.notice}`}>
+      <div className={`${styles.cont} ${styles.notice} wow fadeInUp`} data-wow-delay="0.2s"> 
         {/* Left: notice.module.css의 .n_left 적용 */}
         <div className={styles.n_left}>
           {/* 타이틀: notice.module.css의 .n_tt 적용 */}

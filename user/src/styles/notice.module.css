@@ -1,4 +1,14 @@
 /* 메인 영역 */
+.cont {
+  position: relative;
+  width: 1400px;
+  height: auto;
+  overflow: hidden;
+  margin: 120px auto; 
+  z-index: 111;
+  padding: 0 0;
+}
+
 .cont.notice {
   flex: 1;              /* 남은 공간 채움 */
   display: flex;        /* 좌측 타이틀 + 우측 리스트 가로 배치 */
@@ -7,6 +17,12 @@
 }
 
 /* 좌측 타이틀 */
+.cont.notice .n_left {
+  width: 25%;
+  height: auto;
+  margin-right: 5%;
+}
+
 .n_left {
   width: 100%;
 }

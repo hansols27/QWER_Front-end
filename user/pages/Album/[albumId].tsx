@@ -71,21 +71,16 @@ export default function AlbumDetail() {
     }
 
     return (
-        // 1. 최상위 래퍼: global.css의 .container 클래스 적용 (전체 레이아웃)
         <div className="container"> 
-            
-            {/* 2. Side 영역: global.css의 #side 및 하위 클래스 적용 */}
             <div id="side">
-                <div className="side2"> {/* global.css 클래스 */}
+                <div className="side2"> 
                     02
-                    <span className="s_line"></span> {/* global.css 클래스 */}
+                    <span className="s_line"></span> 
                     DISCOGRAPHY
                 </div>
             </div>
 
-            {/* 3. 메인 상세 컨테이너: global.css의 .cont와 module.css의 .discography 스타일 결합 */}
-            <div className={`cont ${styles.discography} wow fadeInUp`} data-wow-delay="0.2s"> 
-                
+            <div className={`${styles.cont} ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">                
                 {/* 좌측 섹션: .dis_left */}
                 <div className={styles.dis_left}>
                     {/* .dis_bt_top */}

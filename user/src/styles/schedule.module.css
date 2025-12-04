@@ -1,6 +1,23 @@
+.cont {
+  position: relative;
+  width: 1400px;
+  height: auto;
+  overflow: hidden;
+  margin: 120px auto; 
+  z-index: 111;
+  padding: 0 0;
+}
+
 .cont.schedule {
   display: flex;
   gap: 5%;
+}
+
+.cont.schedule .title {
+  width: 100%;
+  text-align: left;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #fff;
 }
 
 .n_left {
