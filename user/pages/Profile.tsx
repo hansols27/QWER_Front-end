@@ -74,14 +74,14 @@ export default function Profile() {
         }, {} as Record<string, string>);
     }, [selectedMember]);
 
-    // 최상위 래퍼는 global.css의 .cont 클래스를 사용
-    if (loading) return <div className="cont">로딩 중...</div>;
-    if (!selectedMember) return <div className="cont">멤버 데이터 없음</div>;
+    // 최상위 래퍼는 global.css의 .container 클래스를 사용
+    if (loading) return <div className="container">로딩 중...</div>;
+    if (!selectedMember) return <div className="container">멤버 데이터 없음</div>;
 
     const imageUrls = selectedMember.images.map(img => img.url).filter(url => url);
 
     return (
-        <div className="cont"> 
+        <div className="container"> 
             {/* Side: global.css의 #side 스타일을 사용 */}
             <div id="side">
                 <div className="side2"> 

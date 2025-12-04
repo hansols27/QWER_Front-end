@@ -175,8 +175,8 @@ export default function ScheduleView() {
     };
 
     return (
-        // 💡 최상위 래퍼: global.css의 .cont 클래스 사용
-        <div className="cont"> 
+        // 💡 최상위 래퍼: global.css의 .container 클래스 사용
+        <div className="container"> 
             {/* 왼쪽 사이드: global.css의 #side 및 하위 클래스 사용 */}
             <div id="side">
                 <div className="side2"> 
