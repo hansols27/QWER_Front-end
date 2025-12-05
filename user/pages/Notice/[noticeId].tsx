@@ -145,7 +145,7 @@ export default function NoticeDetail() {
         </div>
       </div>
 
-      <div className={`${styles.cont} ${styles.notice} wow fadeInUp`} data-wow-delay="0.2s"> 
+      <div className={`${styles.cont} ${styles.notice}`}> 
         {/* Left Title Area (모듈 CSS 유지) */}
         <div className={styles.n_left}>
           <div className={styles.n_tt}>NOTICE</div>

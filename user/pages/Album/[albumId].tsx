@@ -80,7 +80,7 @@ export default function AlbumDetail() {
                 </div>
             </div>
 
-            <div className={`${styles.cont} ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">                
+            <div className={`${styles.cont} ${styles.discography} wow fadeInUp`} data-wow-delay="0.2s">                
                 {/* 좌측 섹션: .dis_left */}
                 <div className={styles.dis_left}>
                     {/* .dis_bt_top */}
@@ -95,7 +95,7 @@ export default function AlbumDetail() {
                     <div className={styles.onlin_cover}>
                         <Image 
                             alt={album.title} 
-                            src={album.coverImageUrl || 'https://via.placeholder.com/455x455?text=No+Image'} 
+                            src={album.coverImageUrl} 
                             fill 
                             style={{ objectFit: 'cover' }} 
                             unoptimized 
@@ -111,7 +111,7 @@ export default function AlbumDetail() {
                     {album.tracks && album.tracks.length > 0 && (
                         <div className={styles.tracklist}>
                             {/* release-playlist 클래스 적용 */}
-                            <div className={styles['release-playlist']}>
+                            <div className={`${styles['card-bare-text']} ${styles['release-playlist']} ${styles['text-tall']}`}>
                                 {album.tracks.map((track, index) => (
                                     <p key={index}>{index + 1}. {track}</p>
                                 ))}

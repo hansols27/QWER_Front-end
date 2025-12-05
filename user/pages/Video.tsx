@@ -82,7 +82,7 @@ export default function Video() {
 
     {/* Main (페이지 콘텐츠 영역) */}
     <div className={`${styles.cont} ${styles.video_ct} wow fadeInUp`} data-wow-delay="0.2s">
-      <div className={`${styles.title} ${styles.v_tt}`}>VIDEO</div>
+      <div className={`title ${styles.v_tt}`}>VIDEO</div>
 
       {/* 💡 로딩 상태 */}
       {loading && (

@@ -183,11 +183,10 @@ export default function ScheduleView() {
                     SCHEDULE
                 </div>
             </div>
-            <div className={`${styles.cont} ${styles.schedule} wow fadeInUp`} data-wow-delay="0.2s">                       
-                {/* 좌측 상세 목록 영역: .n_left 클래스 적용 (모듈 CSS) */}
+            {/* Main */}
+            <div className={`${styles.cont} ${styles.schedule}`}>   
                 <div className={styles.n_left}>
-                    {/* 타이틀: global.css의 .title 클래스를 사용 */}
-                    <div className={styles.title}>SCHEDULE</div>
+                    <div className={`title ${styles.n_tt}`}>SCHEDULE</div>
                     
                     <div className={styles.sch_cont}>
                         {/* 상세 날짜: .dt_date 클래스 적용 (schedule.module.css에 독립적으로 정의되어 있음) */}

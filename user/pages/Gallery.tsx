@@ -69,8 +69,9 @@ export default function GalleryPage() {
         </div>
       </div>
 
+      {/* Main */}  
       <div className={`${styles.cont} ${styles.gallery} wow fadeInUp`} data-wow-delay="0.2s"> 
-        <div className={styles.title}>GALLERY</div>
+        <div className="title">GALLERY</div>
 
         {loading ? (
           <div style={{ textAlign: "center", padding: "50px 0" }}>갤러리 로딩 중...</div>
