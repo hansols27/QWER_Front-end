@@ -457,6 +457,7 @@ body.active {
 .main_vd {
   width: 100vw;
   height: calc(100% - 220px);
+  position: relative;
 }
 
 .main_bgimg {
@@ -473,116 +474,6 @@ body.active {
 
 .main_bgimg img {
   width: 100%;
-}
-
-/* main-right album text */
-.right_cont {
-  position: absolute;
-  width: 750px;
-  right: 4%;
-  top: 23%;
-  z-index: 11;
-}
-
-.main_album {
-  position: relative;
-  width: 100%;
-  height: auto;
-  overflow: hidden;
-  color: #fff;
-  text-align: right;
-}
-
-.main_album .main_album_name {
-  width: 100%;
-  overflow: hidden;
-  cursor: default !important;
-  display: -webkit-box;
-  white-space: normal;
-  word-wrap: break-word;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.main_album .main_album_name a {
-  display: inline-block;
-  color: #fff;
-  font-size: 60pt;
-  letter-spacing: 1px;
-  font-weight: 700;
-  line-height: 90px;
-  margin-bottom: 20px;
-  word-break: keep-all;
-}
-
-.main_album .main_title_name {
-  width: 80%;
-  float: right;
-  overflow: hidden;
-  cursor: default !important;
-  display: -webkit-box;
-  white-space: normal;
-  word-wrap: break-word;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.main_album .main_title_name a {
-  display: inline-block;
-  color: #fff;
-  font-size: 30pt;
-  letter-spacing: 1px;
-  font-weight: 300;
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-.main_line {
-  position: relative;
-  width: 170px;
-  float: right;
-  margin-top: 80px;
-  border-bottom: 1px solid #fff;
-  margin-right: 15px;
-  margin-bottom: 50px;
-}
-
-.main_notice {
-  position: relative;
-  width: 60%;
-  color: #fff;
-  text-align: right;
-  float: right;
-}
-
-.main_notice .main_n_tt a {
-  font-family: 'Montserrat';
-  font-size: 14pt;
-  font-weight: 400;
-  margin-right: 15px;
-  color: #fff;
-}
-
-.main_notice .main_n_stt {
-  font-size: 10pt;
-  line-height: 20px;
-  margin-right: 15px;
-  margin-top: 10px;
-  display: -webkit-box;
-  white-space: normal;
-  height: 40px;
-  word-wrap: break-word;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.main_notice .main_n_stt a {
-  color: #fff;
-  letter-spacing: 0.5px;
 }
 
 /* common - right side text */

@@ -186,7 +186,7 @@ export default function ScheduleView() {
             {/* Main */}
             <div className={`${styles.cont} ${styles.schedule}`}>   
                 <div className={styles.n_left}>
-                    <div className={`title ${styles.n_tt}`}>SCHEDULE</div>
+                     <div className="title">SCHEDULE</div>
                     
                     <div className={styles.sch_cont}>
                         {/* 상세 날짜: .dt_date 클래스 적용 (schedule.module.css에 독립적으로 정의되어 있음) */}

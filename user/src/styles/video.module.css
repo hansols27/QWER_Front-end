@@ -17,6 +17,13 @@
   gap: 20px;
 }
 
+.cont.video_ct .title {
+  width: 100%;
+  text-align: left;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #fff;
+}
+
 /* 왼쪽 큰 영상 */
 .select_video {
   flex: 1;

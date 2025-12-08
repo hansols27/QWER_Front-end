@@ -99,7 +99,7 @@ export default function Notice() {
         {/* Left: notice.module.css의 .n_left 적용 */}
         <div className={styles.n_left}>
           {/* 타이틀: notice.module.css의 .n_tt 적용 */}
-          <div className={styles.n_tt}>NOTICE</div>
+           <div className="title">NOTICE</div>
         </div>
 
         {/* Right: notice.module.css의 .n_right 적용 */}

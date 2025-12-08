@@ -107,7 +107,7 @@ export default function Album() {
               {currentAlbums.map((album: AlbumItem) => (
                 // 화살표 함수의 암묵적 반환 (소괄호 사용)
                 <div className={styles.album_cont} key={album.id}>
-                  <Link href={`/album/${album.id}`}>
+                  <Link href={`/Album/${album.id}`}>
                     {/* 앨범 이미지: styles.album_img (모듈 CSS) */}
                     <div className={styles.album_img}>
                       <Image

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Image from "next/image"; // Image 컴포넌트 사용
 import { api } from "@services/axios";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
@@ -16,6 +16,7 @@ interface GetSettingsResponse {
 }
 
 const getErrorMessage = (err: unknown): string => {
+    // ... (이전과 동일한 에러 처리 함수)
     if (typeof err === 'object' && err !== null) {
         if (('isAxiosError' in err && (err as any).isAxiosError === true) || ('response' in err)) {
             const axiosError = err as any; 
@@ -76,17 +77,18 @@ export default function Home() {
     }
 
     return (
-        <div className="main_vd"> 
+        
+        <div className="main_vd" style={{ position: 'relative' }}> 
             
             <Image
                 src={mainImageUrl}
-                alt="Main Banner"
+                alt="Main Banner Background"
                 priority 
-                fill
-                className="main_bgimg" 
-                // ⭐️ 이 부분이 핵심입니다. z-index를 높게 설정하여 앞으로 렌더링되게 합니다.
-                style={{ objectFit: 'cover', zIndex: 10 }} 
+                fill // ⭐️ 부모 컨테이너(main_vd)를 채우도록 설정
+                className="main_bgimg" // ⭐️ global.css에 정의된 스타일을 적용하여 배경처럼 만듭니다.
+                style={{ objectFit: 'cover' }} 
             />
+
         </div>
     );
 }

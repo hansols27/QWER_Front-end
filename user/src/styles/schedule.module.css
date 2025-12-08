@@ -13,13 +13,6 @@
   gap: 5%;
 }
 
-.cont.schedule .title {
-  width: 100%;
-  text-align: left;
-  padding-bottom: 40px;
-  border-bottom: 1px solid #fff;
-}
-
 .n_left {
   flex: 1;
 }

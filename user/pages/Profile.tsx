@@ -57,6 +57,23 @@ export default function Profile() {
     const [selectedId, setSelectedId] = useState<MemberIdType>("All");
     const [loading, setLoading] = useState<boolean>(true);
 
+    const getDynamicShadowStyle = (memberId: MemberIdType) => {
+        switch (memberId) {
+            case 'Q': // Chodan (Q)
+                return { boxShadow: '15px 15px 20px 0 #ffffffff' }; 
+            case 'W': // Majenta (W)
+                return { boxShadow: '15px 15px 20px 0 #ff4edb' }; 
+            case 'E': // Hina (E)
+                return { boxShadow: '15px 15px 20px 0 #00a8ff' }; 
+            case 'R': // Siyeon (R)
+                return { boxShadow: '15px 15px 20px 0 #00c853' }; 
+            case 'All': // QWER (All)
+                return { boxShadow: '15px 15px 20px 0 #000000ff' }; 
+            default:
+                return {}; // 그림자 없음
+        }
+    };
+
     // 개별 멤버 데이터를 불러오는 함수로 변경합니다.
     const fetchMemberData = useCallback(async (memberId: MemberIdType) => {
         setLoading(true);
