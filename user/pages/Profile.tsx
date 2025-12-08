@@ -163,16 +163,16 @@ export default function Profile() {
                 <div className={styles.pf_inner}>
 
                     {/* 이미지: 이미지 슬라이더 컴포넌트 사용 */}
-                    <div className={styles.profile_img}>
-                        {imageUrls.length > 0 && (
-                            <div className={styles.artist_img}>
+                    <div 
+                                className={styles.artist_img}
+                                // **여기에 동적 그림자 스타일을 적용합니다.**
+                                style={getDynamicShadowStyle(selectedId)} 
+                            >
                                 <ImageSlider
                                     images={imageUrls}
                                     interval={3000}
                                 />
                             </div>
-                        )}
-                    </div>
 
                     {/* 텍스트 + SNS */}
                     <div className={styles.profile_txt}>

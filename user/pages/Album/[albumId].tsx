@@ -63,7 +63,7 @@ export default function AlbumDetail() {
                 <Alert severity={error ? 'error' : 'warning'} sx={{ mb: 2 }}>
                     {error || "요청하신 앨범 정보를 찾을 수 없습니다."}
                 </Alert>
-                <Link href="/album" passHref>
+                <Link href="/Album" passHref>
                     <Button variant="contained">목록으로 돌아가기</Button>
                 </Link>
             </Box>
@@ -87,7 +87,7 @@ export default function AlbumDetail() {
                     <div className={styles.dis_bt_top}>
                         {/* Link를 <p>로 감싸고 .back 클래스 적용 */}
                         <p className={styles.back}>
-                            <Link href="/album">&lt; BACK</Link>
+                            <Link href="/Album">&lt; BACK</Link>
                         </p>
                     </div>
 
