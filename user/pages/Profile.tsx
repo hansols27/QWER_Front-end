@@ -60,15 +60,15 @@ export default function Profile() {
     const getDynamicShadowStyle = (memberId: MemberIdType) => {
         switch (memberId) {
             case 'Q': // Chodan (Q)
-                return { boxShadow: '15px 15px 20px 0 #ffffffff' }; 
+                return { boxShadow: '0px 0px 10px #ffffffff' }; 
             case 'W': // Majenta (W)
-                return { boxShadow: '15px 15px 20px 0 #ff4edb' }; 
+                return { boxShadow: '0px 0px 10px #ff4edb' }; 
             case 'E': // Hina (E)
-                return { boxShadow: '15px 15px 20px 0 #00a8ff' }; 
+                return { boxShadow: '0px 0px 10px #00a8ff' }; 
             case 'R': // Siyeon (R)
-                return { boxShadow: '15px 15px 20px 0 #00c853' }; 
+                return { boxShadow: '0px 0px 10px #00c853' }; 
             case 'All': // QWER (All)
-                return { boxShadow: '15px 15px 20px 0 #000000ff' }; 
+                return { boxShadow: '0px 0px 10px #000000ff' }; 
             default:
                 return {}; // 그림자 없음
         }
