@@ -14,8 +14,8 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 1080px; /* 고정된 높이 */
-  overflow: hidden; /* 스크롤 제거 */
+  height: 100vh;
+  overflow: auto; 
   background-color: #0e1726;
 }
 
@@ -155,9 +155,9 @@ a:hover {
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  height: 1080px;
-  min-width: 1440px;
-  overflow: hidden;
+  height: 100%;
+  min-width: 100vh;
+  overflow: auto;
 }
 
 /* main wrap height */
@@ -477,22 +477,20 @@ body.active {
   width: 100%;
 }
 
-/* common - right side text */
 #side {
   position: absolute;
   width: 100%;
   height: auto;
-  overflow: hidden;
+  overflow: visible; 
   min-width: 1280px;
-  max-width: 10px;
 }
 
-#side .side2 {
+.side2 { 
   position: fixed;
-  width: 380px;
+  width: 430px;
   text-align: center;
   top: 400px;
-  right: -120px;
+  right: -120px;   
   font-family: 'Montserrat';
   font-weight: 700;
   font-size: 14pt;
@@ -503,12 +501,12 @@ body.active {
   -ms-transform: rotate(90deg);
 }
 
-#side .side2 span {
+.s_line {
   display: inline-block;
   width: 130px;
   border-top: 1px solid #ffffff;
   vertical-align: middle;
-  margin: 0 25px;
+  margin: 0 -40px;
 }
 
 /* 에러페이지 */

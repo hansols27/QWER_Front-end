@@ -162,11 +162,10 @@ export default function Profile() {
                 {/* Profile Info */}
                 <div className={styles.pf_inner}>
                     {/* 이미지: 이미지 슬라이더 컴포넌트 사용 */}
-                    <div 
-                        className={styles.profile_img} 
-                        style={getDynamicShadowStyle(selectedId)}  // 그림자 스타일
-                    >
-                        <div className={styles.artist_img}>
+                    <div className={styles.profile_img} >
+                        <div className={styles.artist_img}
+                            style={getDynamicShadowStyle(selectedMember.id)}
+                            >                            
                             <ImageSlider
                                 images={imageUrls}
                                 interval={3000}
