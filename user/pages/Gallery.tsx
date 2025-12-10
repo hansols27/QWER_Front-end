@@ -62,9 +62,9 @@ export default function GalleryPage() {
   return (
     <div className="container">
       <div id="side">
-        <div className="side2">
+        <div className={styles.side2}>
           03
-          <span className="s_line"></span>
+          <span className={styles.s_line}></span>
           GALLERY
         </div>
       </div>

@@ -73,9 +73,9 @@ export default function Video() {
   <div className="container">
     {/* Side */}
     <div id="side">
-      <div className="sides2">
+      <div className={styles.side2}>
         04
-        <span className="s_line"></span>
+        <span className={styles.s_line}></span>
         VIDEO
       </div>
     </div>

@@ -477,38 +477,6 @@ body.active {
   width: 100%;
 }
 
-#side {
-  position: absolute;
-  width: 100%;
-  height: auto;
-  overflow: visible; 
-  min-width: 1280px;
-}
-
-.side2 { 
-  position: fixed;
-  width: 430px;
-  text-align: center;
-  top: 400px;
-  right: -120px;   
-  font-family: 'Montserrat';
-  font-weight: 700;
-  font-size: 14pt;
-  letter-spacing: 0.1em;
-  color: #ffffff;
-  transform: rotate(90deg);
-  -webkit-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-}
-
-.s_line {
-  display: inline-block;
-  width: 130px;
-  border-top: 1px solid #ffffff;
-  vertical-align: middle;
-  margin: 0 -40px;
-}
-
 /* 에러페이지 */
 .errorpage {
   position: absolute;

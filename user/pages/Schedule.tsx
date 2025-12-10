@@ -177,9 +177,9 @@ export default function ScheduleView() {
     return (        
         <div className="container"> 
             <div id="side">
-                <div className="side2"> 
+                <div className={styles.side2}> 
                     05
-                    <span className="s_line"></span>
+                    <span className={styles.s_line}></span>
                     SCHEDULE
                 </div>
             </div>

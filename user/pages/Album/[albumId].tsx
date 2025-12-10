@@ -73,9 +73,9 @@ export default function AlbumDetail() {
     return (
         <div className="container"> 
             <div id="side">
-                <div className="side2"> 
+                <div className={styles.side2}> 
                     02
-                    <span className="s_line"></span> 
+                    <span className={styles.s_line}></span> 
                     DISCOGRAPHY
                 </div>
             </div>
