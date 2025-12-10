@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Image from "next/image"; // Image 컴포넌트 사용
 import { api } from "@services/axios";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
@@ -82,17 +81,16 @@ export default function Home() {
 
     // 3. 이미지 표시 (페이지 전체)
     return (
-        // 컨테이너: 뷰포트 전체 크기 (100vh, 100vw)를 차지하도록 설정
-        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}> 
-            
-            <Image
-                src={mainImageUrl}
-                alt="Main Banner Background"
-                priority // 메인 이미지이므로 우선 로드
-                fill // 부모 컨테이너(div)를 꽉 채우도록 설정
-                // 클래스 없이 인라인 스타일만 사용: 비율을 유지하며 컨테이너를 꽉 채웁니다.
-                style={{ objectFit: 'cover' }} 
-            />
+        <div id="wrap">
+            {mainImageUrl && (
+                <div 
+                    className="main_bgimg" 
+                    style={{ 
+                        backgroundImage: `url(${mainImageUrl})`,
+                    }} 
+                >
+                </div>
+            )}
 
         </div>
     );

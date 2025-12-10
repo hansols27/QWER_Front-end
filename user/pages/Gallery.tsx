@@ -70,7 +70,7 @@ export default function GalleryPage() {
       </div>
 
       {/* Main */}  
-      <div className={`${styles.cont} ${styles.gallery} wow fadeInUp`} data-wow-delay="0.2s"> 
+      <div className={`${styles.galleryCont} ${styles.gallery} wow fadeInUp`} data-wow-delay="0.2s"> 
         <div className="title">GALLERY</div>
 
         {loading ? (

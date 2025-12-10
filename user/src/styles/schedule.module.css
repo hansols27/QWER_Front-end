@@ -1,4 +1,4 @@
-.cont {
+.scheduleCont  {
   position: relative;
   width: 1400px;
   height: auto;
@@ -8,7 +8,7 @@
   padding: 0 0;
 }
 
-.cont.schedule {
+.scheduleCont .schedule {
   display: flex;
   gap: 5%;
 }

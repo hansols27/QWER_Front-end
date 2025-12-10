@@ -1,4 +1,4 @@
-.cont {
+.videoCont {
   position: relative;
   width: 1400px;
   height: auto;
@@ -8,7 +8,7 @@
   padding: 0 0;
 }
 
-.cont.video_ct .video_list {
+.videoCont .video_ct .video_list {
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -17,7 +17,7 @@
   gap: 20px;
 }
 
-.cont.video_ct .title {
+.videoCont .video_ct .title {
   width: 100%;
   text-align: left;
   padding-bottom: 40px;

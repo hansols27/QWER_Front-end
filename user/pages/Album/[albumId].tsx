@@ -80,7 +80,7 @@ export default function AlbumDetail() {
                 </div>
             </div>
 
-            <div className={`${styles.cont} ${styles.discography} wow fadeInUp`} data-wow-delay="0.2s">                
+            <div className={`${styles.albumCont} ${styles.discography} wow fadeInUp`} data-wow-delay="0.2s">                
                 {/* 좌측 섹션: .dis_left */}
                 <div className={styles.dis_left}>
                     {/* .dis_bt_top */}

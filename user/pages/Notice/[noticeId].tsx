@@ -145,7 +145,7 @@ export default function NoticeDetail() {
         </div>
       </div>
 
-      <div className={`${styles.cont} ${styles.notice}`}> 
+      <div className={`${styles.ntCont} ${styles.notice}`}> 
         {/* Left Title Area (모듈 CSS 유지) */}
         <div className={styles.n_left}>
           <div className={styles.n_tt}>NOTICE</div>

@@ -1,4 +1,4 @@
-.cont {
+.pfCont {
   position: relative;
   width: 1400px;
   height: auto;
@@ -8,7 +8,7 @@
   padding: 0 0;
 }
 
-.cont.profile {
+.pfCont .profile {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;

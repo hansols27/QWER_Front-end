@@ -1,5 +1,5 @@
 /* ===== Discography List ===== */
-.cont {
+.albumCont {
   position: relative;
   width: 1400px;
   height: auto;
@@ -9,7 +9,7 @@
   padding: 0 0;
 }
 
-.cont.discography_view .release_list {
+.albumCont .discography_view .release_list {
   display: flex;
   gap: 0;
   justify-content: center;

@@ -95,7 +95,7 @@ export default function Notice() {
       </div>
 
       {/* Main */}
-      <div className={`${styles.cont} ${styles.notice}`}>
+      <div className={`${styles.ntCont} ${styles.notice}`}>
         {/* Left: notice.module.css의 .n_left 적용 */}
         <div className={styles.n_left}>
           {/* 타이틀: notice.module.css의 .n_tt 적용 */}

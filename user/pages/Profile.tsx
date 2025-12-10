@@ -60,15 +60,15 @@ export default function Profile() {
     const getDynamicShadowStyle = (memberId: MemberIdType) => {
         switch (memberId) {
             case 'Q': // Chodan (Q)
-                return { boxShadow: '0px 0px 10px #ffffffff' }; 
+                return { boxShadow: '15px 15px 20px 0 #ffffffff' }; 
             case 'W': // Majenta (W)
-                return { boxShadow: '0px 0px 10px #ff4edb' }; 
+                return { boxShadow: '15px 15px 20px 0 #ff4edb' }; 
             case 'E': // Hina (E)
-                return { boxShadow: '0px 0px 10px #00a8ff' }; 
+                return { boxShadow: '15px 15px 20px 0 #00a8ff' }; 
             case 'R': // Siyeon (R)
-                return { boxShadow: '0px 0px 10px #00c853' }; 
+                return { boxShadow: '15px 15px 20px 0 #00c853' }; 
             case 'All': // QWER (All)
-                return { boxShadow: '0px 0px 10px #000000ff' }; 
+                return { boxShadow: '15px 15px 20px 0 #000000ff' }; 
             default:
                 return {}; // 그림자 없음
         }
@@ -131,7 +131,7 @@ export default function Profile() {
             </div>
 
             {/* Main */}
-            <div className={`${styles.cont} ${styles.profile}`}>
+            <div className={`${styles.pfCont} ${styles.profile}`}>
                 {/* Member Selector */}
                 <div className={styles.member_name}>
                     {/* 버튼은 memberIds 상수 배열을 순회하며 렌더링합니다. */}
@@ -161,18 +161,18 @@ export default function Profile() {
 
                 {/* Profile Info */}
                 <div className={styles.pf_inner}>
-
                     {/* 이미지: 이미지 슬라이더 컴포넌트 사용 */}
                     <div 
-                                className={styles.artist_img}
-                                // **여기에 동적 그림자 스타일을 적용합니다.**
-                                style={getDynamicShadowStyle(selectedId)} 
-                            >
-                                <ImageSlider
-                                    images={imageUrls}
-                                    interval={3000}
-                                />
-                            </div>
+                        className={styles.profile_img} 
+                        style={getDynamicShadowStyle(selectedId)}  // 그림자 스타일
+                    >
+                        <div className={styles.artist_img}>
+                            <ImageSlider
+                                images={imageUrls}
+                                interval={3000}
+                            />
+                        </div>
+                    </div>
 
                     {/* 텍스트 + SNS */}
                     <div className={styles.profile_txt}>

@@ -81,7 +81,7 @@ export default function Album() {
         </div>
       </div>
 
-      <div className={`${styles.cont} ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">         
+      <div className={`${styles.albumCont} ${styles.discography_view} wow fadeInUp`} data-wow-delay="0.2s">         
         {/* Title: styles.title (모듈 CSS) */}
         <div className="title">DISCOGRAPHY</div>
 

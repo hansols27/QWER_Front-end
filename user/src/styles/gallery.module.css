@@ -1,4 +1,4 @@
-.cont {
+.galleryCont {
   position: relative;
   width: 1400px;
   height: auto;
@@ -8,7 +8,7 @@
   padding: 0 0;
 }
 
-.cont.gallery .galleryList {
+.galleryCont .gallery .galleryList {
   display: flex;
   gap: 0;
   justify-content: center;

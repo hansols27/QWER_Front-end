@@ -1,5 +1,5 @@
 /* 메인 영역 */
-.cont {
+.ntCont {
   position: relative;
   width: 1400px;
   height: auto;
@@ -9,7 +9,7 @@
   padding: 0 0;
 }
 
-.cont.notice {
+.ntCont .notice {
   flex: 1;              /* 남은 공간 채움 */
   display: flex;        /* 좌측 타이틀 + 우측 리스트 가로 배치 */
   gap: 5%;
@@ -17,7 +17,7 @@
 }
 
 /* 좌측 타이틀 */
-.cont.notice .n_left {
+.ntCont .notice .n_left {
   width: 25%;
   height: auto;
   margin-right: 5%;

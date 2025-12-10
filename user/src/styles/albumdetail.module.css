@@ -1,5 +1,5 @@
 /* Album Detail Layout */
-.cont {
+.albumCont {
   position: relative;
   width: 1400px;
   height: auto;
@@ -9,7 +9,7 @@
   padding: 0 0;
 }
 
-.cont.discography {
+.albumCont .discography {
   display: flex;
   justify-content: center; /* 좌우 가운데 정렬 */
   align-items: flex-start; /* 위쪽 기준 맞춤 */

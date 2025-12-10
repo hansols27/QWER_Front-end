@@ -184,7 +184,7 @@ export default function ScheduleView() {
                 </div>
             </div>
             {/* Main */}
-            <div className={`${styles.cont} ${styles.schedule}`}>   
+            <div className={`${styles.scheduleCont} ${styles.schedule}`}>   
                 <div className={styles.n_left}>
                      <div className="title">SCHEDULE</div>
                     
