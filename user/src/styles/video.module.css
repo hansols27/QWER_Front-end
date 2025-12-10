@@ -8,20 +8,27 @@
   padding: 0 0;
 }
 
-.videoCont .video_ct .video_list {
+.video_ct {
+  width: 100%;
+  height: auto;
+}
+
+/* 페이지 title */
+.video_ct .title {
+  width: 100%;
+  text-align: left;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #fff;
+}
+
+/* 리스트 전체 박스 */
+.video_list {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   max-width: 1400px;
   margin: 80px auto;
   gap: 20px;
-}
-
-.videoCont .video_ct .title {
-  width: 100%;
-  text-align: left;
-  padding-bottom: 40px;
-  border-bottom: 1px solid #fff;
 }
 
 /* 왼쪽 큰 영상 */

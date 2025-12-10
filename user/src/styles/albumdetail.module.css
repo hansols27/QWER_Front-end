@@ -1,28 +1,40 @@
-/* Album Detail Layout */
+/* ===== Album Detail Layout ===== */
 .albumCont {
   position: relative;
   width: 1400px;
   height: auto;
   overflow: hidden;
-  margin: 120px auto; 
+  margin: 120px auto;
   z-index: 111;
-  padding: 0 0;
+  padding: 0;
 }
 
-.albumCont .discography {
+/* ★ 컴포넌트에서 albumCont + discography를 함께 사용하므로 */
+.albumCont.discography {
   display: flex;
-  justify-content: center; /* 좌우 가운데 정렬 */
-  align-items: flex-start; /* 위쪽 기준 맞춤 */
-  gap: 40px; /* 좌우 간격 */
-  flex-wrap: wrap; /* 모바일 대응: 줄바꿈 허용 */
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
 }
 
 /* ===== Left Section ===== */
 .dis_left {
   position: relative;
-  width: 500px;
+  width: 480px;
   height: auto;
-  overflow: hidden;
+}
+
+.dis_bt_top {
+  width: 100%;
+  margin-bottom: 25px;
+  font-family: 'Montserrat';
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.dis_bt_top .back {
+  margin-bottom: 15px;
 }
 
 .onlin_cover {
@@ -33,32 +45,12 @@
   box-shadow: 2px 6px 9px 0px #fff;
 }
 
-.dis_bt_top {
-  position: relative;
-  width: 455px;
-  margin-bottom: 30px;
-  font-family: 'Montserrat';
-  font-size: 10pt;
-  font-weight: 700;
-}
-
-.dis_bt_top .back {
-  text-align: left;
-  float: left;
-  margin-bottom: 20px;
-}
-
 .dis_bt_bottom {
-  position: relative;
-  width: 455px;
+  width: 100%;
   margin-top: 20px;
   font-size: 12pt;
   font-weight: 700;
   letter-spacing: 0.06em;
-}
-
-.dis_bt_bottom p {
-  font-family: 'Montserrat';
 }
 
 .dis_bt_bottom .dis_date {
@@ -67,70 +59,17 @@
   font-family: 'Montserrat';
 }
 
-/* ===== Right Section ===== */
-.dis_right {
-  position: relative;
-  width: 600px;
-  height: auto;
-  overflow: hidden;
-}
-
-.dis_right .lang {
-  color: #fff;
-  margin: 25px 0 205px;
-  width: 100%;
-  position: relative;
-}
-
-.dis_right .lang li {
-  display: inline-block;
-  margin: 0 5px;
-  font-weight: 600;
-}
-
-.dis_right .lang li:last-child {
-  margin-left: 5px;
-}
-
-.dis_right .lang li a {
-  color: #fff;
-  font-family: 'Montserrat';
-}
-
-/* ===== Text Section ===== */
-.dis_txt_top {
-  position: relative;
-  width: 100%;
-}
-
-.dis_txt_top .name {
-  font-size: 15pt;
-  margin-bottom: 10px;
-}
-
-.dis_txt_top .album_name {
-  font-family: spoqanbold;
-  font-size: 25pt;
-  line-height: 35px;
-  margin-bottom: 30px;
-}
-
-.dis_more_cont {
-  width: 100%;
-  font-size: 10pt;
-  font-weight: 400;
-  line-height: 25px;
-  float: left;
-  padding-bottom: 30px;
+/* ===== Tracklist ===== */
+.tracklist {
+  margin-top: 20px;
 }
 
 .tracklist .release-playlist {
   display: flex;
-  flex-wrap: wrap; /* 여러 줄 허용 */
-  gap: 15px; /* 항목 사이 좌우 간격 */
-  row-gap: 5px; /* 줄 사이 간격 조절 */
-  align-items: center; /* 세로 가운데 정렬 */
-  min-height: 1em; /* 부모 높이 유지 */
+  flex-wrap: wrap;
+  gap: 12px;
+  row-gap: 5px;
+  align-items: center;
 }
 
 .tracklist .release-playlist p {
@@ -138,20 +77,87 @@
   font-size: 10pt;
   font-weight: 300;
   color: #fff;
-  background: transparent;
   white-space: nowrap;
 }
 
-.tracklist {
-  margin-top: 15px; /* 위쪽 간격 조절 */
+/* ===== Right Section ===== */
+.dis_right {
+  width: 600px;
+  height: auto;
+  overflow: hidden;
 }
 
+.discography_inner {
+  width: 100%;
+}
+
+.dis_txt_top {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.dis_txt_top .album_name {
+  font-family: spoqanbold;
+  font-size: 25pt;
+  line-height: 35px;
+  margin-bottom: 20px;
+}
+
+/* ===== Description Section ===== */
+.dis_more_cont {
+  width: 100%;
+  font-size: 11pt;
+  font-weight: 400;
+  line-height: 25px;
+  padding-bottom: 30px;
+  margin-bottom: 20px;
+  white-space: pre-line;
+}
+
+/* ===== Video Section (16:9) ===== */
 .video {
   width: 100%;
   aspect-ratio: 16 / 9;
+  margin-top: 20px;
 }
 
 .video iframe {
   width: 100%;
   height: 100%;
+}
+
+/* ===== Mobile (max 768px) ===== */
+@media (max-width: 768px) {
+  .albumCont {
+    width: 100%;
+    margin: 60px auto;
+    padding: 0 15px;
+  }
+
+  .albumCont.discography {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .dis_left,
+  .dis_right {
+    width: 100%;
+  }
+
+  .onlin_cover {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .dis_txt_top .album_name {
+    font-size: 18pt;
+    line-height: 28px;
+  }
+
+  .dis_more_cont {
+    font-size: 10pt;
+    line-height: 20px;
+  }
 }

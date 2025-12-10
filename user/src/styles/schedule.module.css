@@ -8,7 +8,7 @@
   padding: 0 0;
 }
 
-.scheduleCont .schedule {
+.scheduleCont.schedule {
   display: flex;
   gap: 5%;
 }

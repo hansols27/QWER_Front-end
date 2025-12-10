@@ -1,88 +1,89 @@
-/* ===== Discography List ===== */
+/* ===== Discography Container ===== */
 .albumCont {
   position: relative;
   width: 1400px;
   height: auto;
   overflow: hidden;
-  margin: 120px auto; 
+  margin: 120px auto;
   z-index: 111;
-  padding: 0 0;
+  padding: 0;
 }
 
-.albumCont .discography_view .release_list {
+/* 서브 컨테이너 (구조 유지용) */
+.discography_view {
+  width: 100%;
+}
+
+/* ===== 앨범 리스트 ===== */
+.release_list {
   display: flex;
-  gap: 0;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 40px 0;
   max-width: 1400px;
   margin: 80px auto;
   height: auto;
-  box-sizing: border-box;
 }
 
-/* ===== 앨범 카드 컨테이너 ===== */
-.release_list .album_cont {
+/* ===== 앨범 카드 ===== */
+.album_cont {
   display: flex;
   flex-direction: column;
-  width: 300px; /* 슬라이드 개별 너비 */
-  height: 100%;
+  width: 300px;
   box-sizing: border-box;
-  margin: 0 auto;
+  margin: 0 20px;
 }
 
 /* ===== 이미지 영역 ===== */
-.release_list .album_img {
+.album_img {
   width: 300px;
-  height: 300px; /* 정사각형 고정 */
+  height: 300px;
   background: #000;
   overflow: hidden;
   position: relative;
 }
 
-.release_list .album_img img {
+.album_img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.2s ease-in, filter 0.2s ease-in;
+  transition: transform .2s ease, filter .2s ease, opacity .2s ease;
 }
 
 /* 텍스트 영역 */
-.release_list .txt {
-  height: 40px; /* 전체 고정 */
+.txt {
+  height: 40px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   margin-top: 10px;
 }
 
-.release_list .txt p {
+.txt p {
   margin: 0;
   font-size: 10pt;
   font-weight: bold;
-  height: 20px; /* 한 줄 고정 */
-  line-height: 20px; /* 세로 정렬 */
+  line-height: 20px;
+  white-space: nowrap;
   overflow: hidden;
-  white-space: nowrap; /* 줄바꿈 방지 */
-  text-overflow: ellipsis; /* ... 처리 */
-  color: #fff;
-  font-family: 'Montserrat';
+  text-overflow: ellipsis;
 }
 
-.release_list .txt span {
+.txt span {
   display: block;
   font-size: 10pt;
-  height: 15px; /* 한 줄 고정 */
   line-height: 15px;
   color: #fff;
   font-weight: 200;
   text-align: right;
-  overflow: hidden;
   white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Hover 오버레이 */
-.release_list .list-hover {
+/* ===== Hover Overlay ===== */
+.list-hover {
   position: absolute;
   inset: 0;
   display: flex;
@@ -90,107 +91,43 @@
   justify-content: center;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 180ms ease-in-out;
+  transition: opacity .18s ease;
 }
 
-.release_list .album_img:hover .list-hover,
-.release_list .album_img:focus .list-hover {
+.album_img:hover .list-hover {
   opacity: 1;
 }
 
-.release_list .list-hover img {
+.list-hover img {
   width: 70px;
   height: 70px;
 }
 
-/* 카드 hover 효과 */
-.release_list .album_cont:hover img {
-  opacity: 0.9;
+/* 카드 hover */
+.album_cont:hover img {
+  opacity: .9;
   transform: scale(1.01);
-  transition: transform 180ms ease, opacity 180ms ease;
 }
 
-/* 공통 hover border 효과 */
-.album_img:before,
-.album_img:after,
-.album_img .album_cont:before,
-.album_img .album_cont:after {
-  position: absolute;
-  content: '';
-  background-color: #fff;
-  z-index: 1;
-  transition: all 0.4s ease-in;
-  opacity: 0.8;
-}
-
-.album_img:before,
-.album_img:after {
-  height: 1px;
-  width: 0;
-}
-
-.album_img:before {
-  top: 0;
-  left: 0;
-}
-.album_img:after {
-  bottom: 0;
-  right: 0;
-}
-
-.album_img .album_cont:before,
-.album_img .album_cont:after {
-  width: 1px;
-  height: 0;
-}
-
-.album_img:hover > img {
-  opacity: 0.1;
-}
-
-.album_img:hover div {
-  opacity: 1;
-}
-
-.album_img:hover .album_cont:before,
-.album_img:hover .album_cont:after {
-  height: 100%;
-}
-
-.album_img:hover:before,
-.album_img:hover:after {
-  width: 100%;
-}
-
-.album_img:hover:before,
-.album_img:hover:after,
-.album_img:hover .album_cont:before,
-.album_img:hover .album_cont:after {
-  opacity: 0.1;
-}
-
-/* ===== Mobile Responsive ===== */
+/* ===== Mobile ===== */
 @media (max-width: 768px) {
-  .cont.discography_view .release_list {
-    grid-template-columns: repeat(2, 1fr);
+  .release_list {
+    justify-content: center;
     gap: 20px;
-    height: auto; /* 모바일에서는 높이 제한 해제 */
-    max-width: 100%;
-    padding: 0 10px;
   }
 
-  .release_list .album_img {
+  .album_cont {
+    width: 45%;
+    margin: 0;
+  }
+
+  .album_img {
     width: 100%;
     height: auto;
-    aspect-ratio: 1 / 1; /* 1:1 비율 유지 */
+    aspect-ratio: 1 / 1;
   }
 
-  .release_list .list-hover img {
-    width: 56px;
-    height: 56px;
-  }
-
-  .release_list .txt p {
+  .txt p {
     font-size: 10pt;
     padding-right: 50px;
   }
