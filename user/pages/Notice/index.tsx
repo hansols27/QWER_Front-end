@@ -14,8 +14,8 @@ import styles from "@front/styles/notice.module.css";
 // 타입 정의
 // ===========================
 interface NoticeListResponse {
-  success: boolean;
-  data: Notice[];
+  success: boolean;
+  data: Notice[];
 }
 
 type AlertSeverity = "success" | "error" | "info" | "warning";
@@ -24,67 +24,68 @@ type AlertSeverity = "success" | "error" | "info" | "warning";
 // 유틸 함수
 // ===========================
 const formatDate = (dateString: string): string => {
-  if (!dateString) return "날짜 미정";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "잘못된 날짜";
-  return date
-    .toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
-    .replace(/\./g, "-")
-    .slice(0, -1);
+  if (!dateString) return "날짜 미정";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "잘못된 날짜";
+  return date
+    .toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
+    .replace(/\./g, "-")
+    .slice(0, -1);
 };
 
 const extractErrorMessage = (error: any, defaultMsg: string): string => {
-  if (error?.response?.data?.message) return error.response.data.message;
-  if (error?.message) return error.message;
-  return defaultMsg;
+  if (error?.response?.data?.message) return error.response.data.message;
+  if (error?.message) return error.message;
+  return defaultMsg;
 };
 
 // ===========================
 // 컴포넌트
 // ===========================
 export default function Notice() {
-  const [allNotices, setAllNotices] = useState<Notice[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
+  const [allNotices, setAllNotices] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [alertMessage, setAlertMessage] = useState<{ message: string; severity: AlertSeverity } | null>(null);
 
-  const itemsPerPage = 10;
-  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
+  const [page, setPage] = useState(1);
 
-  const totalPages = Math.ceil(allNotices.length / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const currentNotices = allNotices.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(allNotices.length / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const currentNotices = allNotices.slice(startIndex, startIndex + itemsPerPage);
 
-  const handlePrev = () => setPage((prev) => Math.max(prev - 1, 1));
-  const handleNext = () => setPage((prev) => Math.min(prev + 1, totalPages));
+  const handlePrev = () => setPage((prev) => Math.max(prev - 1, 1));
+  const handleNext = () => setPage((prev) => Math.min(prev + 1, totalPages));
 
-  const fetchNotices = useCallback(async () => {
-    setLoading(true);
-    setAlertMessage(null);
-    setPage(1);
+  const fetchNotices = useCallback(async () => {
+    setLoading(true);
+    setAlertMessage(null);
+    setPage(1);
 
-    try {
-      const res = await api.get<NoticeListResponse>("/api/notice");
-      const sortedNotices = res.data.data.sort((a, b) => b.id.localeCompare(a.id));
-      setAllNotices(sortedNotices);
+    try {
+      const res = await api.get<NoticeListResponse>("/api/notice");
+      // ID 기준 내림차순 정렬 (최신 글이 위로)
+      const sortedNotices = res.data.data.sort((a, b) => b.id.localeCompare(a.id));
+      setAllNotices(sortedNotices);
 
-      if (res.data.data.length === 0) {
-        setAlertMessage({ message: "등록된 공지사항이 없습니다.", severity: "info" });
-      }
-    } catch (err: any) {
-      console.error("공지사항 목록 로드 실패:", err);
-      const errorMsg = extractErrorMessage(err, "공지사항 목록 로드에 실패했습니다.");
-      setAlertMessage({ message: errorMsg, severity: "error" });
-      setAllNotices([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      if (res.data.data.length === 0) {
+        setAlertMessage({ message: "등록된 공지사항이 없습니다.", severity: "info" });
+      }
+    } catch (err: any) {
+      console.error("공지사항 목록 로드 실패:", err);
+      const errorMsg = extractErrorMessage(err, "공지사항 목록 로드에 실패했습니다.");
+      setAlertMessage({ message: errorMsg, severity: "error" });
+      setAllNotices([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  useEffect(() => {
-    fetchNotices();
-  }, [fetchNotices]);
+  useEffect(() => {
+    fetchNotices();
+  }, [fetchNotices]);
 
-  return (
+  return (
     <div className="container">
       <div id="side">
         <div className="side2">
@@ -94,14 +95,9 @@ export default function Notice() {
         </div>
       </div>
 
-      {/* Main Container: .ntCont와 .notice 클래스를 함께 적용하여 flex 컨테이너 생성 */}
-      <div className={`${styles.ntCont} ${styles.notice}`}>
-        
-        {/* Left: 좌측 타이틀 영역 */}
-        <div className={styles.n_left}>
-          {/* 타이틀: .n_tt 클래스 적용 (CSS에 정의된 폰트 크기, 굵기 적용) */}
-          <div className={styles.n_tt}>NOTICE</div>
-        </div>
+      {/* Main Container */}
+      <div className={`${styles.ntCont} ${styles.notice}`}> 
+          <div className="title">NOTICE</div>        
 
         {/* Right: 우측 리스트 영역 */}
         <div className={styles.n_right}>
@@ -113,7 +109,6 @@ export default function Notice() {
             </Box>
           )}
 
-          {/* 로딩 상태 */}
           {loading && (
             <Box display="flex" justifyContent="center" alignItems="center" py={8} flexDirection="column">
               <CircularProgress size={30} />
@@ -121,38 +116,53 @@ export default function Notice() {
             </Box>
           )}
 
-          {/* 공지사항 목록 표시 */}
           {!loading && allNotices.length > 0 && (
             <>
-              {/* Notice List: .noticeList 클래스 적용 */}
+              {/* Notice List: 테이블 형태 마크업 적용 */}
               <div className={styles.noticeList}>
+                
+                {/* [테이블 헤더] - 순번, 제목, 등록일 */}
+                <div className={styles.noticeHeader}>
+                  <span className={styles.no}>No.</span>
+                  <span className={styles.title}>제목</span>
+                  <span className={styles.date}>등록일</span>
+                </div>
+
                 <ul>
-                  {currentNotices.map((noticeItem) => (
-                    // li: hover 효과를 위해 스타일이 적용됨
-                    <li key={noticeItem.id}>
-                      {/* Link Wrapper: 클릭 영역 확장 및 Link 스타일 적용 */}
-                      <Link href={`/notice/${noticeItem.id}`} className={styles['notice-item-link']}>
-                        
-                        {/* 카테고리: .cate 적용. (p 태그 + float: left 적용) */}
-                        <p className={styles.cate}>{noticeItem.type}</p>
-                        
-                        {/* 제목+날짜 컨테이너: .nc_in 적용 (p 태그) */}
-                        <p className={styles.nc_in}>
-                          {/* 제목: .tit 적용 (display: block) */}
-                          <span className={styles.tit}>{noticeItem.title}</span>
-                          {/* 날짜: .date 적용 (display: block) */}
+                  {currentNotices.map((noticeItem, index) => {
+                    const noticeNumber = allNotices.length - startIndex - index;
+
+                    return (
+                      <li key={noticeItem.id}>
+                        <div className={styles['notice-item-link']}> 
+                          
+                          {/* 1. 순번 (No.) */}
+                          <span className={styles.no}>{noticeNumber}</span>
+
+                          {/* 2. 제목+카테고리 컨테이너: .nc_in */}
+                          <p className={styles.nc_in}>
+                            {/* 카테고리: .cate */}
+                            <span className={styles.cate}>[{noticeItem.type}]</span> 
+                            
+                            {/* [수정] 제목(.tit)에만 Link 적용 */}
+                            <Link href={`/Notice/${noticeItem.id}`} className={styles.titLink}>
+                              <span className={styles.tit}>{noticeItem.title}</span>
+                            </Link>
+                          </p>
+                          
+                          {/* 3. 등록일 (Date) */}
                           <span className={styles.date}>{formatDate(noticeItem.createdAt)}</span>
-                        </p>
-                        
-                        {/* float 해제를 위한 Clearfix 대용 요소 */}
-                        <div style={{ clear: 'both' }}></div>
-                      </Link>
-                    </li>
-                  ))}
+                          
+                          <div style={{ clear: 'both' }}></div>
+                        {/* </div>를 사용하여 Link 범위를 제목으로 제한 */}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 
-              {/* Pagination: 일반 CSS 클래스 사용 */}
+              {/* Pagination: 기존의 클래스와 마크업 구조 유지 */}
               <div className="page-btn-box">
                 <button
                   type="button"

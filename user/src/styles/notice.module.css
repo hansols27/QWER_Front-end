@@ -7,69 +7,126 @@
   margin: 120px auto;
   z-index: 111;
   padding: 0;
-  display: flex;
-  gap: 5%;
+  background: #0e1726;
 }
 
-/* 메인 영역 */
 .ntCont.notice {
-  flex: 1;              /* 남은 공간 채움 */
-  display: flex;        /* 좌측 타이틀 + 우측 리스트 가로 배치 */
-  gap: 5%;
-  padding: 20px;
+  display: block; 
+  padding: 20px 0;
 }
 
-/* 좌측 타이틀 */
-.n_left {
-  width: 100%;
-}
-.n_left .n_tt {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-/* 우측 리스트 */
 .n_right {
-  flex: 1;
+  width: 100%; /* .ntCont의 전체 너비 사용 */
   position: relative;
   top: 15px;
+  margin: 0; /* 중앙 정렬은 .ntCont에서 처리 */
 }
 
-/* 공지사항 리스트 */
+/* ==================================== */
+/* 공지사항 목록 (테이블 형태) 스타일 수정 */
+/* ==================================== */
+
 .noticeList {
   width: 100%;
+  margin-bottom: 50px;
 }
+
 .noticeList ul {
   border-top: 2px solid #000;
 }
+
+/* 1. 테이블 헤더 스타일 추가 */
+.noticeHeader {
+  display: flex;
+  height: 50px;
+  line-height: 50px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #000;
+  font-weight: bold;
+  color: #333;
+}
+
+.noticeHeader > span {
+  text-align: center;
+  padding: 0 10px;
+}
+
+/* 헤더의 각 컬럼 너비 정의 */
+.noticeHeader .no { width: 10%; min-width: 60px; }
+.noticeHeader .title { flex-grow: 1; text-align: center; padding-left: 0; } /* 제목이 남은 공간 모두 차지 */
+.noticeHeader .date { width: 15%; min-width: 120px; } /* 날짜는 고정 너비 */
+
+
+/* 2. 목록 항목 (li) 스타일 수정 */
 .noticeList ul li {
-  padding: 20px 10px;
+  padding: 0; 
   border-bottom: 1px solid #ccc;
 }
+
 .noticeList ul li:hover {
-  background-color: #fafafa;
+  background-color: transparent; /* 호버 시 배경색 변경 없앰 */
   transition: all 0.3s;
 }
-.noticeList ul li p {
-  float: left;
+
+/* Link Wrapper (전체 행) - Flex 컨테이너 */
+.noticeList .notice-item-link {
+  display: flex; /* 테이블 형태로 만들기 위한 핵심 */
+  width: 100%;
+  align-items: center; /* 세로 중앙 정렬 */
+  min-height: 60px; 
+  text-decoration: none;
+  color: inherit;
+  padding: 10px 0; /* 항목 상하 패딩 */
+}
+
+.noticeList .notice-item-link:hover .nc_in .tit {
+  text-decoration: underline; /* 텍스트에 밑줄 추가 */
+}
+
+/* 1. 순번 (No.) 스타일 */
+.noticeList .no {
+  width: 10%;
+  min-width: 60px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* 2. 제목 컨테이너 (.nc_in) 스타일 */
+.noticeList .nc_in {
+  flex-grow: 1; /* 남은 공간 모두 차지 */
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
 }
 
 .noticeList .cate {
   font-size: 11pt;
-  margin-right: 20px;
-  line-height: 28px;
+  margin-right: 10px;
+  line-height: normal;
+  font-weight: bold;
+  color: #555;
+  white-space: nowrap;
 }
-.noticeList .nc_in {
-  display: inline-block;
-  width: 80%;
-}
+
 .noticeList .nc_in .tit {
-  display: block;
+  display: inline;
   font-size: 12pt;
-  margin-bottom: 10px;
+  margin-bottom: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.noticeList .nc_in .date {
-  display: block;
-  font-size: 10pt;
+
+/* 3. 등록일 (Date) 스타일 */
+.noticeList .date { 
+  width: 15%; /* 헤더와 동일한 너비 */
+  min-width: 120px;
+  text-align: center;
   color: #666;
+  font-size: 10pt;
+}
+
+/* float 해제 요소 처리 (Flexbox 사용 시 불필요) */
+.noticeList .notice-item-link > div[style*="clear: both"] {
+  display: none;
 }
