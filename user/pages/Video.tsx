@@ -69,82 +69,88 @@ export default function Video() {
 
   const selectedVideo = videos[selectedIndex]; 
 
-  return (
-  <div className="container">
-    {/* Side */}
-    <div id="side">
-      <div className={styles.side2}>
-        04
-        <span className={styles.s_line}></span>
-        VIDEO
-      </div>
-    </div>
+ return (
+    // 'container'는 일반 CSS 클래스로 가정합니다.
+    <div className="container">
+      {/* Side - styles.side2, styles.s_line은 CSS 모듈 클래스입니다. */}
+      <div id="side">
+        <div className="side2">
+          04
+          <span className="s_line"></span>
+          VIDEO
+        </div>
+      </div>
 
-    {/* Main (페이지 콘텐츠 영역) */}
-    <div className={`${styles.videoCont} ${styles.video_ct} wow fadeInUp`} data-wow-delay="0.2s">
-       <div className="title">VIDEO</div>
+      {/* Main (페이지 콘텐츠 영역) */}
+      <div 
+        className={`${styles.videoCont} ${styles.video_ct} wow fadeInUp`} data-wow-delay="0.2s">
+        {/* .title은 일반 CSS 클래스이거나 전역으로 접근 가능한 클래스로 가정합니다. */}
+        <div className="title">VIDEO</div>
 
-      {/* 💡 로딩 상태 */}
-      {loading && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 400, gap: 2 }}>
-          <CircularProgress />
-          <Typography variant="h6">영상 목록을 불러오는 중...</Typography>
-        </Box>
-      )}
-        
-      {/* 💡 오류 상태 */}
-      {error && !loading && (
-        <Box sx={{ p: 4 }}>
-          <Typography variant="h6" color="error">{error}</Typography>
-        </Box>
-      )}
+        {/* 💡 로딩 상태 */}
+        {loading && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 400, gap: 2 }}>
+            <CircularProgress />
+            <Typography variant="h6">영상 목록을 불러오는 중...</Typography>
+          </Box>
+        )}
+        
+        {/* 💡 오류 상태 */}
+        {error && !loading && (
+          <Box sx={{ p: 4 }}>
+            <Typography variant="h6" color="error">{error}</Typography>
+          </Box>
+        )}
 
-      {/* 💡 데이터 없음 상태 */}
-      {!loading && !error && videos.length === 0 && (
-        <Box sx={{ p: 4 }}>
-          <Typography variant="h6">등록된 영상이 없습니다. 관리자 페이지에서 영상을 등록해주세요.</Typography>
-        </Box>
-      )}
-    
-      {/* 💡 정상 데이터 (videos.length > 0) 렌더링: video_list가 컨테이너 안에 위치 */}
-      {!loading && !error && videos.length > 0 && (
-        <div className={styles.video_list}>
-          {/* 큰 영상 (왼쪽) */}
-          <div className={styles.select_video}>
-            {selectedVideo && (
-              <iframe
-                src={getEmbedUrl(selectedVideo.src)}
-                title={selectedVideo.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                style={{ width: '100%', height: '100%' }}
-              ></iframe>
-            )}
-          </div>
-    
-          {/* 썸네일 목록 (오른쪽) */}
-          <div className={styles.thumb_box}>
-            <div className={styles['thumb-list']}>
-              {videos.map((video, idx) => (
-                <div
-                  key={video.id}
-                  className={`${styles['thumb-item']} ${
-                    selectedIndex === idx ? styles.active : ''
-                  }`}
-                  onClick={() => setSelectedIndex(idx)}
-                >
-                  <img 
-                    src={getThumbnail(video.src)} 
-                    alt={video.title} 
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-);
+        {/* 💡 데이터 없음 상태 */}
+        {!loading && !error && videos.length === 0 && (
+          <Box sx={{ p: 4 }}>
+            <Typography variant="h6">등록된 영상이 없습니다. 관리자 페이지에서 영상을 등록해주세요.</Typography>
+          </Box>
+        )}
+      
+        {/* 💡 정상 데이터 (videos.length > 0) 렌더링 */}
+        {!loading && !error && videos.length > 0 && (
+          // .video_list 클래스 적용
+          <div className={styles.video_list}>
+            {/* 큰 영상 (왼쪽) - styles.select_video 클래스 적용 */}
+            <div className={styles.select_video}>
+              {selectedVideo && (
+                <iframe
+                  src={getEmbedUrl(selectedVideo.src)}
+                  title={selectedVideo.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  // styles.select_video iframe 스타일이 CSS에 잘 정의되어 있으므로 인라인 스타일 제거 (필요시 복원)
+                ></iframe>
+              )}
+            </div>
+        
+            {/* 썸네일 목록 (오른쪽) - styles.thumb_box 클래스 적용 */}
+            <div className={styles.thumb_box}>
+              {/* styles['thumb-list'] 클래스 적용 (하이픈 때문에 배열 접근 방식 사용) */}
+              <div className={styles['thumb-list']}>
+                {videos.map((video, idx) => (
+                  <div
+                    key={video.id}
+                    // styles['thumb-item'] 클래스 및 활성 상태 클래스 적용
+                    className={`${styles['thumb-item']} ${
+                      selectedIndex === idx ? styles.active : ''
+                    }`}
+                    onClick={() => setSelectedIndex(idx)}
+                  >
+                    <img 
+                      src={getThumbnail(video.src)} 
+                      alt={video.title} 
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

@@ -92,9 +92,9 @@ export default function AlbumDetail() {
         <div className="container"> 
             {/* 측면 메뉴 */}
             <div id="side">
-                <div className={styles.side2}> 
+                <div className="side2"> 
                     02
-                    <span className={styles.s_line}></span> 
+                    <span className="s_line"></span> 
                     DISCOGRAPHY
                 </div>
             </div>

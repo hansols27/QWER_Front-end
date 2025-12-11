@@ -138,12 +138,12 @@ export default function NoticeDetail() {
   return (
     <div className="container"> 
       <div id="side">
-        <div className={styles.side2}>
-          06
-          <span className={styles.s_line}></span>
-          NOTICE
-        </div>
-      </div>
+        <div className="side2">
+          06
+          <span className="s_line"></span>
+          NOTICE
+        </div>
+      </div>
 
       <div className={`${styles.ntCont} ${styles.notice}`}> 
         {/* Left Title Area (모듈 CSS 유지) */}

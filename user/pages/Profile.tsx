@@ -123,9 +123,9 @@ export default function Profile() {
     return (
         <div className="container">
             <div id="side">
-                <div className={styles.side2}>
+                <div className="side2">
                     01
-                    <span className={styles.s_line}></span>
+                    <span className="s_line"></span>
                     PROFILE
                 </div>
             </div>

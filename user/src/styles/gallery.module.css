@@ -8,48 +8,14 @@
   padding: 0 0;
 }
 
-#side {
-  position: absolute;
-  width: 100%;
-  height: auto;
-  overflow: visible; 
-  min-width: 1280px;
-}
-
-.side2 { 
-  position: fixed;
-  width: 430px;
-  text-align: center;
-  top: 400px;
-  right: -120px;   
-  font-family: 'Montserrat';
-  font-weight: 700;
-  font-size: 14pt;
-  letter-spacing: 0.1em;
-  color: #ffffff;
-  transform: rotate(90deg);
-  -webkit-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-}
-
-.s_line {
-  display: inline-block;
-  width: 130px;
-  border-top: 1px solid #ffffff;
-  vertical-align: middle;
-  margin: 0 -40px;
-}
-
-.gallery {
-  width: 100%;
-}
-
-.galleryList {
+/* 컨테이너 */
+.galleryCont.gallery .galleryList {
   display: flex;
+  gap: 0;
   justify-content: center;
   max-width: 1400px;
   margin: 80px auto;
-  gap: 0;
+  height: auto;
   box-sizing: border-box;
 }
 

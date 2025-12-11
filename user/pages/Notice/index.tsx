@@ -85,96 +85,103 @@ export default function Notice() {
   }, [fetchNotices]);
 
   return (
-    <div className="container">
-      <div id="side">
-        <div className={styles.side2}>
-          06
-          <span className={styles.s_line}></span>
-          NOTICE
-        </div>
-      </div>
+    <div className="container">
+      <div id="side">
+        <div className="side2">
+          06
+          <span className="s_line"></span>
+          NOTICE
+        </div>
+      </div>
 
-      {/* Main */}
-      <div className={`${styles.ntCont} ${styles.notice}`}>
-        {/* Left: notice.module.css의 .n_left 적용 */}
-        <div className={styles.n_left}>
-          {/* 타이틀: notice.module.css의 .n_tt 적용 */}
-           <div className="title">NOTICE</div>
-        </div>
+      {/* Main Container: .ntCont와 .notice 클래스를 함께 적용하여 flex 컨테이너 생성 */}
+      <div className={`${styles.ntCont} ${styles.notice}`}>
+        
+        {/* Left: 좌측 타이틀 영역 */}
+        <div className={styles.n_left}>
+          {/* 타이틀: .n_tt 클래스 적용 (CSS에 정의된 폰트 크기, 굵기 적용) */}
+          <div className={styles.n_tt}>NOTICE</div>
+        </div>
 
-        {/* Right: notice.module.css의 .n_right 적용 */}
-        <div className={styles.n_right}>
-          {alertMessage && (
-            <Box py={2}>
-              <Alert severity={alertMessage.severity}>{alertMessage.message}</Alert>
-            </Box>
-          )}
+        {/* Right: 우측 리스트 영역 */}
+        <div className={styles.n_right}>
+          
+          {/* 알림 메시지 */}
+          {alertMessage && (
+            <Box py={2}>
+              <Alert severity={alertMessage.severity}>{alertMessage.message}</Alert>
+            </Box>
+          )}
 
-          {loading && (
-            <Box display="flex" justifyContent="center" alignItems="center" py={8} flexDirection="column">
-              <CircularProgress size={30} />
-              <Typography mt={2}>공지사항을 불러오는 중...</Typography>
-            </Box>
-          )}
+          {/* 로딩 상태 */}
+          {loading && (
+            <Box display="flex" justifyContent="center" alignItems="center" py={8} flexDirection="column">
+              <CircularProgress size={30} />
+              <Typography mt={2}>공지사항을 불러오는 중...</Typography>
+            </Box>
+          )}
 
-          {!loading && allNotices.length > 0 && (
-            <>
-              {/* Notice List: .noticeList 클래스 적용 (모듈 CSS) */}
-              <div className={styles.noticeList}>
-                <ul>
-                  {currentNotices.map((noticeItem) => (
-                    <li key={noticeItem.id}>
-                      {/* Link Wrapper */}
-                      <Link href={`/notice/${noticeItem.id}`} className={styles['notice-item-link']}>
-                        {/* 카테고리: .cate 적용 (모듈 CSS) */}
-                        <p className={styles.cate}>{noticeItem.type}</p>
-                        
-                        {/* 제목+날짜: .nc_in 적용 (모듈 CSS) */}
-                        <p className={styles.nc_in}>
-                          {/* 제목: .tit 적용 (모듈 CSS) */}
-                          <span className={styles.tit}>{noticeItem.title}</span>
-                          {/* 날짜: .date 적용 (모듈 CSS) */}
-                          <span className={styles.date}>{formatDate(noticeItem.createdAt)}</span>
-                        </p>
-                        
-                        {/* float 해제를 위한 Clearfix 대용 요소 */}
-                        <div style={{ clear: 'both' }}></div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {/* 공지사항 목록 표시 */}
+          {!loading && allNotices.length > 0 && (
+            <>
+              {/* Notice List: .noticeList 클래스 적용 */}
+              <div className={styles.noticeList}>
+                <ul>
+                  {currentNotices.map((noticeItem) => (
+                    // li: hover 효과를 위해 스타일이 적용됨
+                    <li key={noticeItem.id}>
+                      {/* Link Wrapper: 클릭 영역 확장 및 Link 스타일 적용 */}
+                      <Link href={`/notice/${noticeItem.id}`} className={styles['notice-item-link']}>
+                        
+                        {/* 카테고리: .cate 적용. (p 태그 + float: left 적용) */}
+                        <p className={styles.cate}>{noticeItem.type}</p>
+                        
+                        {/* 제목+날짜 컨테이너: .nc_in 적용 (p 태그) */}
+                        <p className={styles.nc_in}>
+                          {/* 제목: .tit 적용 (display: block) */}
+                          <span className={styles.tit}>{noticeItem.title}</span>
+                          {/* 날짜: .date 적용 (display: block) */}
+                          <span className={styles.date}>{formatDate(noticeItem.createdAt)}</span>
+                        </p>
+                        
+                        {/* float 해제를 위한 Clearfix 대용 요소 */}
+                        <div style={{ clear: 'both' }}></div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              {/* Pagination: global.css 클래스 사용 */}
-              <div className="page-btn-box">
-                <button
-                  type="button"
-                  className="prev-btn"
-                  onClick={handlePrev}
-                  disabled={page === 1}
-                >
-                  <Image alt="이전" src={btn_prev} width={36} height={36} />
-                  이전
-                </button>
+              {/* Pagination: 일반 CSS 클래스 사용 */}
+              <div className="page-btn-box">
+                <button
+                  type="button"
+                  className="prev-btn"
+                  onClick={handlePrev}
+                  disabled={page === 1}
+                >
+                  <Image alt="이전" src={btn_prev} width={36} height={36} />
+                  이전
+                </button>
 
-                <span className="page-number">
-                  <strong>{page}</strong> / <em>{totalPages}</em>
-                </span>
+                <span className="page-number">
+                  <strong>{page}</strong> / <em>{totalPages}</em>
+                </span>
 
-                <button
-                  type="button"
-                  className="next-btn"
-                  onClick={handleNext}
-                  disabled={page >= totalPages}
-                >
-                  <Image alt="이후" src={btn_next} width={36} height={36} />
-                  이후
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+                <button
+                  type="button"
+                  className="next-btn"
+                  onClick={handleNext}
+                  disabled={page >= totalPages}
+                >
+                  <Image alt="이후" src={btn_next} width={36} height={36} />
+                  이후
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
