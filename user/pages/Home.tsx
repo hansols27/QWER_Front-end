@@ -19,7 +19,6 @@ const getErrorMessage = (err: unknown): string => {
     if (typeof err === 'object' && err !== null) {
         if (('isAxiosError' in err && (err as any).isAxiosError === true) || ('response' in err)) {
             const axiosError = err as any; 
-            // 응답 메시지가 있으면 사용, 없으면 axios 기본 메시지 사용
             return axiosError.response?.data?.message ?? axiosError.message;
         }
         if (err instanceof Error) {
@@ -45,7 +44,7 @@ export default function Home() {
                     setMainImageUrl(res.data.data.mainImage);
                 } else {
                     setMainImageUrl(null);
-                    setError(null); // 데이터는 성공적으로 가져왔지만 이미지가 없을 경우 에러 초기화
+                    setError(null);
                 }
             } catch (err) {
                 console.error("Failed to fetch main image URL:", err);
@@ -81,17 +80,33 @@ export default function Home() {
 
     // 3. 이미지 표시 (페이지 전체)
     return (
-        <div id="wrap">
+        <div 
+            id="wrap" 
+            style={{ 
+                // ✨ 뷰포트 전체를 고정된 위치에 채우는 핵심 스타일
+                position: 'fixed', 
+                top: 0, 
+                left: 0, 
+                width: '100vw', 
+                height: '100vh', 
+                zIndex: -1, // 다른 콘텐츠(헤더, 푸터 등) 아래에 위치하도록 설정
+            }}
+        >
             {mainImageUrl && (
                 <div 
                     className="main_bgimg" 
                     style={{ 
                         backgroundImage: `url(${mainImageUrl})`,
+                        // ✨ 배경 이미지가 요소를 꽉 채우도록 설정
+                        width: '100%', 
+                        height: '100%',
+                        backgroundSize: 'cover', // 화면 비율 유지하며 요소 꽉 채우기
+                        backgroundPosition: 'center', // 중앙 정렬
+                        backgroundRepeat: 'no-repeat', // 반복 금지
                     }} 
                 >
                 </div>
             )}
-
         </div>
     );
 }
