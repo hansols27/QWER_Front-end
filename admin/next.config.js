@@ -16,7 +16,7 @@ const nextConfig = {
                 // S3 버킷 도메인 hostname을 정확하게 입력
                 hostname: 'qwerfansite.s3.ap-northeast-2.amazonaws.com', 
                 port: '',
-                pathname: '/albums/**', // S3 내 앨범 이미지 경로 지정
+                pathname: "/**", // 버킷 전체 접근
             },
         ],
     },

@@ -182,9 +182,9 @@ export default function GalleryCreate() {
                                     <Grid 
                                         item 
                                         component="div" 
-                                        xs={6} 
-                                        sm={4} 
-                                        md={3} 
+                                        xs={4} 
+                                        sm={3} 
+                                        md={2} 
                                         lg={2} 
                                         key={idx}
                                         {...({} as any)} 
@@ -194,9 +194,7 @@ export default function GalleryCreate() {
                                                 width: '100%', 
                                                 aspectRatio: '1 / 1', 
                                                 position: 'relative',
-                                                // 일반 <img> 태그 사용 시 너비/높이 설정
                                             }}> 
-                                                {/* next/image 대신 일반 <img> 태그 사용 */}
                                                 <img
                                                     src={url}
                                                     alt={`preview-${idx}`}
