@@ -4,7 +4,6 @@ import { useState, ChangeEvent, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@shared/services/axios";
 import Layout from "@components/common/layout";
-import Image from "next/image";
 import { 
     Box, 
     Button, 
@@ -35,7 +34,7 @@ export default function GalleryCreate() {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // 1. 파일 선택 및 유효성 검사
+    // 1. 파일 선택 및 유효성 검사 (변경 없음)
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         setAlertMessage(null);
         if (!e.target.files) return;
@@ -75,14 +74,14 @@ export default function GalleryCreate() {
         }
     };
 
-    // 2. 파일 미리보기 생성 및 해제
+    // 2. 파일 미리보기 생성 및 해제 (변경 없음)
     useEffect(() => {
         const urls = files.map((file) => URL.createObjectURL(file));
         setPreviews(urls);
         return () => urls.forEach((url) => URL.revokeObjectURL(url));
     }, [files]);
 
-    // 3. 선택 이미지 삭제
+    // 3. 선택 이미지 삭제 (변경 없음)
     const handleRemoveFile = (index: number) => {
         const newFiles = files.filter((_, i) => i !== index);
         setFiles(newFiles);
@@ -95,7 +94,7 @@ export default function GalleryCreate() {
         }
     };
 
-    // 4. 이미지 업로드 (POST)
+    // 4. 이미지 업로드 (POST) (변경 없음)
     const handleUpload = async () => {
         setAlertMessage(null);
 
@@ -110,7 +109,7 @@ export default function GalleryCreate() {
         files.forEach((file) => formData.append("images", file));
 
         try {
-            await api.post("/api/gallery", formData, {
+            await api.post("/api/gallery/upload", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
@@ -138,7 +137,7 @@ export default function GalleryCreate() {
                 {alertMessage && <Alert severity={alertMessage.severity} sx={{ mb: 2 }}>{alertMessage.message}</Alert>}
 
                 <Stack spacing={3}>
-                    {/* 파일 선택 섹션 */}
+                    {/* 파일 선택 섹션 (변경 없음) */}
                     <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                         <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>이미지 파일 선택</Typography>
                         
@@ -171,7 +170,7 @@ export default function GalleryCreate() {
 
                     </Card>
 
-                    {/* 미리보기 섹션 */}
+                    {/* 미리보기 섹션 (↓↓↓ 이 부분이 수정되었습니다 ↓↓↓) */}
                     {files.length > 0 && (
                         <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                             <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>
@@ -188,22 +187,29 @@ export default function GalleryCreate() {
                                         md={3} 
                                         lg={2} 
                                         key={idx}
-                                        {...({} as any)} // 👈 타입 오류 회피를 위한 캐스팅 (수정 반영)
+                                        {...({} as any)} 
                                     > 
                                         <Card sx={{ position: "relative" }}>
-                                            <Box sx={{ width: '100%', aspectRatio: '1 / 1', position: 'relative' }}> 
-                                                <Image
+                                            <Box sx={{ 
+                                                width: '100%', 
+                                                aspectRatio: '1 / 1', 
+                                                position: 'relative',
+                                                // 일반 <img> 태그 사용 시 너비/높이 설정
+                                            }}> 
+                                                {/* next/image 대신 일반 <img> 태그 사용 */}
+                                                <img
                                                     src={url}
                                                     alt={`preview-${idx}`}
-                                                    fill
-                                                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, (max-width: 1200px) 25vw, 16vw" 
-                                                    style={{ objectFit: "cover", borderRadius: '4px' }}
-                                                    priority={false}
-                                                    unoptimized
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        height: '100%', 
+                                                        objectFit: "cover", 
+                                                        borderRadius: '4px' 
+                                                    }}
                                                 />
                                             </Box>
 
-                                            {/* 삭제 버튼 */}
+                                            {/* 삭제 버튼 (변경 없음) */}
                                             <IconButton
                                                 size="small"
                                                 color="error"
@@ -226,7 +232,7 @@ export default function GalleryCreate() {
                         </Card>
                     )}
                     
-                    {/* 액션 버튼 섹션 */}
+                    {/* 액션 버튼 섹션 (변경 없음) */}
                     <Divider sx={{ mt: 4, mb: 4 }}/>
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                         <Button 
