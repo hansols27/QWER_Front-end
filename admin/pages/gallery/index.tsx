@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; 
 import { api } from "@shared/services/axios";
 import Layout from "@components/common/layout";
 import type { GalleryItem } from "@shared/types/gallery";
@@ -65,12 +65,11 @@ export default function GalleryList() {
     };
 
     // -----------------------------------
-    // 상세 페이지 이동
-    // (이미지 클릭 시 이동, 체크박스 클릭은 이동 X)
+    // 상세 페이지 이동 함수 제거됨 (요청 사항)
     // -----------------------------------
-    const handleItemClick = (galleryId: string) => {
-        router.push(`/gallery/${galleryId}`);
-    };
+    // const handleItemClick = (galleryId: string) => {
+    //     router.push(`/gallery/${galleryId}`);
+    // };
 
     const handleCreateClick = () => {
         router.push("/gallery/create");
@@ -153,16 +152,18 @@ export default function GalleryList() {
                         const isChecked = selectedIds.includes(item.id);
 
                         return (
-                            <Grid item xs={6} sm={4} md={3} key={item.id} {...({} as any)}>
+                            // Grid item 수정: 불필요한 {...({} as any)} 제거 및 md={1} 유지
+                            <Grid item xs={6} sm={4} md={1} key={item.id} {...({} as any)}>
                                 <Card
                                     sx={{
-                                        cursor: "pointer",
-                                        transition: "0.2s",
-                                        "&:hover": { transform: "scale(1.02)", boxShadow: 6 },
+                                        // 호버 및 클릭 효과 제거 (요청 사항)
+                                        cursor: "default", 
+                                        transition: "none", 
+                                        "&:hover": {}, 
                                         position: "relative",
                                     }}
                                 >
-                                    {/* 체크박스 (카드 클릭과 분리) */}
+                                    {/* 체크박스 */}
                                     <Checkbox
                                         checked={isChecked}
                                         onChange={() => handleSelect(item.id)}
@@ -176,10 +177,14 @@ export default function GalleryList() {
                                         }}
                                     />
 
-                                    {/* 이미지: next/image 대신 표준 <img> 태그 사용 */}
+                                    {/* 이미지: 표준 <img> 태그 사용 (클릭 이벤트 제거) */}
                                     <Box
-                                        onClick={() => handleItemClick(item.id)}
-                                        sx={{ width: "100%", aspectRatio: "1/1", position: "relative" }}
+                                        // onClick 핸들러 제거됨
+                                        sx={{ 
+                                            width: "100%", 
+                                            aspectRatio: "1/1", 
+                                            position: "relative" 
+                                        }}
                                     >
                                         <img
                                             src={item.url || "https://via.placeholder.com/300?text=No+Image"}
