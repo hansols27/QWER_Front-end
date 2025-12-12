@@ -170,63 +170,54 @@ export default function GalleryCreate() {
 
                     </Card>
 
-                    {/* 미리보기 섹션 (↓↓↓ 이 부분이 수정되었습니다 ↓↓↓) */}
+                    {/* 미리보기 섹션 */}
                     {files.length > 0 && (
                         <Card sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                             <Typography variant="h6" mb={2} borderBottom="1px solid #eee" pb={1}>
                                 {files.length}개 이미지 미리보기
                             </Typography>
 
-                            <Grid container spacing={3}>
+                            {/* 💡 Grid 대신 Flexbox/Stack을 사용하여 80x80 이미지를 나열합니다. */}
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                                 {previews.map((url, idx) => (
-                                    <Grid 
-                                        item 
-                                        component="div" 
-                                        xs={4} 
-                                        sm={3} 
-                                        md={2} 
-                                        lg={2} 
+                                    <Box 
                                         key={idx}
-                                        {...({} as any)} 
+                                        sx={{ position: "relative" }}
                                     > 
-                                        <Card sx={{ position: "relative" }}>
-                                            <Box sx={{ 
-                                                width: '100%', 
-                                                aspectRatio: '1 / 1', 
-                                                position: 'relative',
-                                            }}> 
-                                                <img
-                                                    src={url}
-                                                    alt={`preview-${idx}`}
-                                                    style={{ 
-                                                        width: '100%', 
-                                                        height: '100%', 
-                                                        objectFit: "cover", 
-                                                        borderRadius: '4px' 
-                                                    }}
-                                                />
-                                            </Box>
+                                        <Box
+                                            component="img"
+                                            // 💡 item.url 대신 map 함수의 url 인자를 사용합니다.
+                                            src={url || undefined} 
+                                            alt={`preview-${idx}`}
+                                            sx={{ 
+                                                // 💡 고정된 크기 80px x 80px 적용 (요청하신 크기)
+                                                width: 80, 
+                                                height: 80, 
+                                                objectFit: "cover", 
+                                                borderRadius: 1, 
+                                                border: "1px solid #ccc",
+                                            }}
+                                        />
 
-                                            {/* 삭제 버튼 (변경 없음) */}
-                                            <IconButton
-                                                size="small"
-                                                color="error"
-                                                sx={{
-                                                    position: "absolute",
-                                                    top: 5,
-                                                    right: 5,
-                                                    backgroundColor: "rgba(255,255,255,0.8)",
-                                                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.95)' }
-                                                }}
-                                                onClick={() => handleRemoveFile(idx)}
-                                                disabled={loading}
-                                            >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
-                                        </Card>
-                                    </Grid>
+                                        {/* 삭제 버튼 (기존 코드와 동일) */}
+                                        <IconButton
+                                            size="small"
+                                            color="error"
+                                            sx={{
+                                                position: "absolute",
+                                                top: -10, // 위치 조정
+                                                right: -10, // 위치 조정
+                                                backgroundColor: "rgba(255,255,255,0.8)",
+                                                '&:hover': { backgroundColor: 'rgba(255,255,255,0.95)' }
+                                            }}
+                                            onClick={() => handleRemoveFile(idx)}
+                                            disabled={loading}
+                                        >
+                                            <DeleteIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
                                 ))}
-                            </Grid>
+                            </Box>
                         </Card>
                     )}
                     
