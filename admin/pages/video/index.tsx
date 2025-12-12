@@ -103,17 +103,22 @@ export default function VideoList() {
                     </Typography>
                 )}
 
+                {/* 360px 카드에 맞춰 균등 정렬 */}
                 <Grid container spacing={4} {...({} as any)}>
                     {items.map((item) => (
-                        <Grid item xs={6} sm={4} md={3} key={String(item.id)} {...({} as any)}>
+                        <Grid item key={String(item.id)} {...({} as any)}>
+
+                            {/* 카드 전체 크기 고정 */}
                             <Card
                                 onClick={() => handleVideoClick(item.id)}
                                 sx={{
                                     cursor: "pointer",
+                                    width: "360px",
                                     transition: "transform 0.2s",
                                     "&:hover": { transform: "scale(1.02)", boxShadow: 6 }
                                 }}
                             >
+                                {/* 썸네일 크기 고정 */}
                                 <CardMedia
                                     component="img"
                                     image={getThumbnail(item.src) || "https://via.placeholder.com/360x240?text=No+Thumbnail"}
@@ -121,12 +126,11 @@ export default function VideoList() {
                                     sx={{
                                         width: "360px",
                                         height: "240px",
-                                        objectFit: "cover",
-                                        display: "block",
-                                        margin: "0 auto",
+                                        objectFit: "cover"
                                     }}
                                 />
 
+                                {/* 제목 영역 */}
                                 <Box p={1}>
                                     <Typography
                                         variant="subtitle1"
@@ -136,13 +140,14 @@ export default function VideoList() {
                                             WebkitBoxOrient: "vertical",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
-                                            minHeight: "48px" // 2줄 기준 높이
+                                            height: "44px"  // 두 줄 텍스트 높이 고정
                                         }}
                                     >
                                         {item.title}
                                     </Typography>
                                 </Box>
                             </Card>
+
                         </Grid>
                     ))}
                 </Grid>

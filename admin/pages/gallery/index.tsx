@@ -23,6 +23,14 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
     return defaultMsg;
 };
 
+const getResizedImageUrl = (url: string, width: number = 100): string => {
+    if (!url) return "https://via.placeholder.com/300?text=No+Image";
+    
+    // 이미 URL에 쿼리가 있는지 확인하고 추가
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}w=${width}`;
+};
+
 export default function GalleryList() {
     const [items, setItems] = useState<GalleryItem[]>([]);
     const [loading, setLoading] = useState(false);
@@ -63,13 +71,6 @@ export default function GalleryList() {
             prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
         );
     };
-
-    // -----------------------------------
-    // 상세 페이지 이동 함수 제거됨 (요청 사항)
-    // -----------------------------------
-    // const handleItemClick = (galleryId: string) => {
-    //     router.push(`/gallery/${galleryId}`);
-    // };
 
     const handleCreateClick = () => {
         router.push("/gallery/create");
@@ -150,13 +151,12 @@ export default function GalleryList() {
                 <Grid container spacing={4} {...({} as any)}>
                     {items.map((item) => {
                         const isChecked = selectedIds.includes(item.id);
+                        const resizedUrl = getResizedImageUrl(item.url, 100);
 
                         return (
-                            // Grid item 수정: 불필요한 {...({} as any)} 제거 및 md={1} 유지
                             <Grid item xs={6} sm={4} md={1} key={item.id} {...({} as any)}>
                                 <Card
                                     sx={{
-                                        // 호버 및 클릭 효과 제거 (요청 사항)
                                         cursor: "default", 
                                         transition: "none", 
                                         "&:hover": {}, 
@@ -179,7 +179,6 @@ export default function GalleryList() {
 
                                     {/* 이미지: 표준 <img> 태그 사용 (클릭 이벤트 제거) */}
                                     <Box
-                                        // onClick 핸들러 제거됨
                                         sx={{ 
                                             width: "100%", 
                                             aspectRatio: "1/1", 
@@ -187,8 +186,9 @@ export default function GalleryList() {
                                         }}
                                     >
                                         <img
-                                            src={item.url || "https://via.placeholder.com/300?text=No+Image"}
+                                            src={resizedUrl} // 리사이징된 URL 사용
                                             alt={`Gallery ${item.id}`}
+                                            // style은 컨테이너에 맞춰 표시하는 역할만 합니다.
                                             style={{ 
                                                 width: "100%", 
                                                 height: "100%", 
