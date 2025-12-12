@@ -69,37 +69,47 @@ export default function GalleryList() {
     };
 
     // -----------------------------------
-    // 선택된 이미지 삭제
+    // 선택된 이미지 삭제 (수정된 부분)
     // -----------------------------------
     const handleDeleteSelected = async () => {
-    if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0) return;
 
-    const confirmDelete = window.confirm(
-        `${selectedIds.length}개의 이미지를 삭제하시겠습니까?`
-    );
-    if (!confirmDelete) return;
+        const confirmDelete = window.confirm(
+            `${selectedIds.length}개의 이미지를 삭제하시겠습니까?`
+        );
+        if (!confirmDelete) return;
 
         try {
             setLoading(true);
 
-            // TS 오류 없이 DELETE body 전송
+            const idsToDelete = [...selectedIds]; // 삭제 요청할 ID 목록 복사
+
+            // 1. 백엔드 API 호출 (실제 삭제)
             await api.delete("/api/gallery", {
-                data: { ids: selectedIds },
+                data: { ids: idsToDelete },
             } as any);
+
+            // 2. 🚀 핵심 해결책: 상태(items)에서 삭제된 ID 필터링
+            setItems((prevItems) => 
+                prevItems.filter((item) => !idsToDelete.includes(item.id))
+            );
 
             setAlertMessage({
                 message: "선택한 이미지가 삭제되었습니다.",
                 severity: "success",
             });
 
-            setSelectedIds([]);
-            fetchGalleryItems();
+            setSelectedIds([]); // 선택된 ID 목록 초기화
+
+            // 💡 주의: 상태 필터링 방식에서는 fetchGalleryItems()를 호출할 필요가 없습니다.
+            // fetchGalleryItems(); // <-- 이 라인을 주석 처리하거나 제거합니다.
 
         } catch (err: any) {
             setAlertMessage({
                 message: extractErrorMessage(err, "이미지 삭제 실패"),
                 severity: "error",
             });
+            // 🚨 삭제 실패 시, 선택 목록을 초기화하지 않아야 사용자가 재시도할 수 있습니다.
         } finally {
             setLoading(false);
         }
