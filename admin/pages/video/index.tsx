@@ -125,7 +125,7 @@ export default function VideoList() {
                                     alt={item.title}
                                     sx={{
                                         width: "360px",
-                                        height: "240px",
+                                        height: "200px",
                                         objectFit: "cover"
                                     }}
                                 />

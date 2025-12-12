@@ -163,7 +163,7 @@ export default function GalleryList() {
                                             top: 8,
                                             left: 8,
                                             zIndex: 5,
-                                            background: "rgba(255,255,255,0.7)",
+                                            backgroundColor: "transparent",
                                             borderRadius: "4px",
                                         }}
                                     />
