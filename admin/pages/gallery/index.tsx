@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { api } from "@shared/services/axios";
 import Layout from "@components/common/layout";
 import type { GalleryItem } from "@shared/types/gallery";
@@ -177,17 +176,21 @@ export default function GalleryList() {
                                         }}
                                     />
 
-                                    {/* 이미지 */}
+                                    {/* 이미지: next/image 대신 표준 <img> 태그 사용 */}
                                     <Box
                                         onClick={() => handleItemClick(item.id)}
                                         sx={{ width: "100%", aspectRatio: "1/1", position: "relative" }}
                                     >
-                                        <Image
+                                        <img
                                             src={item.url || "https://via.placeholder.com/300?text=No+Image"}
                                             alt={`Gallery ${item.id}`}
-                                            fill
-                                            sizes="50vw"
-                                            style={{ objectFit: "cover" }}
+                                            style={{ 
+                                                width: "100%", 
+                                                height: "100%", 
+                                                objectFit: "cover",
+                                                display: "block"
+                                            }}
+                                            loading="lazy"
                                         />
                                     </Box>
                                 </Card>

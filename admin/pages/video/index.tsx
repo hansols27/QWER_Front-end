@@ -116,10 +116,15 @@ export default function VideoList() {
                             >
                                 <CardMedia
                                     component="img"
-                                    height="200"
-                                    image={getThumbnail(item.src) || "https://via.placeholder.com/200x200?text=No+Thumbnail"}
+                                    image={getThumbnail(item.src) || "https://via.placeholder.com/360x240?text=No+Thumbnail"}
                                     alt={item.title}
-                                    sx={{ objectFit: "cover" }}
+                                    sx={{
+                                        width: "360px",
+                                        height: "240px",
+                                        objectFit: "cover",
+                                        display: "block",
+                                        margin: "0 auto",
+                                    }}
                                 />
 
                                 <Box p={1}>
