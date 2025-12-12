@@ -23,14 +23,6 @@ const extractErrorMessage = (error: any, defaultMsg: string): string => {
     return defaultMsg;
 };
 
-const getResizedImageUrl = (url: string, width: number = 100): string => {
-    if (!url) return "https://via.placeholder.com/300?text=No+Image";
-    
-    // 이미 URL에 쿼리가 있는지 확인하고 추가
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}w=${width}`;
-};
-
 export default function GalleryList() {
     const [items, setItems] = useState<GalleryItem[]>([]);
     const [loading, setLoading] = useState(false);
@@ -151,7 +143,6 @@ export default function GalleryList() {
                 <Grid container spacing={4} {...({} as any)}>
                     {items.map((item) => {
                         const isChecked = selectedIds.includes(item.id);
-                        const resizedUrl = getResizedImageUrl(item.url, 100);
 
                         return (
                             <Grid item xs={6} sm={4} md={1} key={item.id} {...({} as any)}>
@@ -179,21 +170,22 @@ export default function GalleryList() {
 
                                     {/* 이미지: 표준 <img> 태그 사용 (클릭 이벤트 제거) */}
                                     <Box
-                                        sx={{ 
-                                            width: "100%", 
-                                            aspectRatio: "1/1", 
-                                            position: "relative" 
+                                        sx={{
+                                            width: "180px",
+                                            height: "270px",
+                                            position: "relative",
+                                            overflow: "hidden",
+                                            borderRadius: "6px"
                                         }}
-                                    >
+                                        >
                                         <img
-                                            src={resizedUrl} // 리사이징된 URL 사용
+                                            src={item.url || "https://via.placeholder.com/300?text=No+Image"}
                                             alt={`Gallery ${item.id}`}
-                                            // style은 컨테이너에 맞춰 표시하는 역할만 합니다.
-                                            style={{ 
-                                                width: "100%", 
-                                                height: "100%", 
-                                                objectFit: "cover",
-                                                display: "block"
+                                            style={{
+                                            width: "100%",
+                                            height: "100%",
+                                            objectFit: "cover",   // 비율 유지 + 박스를 꽉 채움
+                                            display: "block"
                                             }}
                                             loading="lazy"
                                         />

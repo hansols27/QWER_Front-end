@@ -140,7 +140,7 @@ export default function VideoList() {
                                             WebkitBoxOrient: "vertical",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
-                                            height: "44px"  // 두 줄 텍스트 높이 고정
+                                            height: "50px"  // 두 줄 텍스트 높이 고정
                                         }}
                                     >
                                         {item.title}
