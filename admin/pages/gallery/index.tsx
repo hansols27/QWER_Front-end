@@ -72,26 +72,26 @@ export default function GalleryList() {
     // 선택된 이미지 삭제
     // -----------------------------------
     const handleDeleteSelected = async () => {
-        if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) return;
 
-        const confirmDelete = window.confirm(
-            `${selectedIds.length}개의 이미지를 삭제하시겠습니까?`
-        );
-        if (!confirmDelete) return;
+    const confirmDelete = window.confirm(
+        `${selectedIds.length}개의 이미지를 삭제하시겠습니까?`
+    );
+    if (!confirmDelete) return;
 
         try {
             setLoading(true);
 
-            await api.post("/api/gallery/delete-multiple", {
-                ids: selectedIds,
-            });
+            // TS 오류 없이 DELETE body 전송
+            await api.delete("/api/gallery", {
+                data: { ids: selectedIds },
+            } as any);
 
             setAlertMessage({
                 message: "선택한 이미지가 삭제되었습니다.",
                 severity: "success",
             });
 
-            // 목록 새로고침
             setSelectedIds([]);
             fetchGalleryItems();
 
