@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { api } from "@shared/services/axios";
-import styles from "@front/styles/gallery.module.css"; // styles는 다른 부분에 여전히 사용됨
+import styles from "@front/styles/gallery.module.css"; 
 
 // Yet Another React Lightbox
 import Lightbox from "yet-another-react-lightbox";
@@ -29,144 +28,178 @@ export default function GalleryPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
 
-  const totalPages = Math.ceil(galleryItems.length / itemsPerPage);
+  // totalPages 계산: 데이터가 없을 때도 최소 1페이지는 유지하도록 Math.max(1, ...) 사용
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(galleryItems.length / itemsPerPage)), [galleryItems.length, itemsPerPage]);
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentImages = galleryItems.slice(startIndex, startIndex + itemsPerPage);
 
-  // API 호출 함수 생략...
-
+  // API 호출 함수 (useCallback 유지)
   const fetchGalleryItems = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get<{ success: boolean; data: GalleryItem[] }>("/api/gallery");
+        // 캐시 무력화를 위해 쿼리 파라미터에 현재 타임스탬프를 추가 (최신 데이터 강제 요청)
+        const timestamp = new Date().getTime(); 
+        const endpoint = `/api/gallery?t=${timestamp}`; 
+
+        const res = await api.get<{ success: boolean; data: GalleryItem[] }>(endpoint, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      });
+      
       setGalleryItems(res.data.data);
+      
+      // 데이터가 줄어들었을 경우, 현재 페이지가 유효하도록 조정
+      setCurrentPage(prevPage => {
+        const newTotalPages = Math.max(1, Math.ceil(res.data.data.length / itemsPerPage));
+        return Math.min(prevPage, newTotalPages);
+      });
+      
     } catch (err) {
       console.error("갤러리 로드 실패:", err);
+      setGalleryItems([]); 
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [itemsPerPage]); 
 
   useEffect(() => {
+    // 페이지 접근 시마다 데이터를 다시 불러와 최신 상태 유지
     fetchGalleryItems();
+        
   }, [fetchGalleryItems]);
 
-  const goPrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
-  const goNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
+  const goPrev = useCallback(() => setCurrentPage((p) => Math.max(p - 1, 1)), []);
+  const goNext = useCallback(() => setCurrentPage((p) => Math.min(p + 1, totalPages)), [totalPages]);
 
-  const slides: MySlide[] = galleryItems.map((item) => ({
+
+  const slides: MySlide[] = useMemo(() => galleryItems.map((item) => ({
     src: item.url,
     title: item.alt,
-  }));
+  })), [galleryItems]);
+
 
   return (
-    <div className="container">
-      {/* Side (일반 클래스 사용 가정) */}
-      <div id="side">
-        <div className="side2">
-          03
-          <span className="s_line"></span>
-          GALLERY
-        </div>
-      </div>
+    <div className="container">
+      <div id="side">
+        <div className="side2">
+          03
+          <span className="s_line"></span>
+          GALLERY
+        </div>
+        </div>
 
-      {/* Main Container: .galleryCont와 .gallery 클래스를 함께 적용 */}  
-      <div className={`${styles.galleryCont} ${styles.gallery} wow fadeInUp`} data-wow-delay="0.2s"> 
-        {/* Title (일반 클래스 사용 가정) */}
-        <div className="title">GALLERY</div>
+      <div className={`${styles.galleryCont} ${styles.gallery} wow fadeInUp`} data-wow-delay="0.2s"> 
+        <div className="title">GALLERY</div>
 
-        {/* 로딩/데이터 없음/데이터 표시 분기 */}
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "50px 0" }}>갤러리 로딩 중...</div>
-        ) : galleryItems.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "50px 0" }}>등록된 이미지가 없습니다.</div>
-        ) : (
-          <>
-            {/* 이미지 목록: .galleryList 클래스 적용 */}
-            <div className={styles.galleryList}>
-              {/* ul: CSS에 grid-template-columns: repeat(10, 1fr) 및 gap 정의됨 */}
-              <ul>
-                {currentImages.map((item, index) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      // 클릭 시 라이트박스 열기
-                      onClick={() => {
-                        setPhotoIndex(startIndex + index);
-                        setIsOpen(true);
-                      }}
-                    >
-                      {/* Image 컴포넌트에 fill을 사용하므로, 부모 요소에 position: relative 및 aspect-ratio를 인라인 스타일로 유지 */}
-                      <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1' }}>
-                        <Image
-                          src={item.url}
-                          alt={item.alt ?? `Gallery item ${item.id}`}
-                          fill
-                          sizes="(max-width: 1400px) 10vw" // CSS grid에 따라 10개이므로 10vw (대략 1/10)로 설정 (반응형에 맞게 조정 필요)
-                          style={{ objectFit: "cover" }}
-                        />
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            {/* Pagination (일반 클래스 사용 가정) */}
-            <div className="page-btn-box">
-              <button
-                type="button"
-                className="prev-btn"
-                onClick={goPrev}
-                disabled={currentPage <= 1}
-              >
-                이전
-              </button>
-              <span className="page-number">
-                <strong>{currentPage}</strong> / <em>{totalPages}</em>
-              </span>
-              <button
-                type="button"
-                className="next-btn"
-                onClick={goNext}
-                disabled={currentPage >= totalPages}
-              >
-                이후
-              </button>
-            </div>
+        {loading && galleryItems.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "50px 0" }}>갤러리 로딩 중...</div>
+        ) : galleryItems.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "50px 0" }}>등록된 이미지가 없습니다.</div>
+        ) : (
+          <>
+            <div className={styles.galleryList}>
+              <ul>
+                {currentImages.map((item, index) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhotoIndex(startIndex + index);
+                        setIsOpen(true);
+                      }}
+                    >
+                        <div style={{
+                            width: "180px",
+                            height: "270px",
+                            position: "relative",
+                            overflow: "hidden",
+                            borderRadius: "6px"
+                        }}>
+                          <img
+                            src={item.url || "https://via.placeholder.com/300?text=No+Image"}
+                            alt={item.alt ?? `Gallery ${item.id}`}
+                            // 🚀 width와 height 속성을 명시하여 공간을 미리 확보합니다.
+                            width={180} 
+                            height={270} 
+                            loading="lazy" 
+                            style={{ 
+                              width: "100%", 
+                              height: "100%", 
+                              objectFit: "cover", 
+                              // 🚀 핵심 수정: 인라인 요소 특성 제거 및 여백 문제 해결
+                              display: "block"
+                            }}
+                          />
+                        </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Pagination (기존 코드 유지) */}
+            <div className="page-btn-box">
+              <button
+                type="button"
+                className="prev-btn"
+                onClick={goPrev}
+                disabled={currentPage <= 1}
+              >
+                이전
+              </button>
+              <span className="page-number">
+                <strong>{currentPage}</strong> / <em>{totalPages}</em>
+              </span>
+              <button
+                type="button"
+                className="next-btn"
+                onClick={goNext}
+                disabled={currentPage >= totalPages}
+              >
+                이후
+              </button>
+            </div>
 
-            {/* Lightbox (기존 코드 유지) */}
-            {isOpen && (
-              <Lightbox
-                open={isOpen}
-                close={() => setIsOpen(false)}
-                slides={slides}
-                index={photoIndex}
-                render={{
-                  slide: ({ slide }: RenderSlideProps<MySlide>) => (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor: "#000",
-                      }}
-                    >
-                      <img
-                        src={slide.src}
-                        alt={slide.title ?? ""}
-                        style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
-                      />
-                    </div>
-                  ),
-                }}
-              />
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
+            {/* Lightbox 수정: max-width와 max-height를 360px x 540px로 설정 */}
+            {isOpen && (
+              <Lightbox
+                open={isOpen}
+                close={() => setIsOpen(false)}
+                slides={slides}
+                index={photoIndex}
+                render={{
+                  slide: ({ slide }: RenderSlideProps<MySlide>) => (
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: "#000",
+                      }}
+                    >
+                      <img
+                        src={slide.src}
+                        alt={slide.title ?? ""}
+                        style={{ 
+                            maxWidth: "360px", 
+                            maxHeight: "540px", 
+                            objectFit: "contain" 
+                        }}
+                      />
+                    </div>
+                  ),
+                }}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
 }

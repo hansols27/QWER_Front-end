@@ -5,7 +5,8 @@
   overflow: hidden;
   margin: 120px auto; 
   z-index: 111;
-  padding: 0 0;
+  padding: 0;
+  background: #0e1726;
 }
 
 /* 컨테이너 */
