@@ -102,3 +102,127 @@
   font-weight: 600;     /* 글씨 굵기 */
   color: #fff;          /* 글씨 색상 */
 }
+
+/* =========================
+   Tablet (≤1024px)
+========================= */
+@media screen and (max-width: 1024px) {
+  .scheduleCont {
+    width: 100%;
+    margin: 80px auto;
+    padding: 0 24px;
+  }
+
+  .scheduleCont.schedule {
+    gap: 40px;
+  }
+
+  .n_right {
+    padding-left: 0;
+  }
+
+  .rbc-toolbar-custom {
+    gap: 40px;
+  }
+
+  .rbc-toolbar-custom .rbc-toolbar-label {
+    font-size: 18px;
+  }
+}
+
+/* =========================
+   Mobile (≤768px)
+========================= */
+@media screen and (max-width: 768px) {
+  .scheduleCont {
+    margin: 60px auto;
+    padding: 0 20px;
+  }
+
+  .scheduleCont.schedule {
+    flex-direction: column; /* 세로 스택 */
+    gap: 40px;
+  }
+
+  .n_left,
+  .n_right {
+    width: 100%;
+    flex: none;
+  }
+
+  .cd_calendar {
+    width: 100%;
+  }
+
+  .sch_detail li {
+    font-size: 10.5pt;
+    line-height: 22px;
+  }
+
+  .sch_detail .dt_date {
+    font-size: 8.5pt;
+  }
+
+  .rbc-toolbar-custom {
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+
+  .nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-btn img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .rbc-toolbar-custom .rbc-toolbar-label {
+    font-size: 16px;
+  }
+}
+
+/* =========================
+   Small Mobile (≤480px)
+========================= */
+@media screen and (max-width: 480px) {
+  .scheduleCont {
+    margin: 40px auto;
+    padding: 0 16px;
+  }
+
+  .scheduleCont.schedule {
+    gap: 32px;
+  }
+
+  .sch_detail li {
+    font-size: 10pt;
+    line-height: 20px;
+  }
+
+  .sch_detail li span {
+    width: 14px;
+    height: 14px;
+    font-size: 6.5pt;
+    line-height: 14px;
+  }
+
+  .rbc-toolbar-custom {
+    gap: 16px;
+  }
+
+  .nav-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-btn img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .rbc-toolbar-custom .rbc-toolbar-label {
+    font-size: 14px;
+  }
+}

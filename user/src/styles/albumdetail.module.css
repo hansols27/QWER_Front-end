@@ -126,23 +126,23 @@
   height: 100%;
 }
 
-/* ===== Mobile (max 768px) ===== */
-@media (max-width: 768px) {
+/* ===============================
+   Tablet (≤ 1024px)
+================================ */
+@media (max-width: 1024px) {
+
   .albumCont {
     width: 100%;
-    margin: 60px auto;
-    padding: 0 15px;
+    margin: 80px auto;
+    padding: 0 24px;
   }
 
   .albumCont.discography {
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
+    gap: 30px;
   }
 
-  .dis_left,
-  .dis_right {
-    width: 100%;
+  .dis_left {
+    width: 420px;
   }
 
   .onlin_cover {
@@ -151,13 +151,116 @@
     aspect-ratio: 1 / 1;
   }
 
+  .dis_right {
+    width: calc(100% - 450px);
+  }
+
   .dis_txt_top .album_name {
-    font-size: 18pt;
+    font-size: 22pt;
+    line-height: 30px;
+  }
+
+  .dis_more_cont {
+    font-size: 10.5pt;
+    line-height: 23px;
+  }
+}
+
+/* ===============================
+   Mobile / Tablet (≤ 768px)
+================================ */
+@media (max-width: 768px) {
+
+  .albumCont {
+    margin: 60px auto;
+    padding: 0 16px;
+  }
+
+  .albumCont.discography {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .dis_left,
+  .dis_right {
+    width: 100%;
+  }
+
+  .dis_bt_top {
+    font-size: 9pt;
+  }
+
+  .dis_bt_bottom {
+    font-size: 11pt;
+  }
+
+  .dis_bt_bottom .dis_date {
+    font-size: 9pt;
+  }
+
+  .tracklist .release-playlist p {
+    font-size: 9pt;
+  }
+
+  .dis_txt_top .album_name {
+    font-size: 20pt;
     line-height: 28px;
   }
 
   .dis_more_cont {
     font-size: 10pt;
+    line-height: 22px;
+  }
+}
+
+
+/* ===============================
+   Small Mobile (≤ 480px)
+================================ */
+@media (max-width: 480px) {
+
+  .albumCont {
+    margin: 40px auto;
+    padding: 0 12px;
+  }
+
+  .dis_bt_top {
+    font-size: 8.5pt;
+  }
+
+  .onlin_cover {
+    box-shadow: 1px 3px 6px 0px #fff;
+  }
+
+  .dis_bt_bottom {
+    font-size: 10pt;
+  }
+
+  .tracklist {
+    margin-top: 15px;
+  }
+
+  .tracklist .release-playlist {
+    gap: 6px;
+  }
+
+  .tracklist .release-playlist p {
+    font-size: 8.5pt;
+  }
+
+  .dis_txt_top .album_name {
+    font-size: 17pt;
+    line-height: 24px;
+    margin-bottom: 12px;
+  }
+
+  .dis_more_cont {
+    font-size: 9.5pt;
     line-height: 20px;
+    padding-bottom: 15px;
+  }
+
+  .video {
+    margin-top: 12px;
   }
 }

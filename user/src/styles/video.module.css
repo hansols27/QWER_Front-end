@@ -87,3 +87,85 @@
   opacity: 1;
   transform: scale(1.03);
 }
+
+/* ===============================
+   Tablet (≤ 1024px)
+================================ */
+@media (max-width: 1024px) {
+  .videoCont {
+    width: 100%;
+    margin: 80px auto;
+    padding: 0 20px;
+  }
+
+  .videoCont.video_ct .video_list {
+    flex-direction: column;
+    margin: 60px auto;
+  }
+
+  .select_video {
+    max-width: 100%;
+  }
+
+  .thumb_box {
+    width: 100%;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 0;
+    margin-top: 30px;
+  }
+
+  .thumb-list {
+    flex-direction: row;
+    gap: 15px;
+  }
+
+  .thumb-item {
+    min-width: 220px;
+    flex-shrink: 0;
+  }
+}
+
+/* ===============================
+   Mobile (≤ 768px)
+================================ */
+@media (max-width: 768px) {
+  .videoCont {
+    margin: 60px auto;
+    padding: 0 16px;
+  }
+
+  .videoCont.video_ct .video_list {
+    margin: 40px auto;
+    gap: 25px;
+  }
+
+  .thumb-item {
+    min-width: 200px;
+  }
+
+  /* 모바일에서는 hover 확대 제거 */
+  .thumb-item:hover {
+    transform: none;
+  }
+}
+
+/* ===============================
+   Small Mobile (≤ 480px)
+================================ */
+@media (max-width: 480px) {
+  .videoCont {
+    margin: 40px auto;
+    padding: 0 12px;
+  }
+
+  .thumb-item {
+    min-width: 180px;
+    border-radius: 6px;
+  }
+
+  .select_video iframe {
+    border-radius: 8px;
+  }
+}

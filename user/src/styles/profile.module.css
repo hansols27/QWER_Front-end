@@ -82,7 +82,6 @@
   margin: 0 0 5px 0;
 }
 
-/* 20210518 프로필 네임 길어졌을 시 대응 */
 .profile_txt .name_tt {
   position: relative;
   width: 360px;
@@ -123,58 +122,114 @@
   transform: scale(1.1);
 }
 
-/* 모바일 (max-width: 768px) */
-@media (max-width: 768px) {
+/* =========================
+   1024px 이하 (태블릿 가로)
+========================= */
+@media screen and (max-width: 1024px) {
+  .pfCont {
+    width: 100%;
+    margin: 100px auto;
+    padding: 0 40px;
+  }
+
+  .pfCont.profile {
+    gap: 40px;
+  }
+
+  .profile_img {
+    width: 420px;
+    height: auto;
+  }
+
+  .profile_txt {
+    width: 320px;
+    margin-right: 40px;
+    bottom: 0;
+  }
+
+  .profile_txt .name_tt {
+    font-size: 26pt;
+  }
+}
+
+/* =========================
+   768px 이하 (태블릿 세로)
+========================= */
+@media screen and (max-width: 768px) {
+  .pfCont {
+    margin: 80px auto;
+    padding: 0 24px;
+  }
+
   .pfCont.profile {
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-  }
-
-  .pf_inner {
-    flex-direction: column;
-    align-items: center;
-    width: 90%;
+    gap: 50px;
   }
 
   .member_name {
     width: 100%;
-    margin-right: 0;
     text-align: center;
     top: 0;
-    margin-bottom: 20px;
-    flex: none; /* 고정 너비 해제 */
   }
 
   .profile_img {
-    width: 90%;
+    width: 100%;
+    max-width: 420px;
     height: auto;
-    flex: none;
+  }
+
+  .artist_img {
+    width: 100%;
+    top: 0;
   }
 
   .profile_txt {
-    width: 90%;
-    margin: 20px 0 0;
-    align-self: center;
-    bottom: 0;
-    flex: none;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: center;
   }
 
   .profile_txt .name_tt {
     width: 100%;
-    font-size: 20pt;
-    text-align: center;
+    font-size: 24pt;
   }
 
   .sns_area {
     justify-content: center;
-    flex-wrap: wrap;
-    height: auto;
-    padding: 10px;
+  }
+}
+
+/* =========================
+   480px 이하 (모바일)
+========================= */
+@media screen and (max-width: 480px) {
+  .pfCont {
+    margin: 60px auto;
+    padding: 0 16px;
+  }
+
+  .member_name {
+    font-size: 14px;
+    letter-spacing: 0.15em;
+  }
+
+  .profile_img {
+    max-width: 100%;
+  }
+
+  .profile_txt div {
+    font-size: 13pt;
+  }
+
+  .profile_txt .name_tt {
+    font-size: 20pt;
+    letter-spacing: 0.03em;
   }
 
   .sns-icon {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 }

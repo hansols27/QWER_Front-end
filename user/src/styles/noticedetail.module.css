@@ -98,3 +98,115 @@
   line-height: 25px;  
   color: #aaa; /* 하단 보조 텍스트 연한 색상 */
 }
+
+/* ===============================
+   Responsive (Tablet - 1024px)
+================================ */
+@media screen and (max-width: 1024px) {
+  .ntCont {
+    width: 100%;
+    margin: 100px auto;
+    padding: 0 20px;
+  }
+
+  .boardView {
+    width: 100%;
+  }
+
+  .boardView_header {
+    padding: 25px 15px;
+  }
+
+  .boardView_header .tit {
+    font-size: 12.5pt;
+  }
+
+  .boardView_cont {
+    padding: 25px 15px;
+    font-size: 14px;
+  }
+}
+
+/* ===============================
+   Responsive (Tablet / Mobile - 768px)
+================================ */
+@media screen and (max-width: 768px) {
+  .ntCont {
+    margin: 80px auto;
+    padding: 0 15px;
+  }
+
+  .boardView_header {
+    padding: 20px 10px;
+  }
+
+  .boardView_header p {
+    float: none;
+    display: block;
+  }
+
+  .boardView_header .cate {
+    font-size: 10pt;
+    margin-bottom: 5px;
+  }
+
+  .boardView_header .tit {
+    font-size: 12pt;
+    line-height: 24px;
+  }
+
+  .boardView_header .date {
+    float: none;
+    text-align: left;
+    font-size: 9.5pt;
+    margin-top: 8px;
+  }
+
+  .boardView_cont {
+    padding: 20px 10px;
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+
+  .boardView_cont .bd_txt {
+    font-size: 9.5pt;
+    line-height: 22px;
+  }
+}
+
+/* ===============================
+   Responsive (Mobile - 480px)
+================================ */
+@media screen and (max-width: 480px) {
+  .ntCont {
+    margin: 60px auto;
+    padding: 0 10px;
+  }
+
+  .boardView_header {
+    padding: 15px 5px;
+  }
+
+  .boardView_header .cate {
+    font-size: 9pt;
+  }
+
+  .boardView_header .tit {
+    font-size: 11pt;
+    line-height: 22px;
+  }
+
+  .boardView_header .date {
+    font-size: 9pt;
+  }
+
+  .boardView_cont {
+    padding: 15px 5px;
+    font-size: 13px;
+  }
+
+  .boardView_cont .bd_txt {
+    margin-top: 20px;
+    font-size: 9pt;
+  }
+}
