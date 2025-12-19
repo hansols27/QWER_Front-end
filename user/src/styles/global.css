@@ -689,7 +689,7 @@ body.active {
   /* Main */
   .main_vd {
     height: auto;
-    min-height: 60vh;
+    min-height: calc(100vh - 80px - 120px);
   }
 
   /* Error Page */
