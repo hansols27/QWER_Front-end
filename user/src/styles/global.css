@@ -577,97 +577,47 @@ body.active {
   opacity: 1;
 }
 
-/* ===============================
-   Tablet (≤1024px)
-================================ */
 @media screen and (max-width: 1024px) {
 
   html,
   body {
+    height: auto;
+    min-height: 100vh;
     overflow-y: auto;
-    height: auto;
   }
 
-  #side {
-    min-width: 100%;
-  }
-
-  #header,
-  #footer {
-    padding: 30px 24px;
-    height: auto;
-  }
-
-  .title {
-    font-size: 32pt;
-  }
-
-  .gnb_list li a {
-    font-size: 26pt;
-  }
-
-  .errorpage {
-    width: 90%;
-  }
-}
-
-/* ===============================
-   Tablet / Mobile (≤768px)
-================================ */
-@media screen and (max-width: 768px) {
-
-  html,
-  body {
-    overflow-y: auto;
-    height: auto;
-  }
-
-  #wrap,
-  #wrap.main_wrap {
-    height: auto;
+  #wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     overflow: visible;
   }
 
-  /* Header */
-  #header {
-    padding: 20px 16px;
-    height: 80px;
+  /* 모든 실제 콘텐츠 영역 */
+  .main_vd,
+  .container,
+  #container {
+    flex: 1;
+    height: auto;
+    min-height: 0;
   }
 
-  #header .logo img,
-  #header .menu img {
-    width: 32px;
-  }
-
-  /* Side 텍스트 제거 */
-  #side,
-  .side2 {
-    display: none;
-  }
-
-  /* GNB */
-  .gnb_list {
-    width: 100%;
-    text-align: center;
-  }
-
-  .gnb_list li {
-    margin: 25px 0;
-  }
-
-  .gnb_list li a {
-    font-size: 22pt;
-  }
-
-  /* Title */
-  .title {
-    font-size: 26pt;
-    margin-bottom: 20px;
-  }
-
-  /* Footer */
+  /* footer는 문서 흐름 + 하단 고정 효과 */
   #footer {
     position: static;
+    margin-top: auto;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+
+  #header {
+    height: 80px;
+    padding: 20px 16px;
+  }
+
+  #footer {
     padding: 20px 16px;
     text-align: center;
   }
@@ -677,31 +627,11 @@ body.active {
     gap: 10px;
   }
 
-  .copyright {
-    font-size: 12px;
-  }
-
-  /* SNS */
-  .sns-menu ul {
-    justify-content: center;
-  }
-
-  /* Main */
   .main_vd {
     height: auto;
-    min-height: calc(100vh - 80px - 120px);
-  }
-
-  /* Error Page */
-  .errorpage {
-    width: 100%;
-    padding: 0 20px;
-  }
-
-  .errorbox .error_img {
-    font-size: 72px;
   }
 }
+
 
 /* ===============================
    Mobile (≤480px)
@@ -739,7 +669,7 @@ body.active {
 
   /* Title */
   .title {
-    font-size: 22pt;
+    font-size: 20pt;
     letter-spacing: 0.03em;
   }
 
