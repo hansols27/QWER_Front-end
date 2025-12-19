@@ -1,0 +1,61 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      # --- Admin 빌드 및 S3 업로드 ---
+      - name: Build Admin
+        run: |
+          cd admin
+          echo "NEXT_PUBLIC_API_URL=http://api.qwerfansite.com" > .env.production
+          npm install
+          npm run build
+          zip -r ../admin-deploy.zip . -x "node_modules/*" ".git*"
+
+      # --- User 빌드 및 S3 업로드 ---
+      - name: Build User
+        run: |
+          cd user
+          echo "NEXT_PUBLIC_API_URL=http://api.qwerfansite.com" > .env.production
+          npm install
+          npm run build
+          zip -r ../user-deploy.zip . -x "node_modules/*" ".git*"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp admin-deploy.zip s3://${{ secrets.S3_BUCKET_NAME }}/
+          aws s3 cp user-deploy.zip s3://${{ secrets.S3_BUCKET_NAME }}/
+
+      # --- CodeDeploy 실행 ---
+      - name: Deploy Admin
+        run: |
+          aws deploy create-deployment \
+            --application-name qwerfansite-frontend \
+            --deployment-group-name admin-group \
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=admin-deploy.zip
+
+      - name: Deploy User
+        run: |
+          aws deploy create-deployment \
+            --application-name qwerfansite-frontend \
+            --deployment-group-name user-group \
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=user-deploy.zip

@@ -1,0 +1,29 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /root/QWER_Front-end/user
+    overwrite: yes
+
+permissions:
+  - object: /root/QWER_Front-end/user
+    pattern: "**"
+    owner: root
+    group: root
+
+hooks:
+  ApplicationStop:
+    - location: scripts/stop_server.sh
+      timeout: 60
+      runas: root
+  AfterInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: root
+    - location: scripts/daemon_reload.sh
+      timeout: 30
+      runas: root
+  ApplicationStart:
+    - location: scripts/start_server.sh
+      timeout: 60
+      runas: root
