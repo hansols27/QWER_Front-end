@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: '18.x'
 
-      # --- Admin 빌드 및 S3 업로드 ---
+      # --- Admin 빌드 및 압축 ---
       - name: Build Admin
         run: |
           cd admin
@@ -24,7 +24,7 @@ jobs:
           npm run build
           zip -r ../admin-deploy.zip . -x "node_modules/*" ".git*"
 
-      # --- User 빌드 및 S3 업로드 ---
+      # --- User 빌드 및 압축 ---
       - name: Build User
         run: |
           cd user
@@ -33,29 +33,32 @@ jobs:
           npm run build
           zip -r ../user-deploy.zip . -x "node_modules/*" ".git*"
 
+      # --- AWS 인증 설정 ---
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
+          aws-region: ${{ secrets.AWS_REGION }}
 
+      # --- S3 업로드 ---
       - name: Upload to S3
         run: |
           aws s3 cp admin-deploy.zip s3://${{ secrets.S3_BUCKET_NAME }}/
           aws s3 cp user-deploy.zip s3://${{ secrets.S3_BUCKET_NAME }}/
 
-      # --- CodeDeploy 실행 ---
+      # --- CodeDeploy 실행 (Admin) ---
       - name: Deploy Admin
         run: |
           aws deploy create-deployment \
-            --application-name qwerfansite-frontend \
-            --deployment-group-name admin-group \
+            --application-name ${{ secrets.CODE_DEPLOY_APPLICATION_NAME }} \
+            --deployment-group-name ${{ secrets.CODE_DEPLOY_ADMIN_GROUP }} \
             --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=admin-deploy.zip
 
+      # --- CodeDeploy 실행 (User) ---
       - name: Deploy User
         run: |
           aws deploy create-deployment \
-            --application-name qwerfansite-frontend \
-            --deployment-group-name user-group \
+            --application-name ${{ secrets.CODE_DEPLOY_APPLICATION_NAME }} \
+            --deployment-group-name ${{ secrets.CODE_DEPLOY_USER_GROUP }} \
             --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=user-deploy.zip
