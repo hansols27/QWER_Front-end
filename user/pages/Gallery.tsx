@@ -42,18 +42,16 @@ export default function GalleryPage() {
     startIndex + itemsPerPage
   );
 
-  /* API */
+  /* API 호출 */
   const fetchGalleryItems = useCallback(async () => {
     setLoading(true);
     try {
-      const timestamp = Date.now();
+      // 💡 잦은 API 호출 부하를 줄이기 위해 캐시 활용 권장 (필요시 timestamp 제거 가능)
       const res = await api.get<{ success: boolean; data: GalleryItem[] }>(
-        `/api/gallery?t=${timestamp}`,
+        `/api/gallery`, 
         {
           headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
+            "Cache-Control": "max-age=60", // 1분간은 브라우저 캐시 활용
           },
         }
       );
@@ -100,7 +98,7 @@ export default function GalleryPage() {
 
   return (
     <div className="container">
-      {/* ===== SIDE (Album 페이지와 동일) ===== */}
+      {/* ===== SIDE ===== */}
       <div id="side">
         <div className="side2">
           03
@@ -117,22 +115,23 @@ export default function GalleryPage() {
         <div className="title">GALLERY</div>
 
         {loading && galleryItems.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "50px 0" }}>
-            갤러리 로딩 중...
+          <div style={{ textAlign: "center", padding: "100px 0", color: "#888" }}>
+            갤러리를 불러오는 중입니다...
           </div>
         ) : galleryItems.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "50px 0" }}>
+          <div style={{ textAlign: "center", padding: "100px 0", color: "#888" }}>
             등록된 이미지가 없습니다.
           </div>
         ) : (
           <>
             {/* ===== GALLERY LIST ===== */}
             <div className={styles.galleryList}>
-              <ul>
+              <ul style={{ display: "flex", flexWrap: "wrap", gap: "20px", listStyle: "none", padding: 0 }}>
                 {currentImages.map((item, index) => (
                   <li key={item.id}>
                     <button
                       type="button"
+                      style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
                       onClick={() => {
                         setPhotoIndex(startIndex + index);
                         setIsOpen(true);
@@ -145,17 +144,19 @@ export default function GalleryPage() {
                           position: "relative",
                           overflow: "hidden",
                           borderRadius: "6px",
+                          backgroundColor: "#2a2a2a", // 💡 로딩 전 회색 배경으로 레이아웃 깨짐 방지
                         }}
                       >
                         <Image
-                          src={
-                            item.url ||
-                            "https://via.placeholder.com/300?text=No+Image"
-                          }
+                          src={item.url || "https://via.placeholder.com/300?text=No+Image"}
                           alt={item.alt ?? `Gallery ${item.id}`}
                           fill
                           sizes="180px"
                           style={{ objectFit: "cover" }}
+                          // 💡 서버 CPU 부하를 막기 위해 S3 원본 직접 로드
+                          unoptimized
+                          // 💡 현재 페이지 상단 4개 이미지는 즉시 로드(LCP 최적화)
+                          priority={index < 4}
                         />
                       </div>
                     </button>
@@ -164,8 +165,8 @@ export default function GalleryPage() {
               </ul>
             </div>
 
-            {/* ===== PAGINATION (Album과 동일) ===== */}
-            <div className="page-btn-box">
+            {/* ===== PAGINATION ===== */}
+            <div className="page-btn-box" style={{ marginTop: "40px", textAlign: "center" }}>
               <button
                 type="button"
                 className="prev-btn"
@@ -174,7 +175,7 @@ export default function GalleryPage() {
               >
                 이전
               </button>
-              <span className="page-number">
+              <span className="page-number" style={{ margin: "0 20px" }}>
                 <strong>{currentPage}</strong> / <em>{totalPages}</em>
               </span>
               <button
@@ -203,13 +204,14 @@ export default function GalleryPage() {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        backgroundColor: "#000",
+                        backgroundColor: "rgba(0,0,0,0.9)",
                       }}
                     >
                       <div
                         style={{
-                          width: "360px",
-                          height: "540px",
+                          width: "90%", // 모바일 대응을 위해 비율 조정
+                          maxWidth: "600px",
+                          height: "80vh",
                           position: "relative",
                         }}
                       >
@@ -217,8 +219,8 @@ export default function GalleryPage() {
                           src={slide.src}
                           alt={slide.title ?? ""}
                           fill
-                          unoptimized
-                          sizes="360px"
+                          unoptimized // 💡 라이트박스에서도 고화질 원본 바로 표시
+                          sizes="(max-width: 768px) 100vw, 80vw"
                           style={{ objectFit: "contain" }}
                         />
                       </div>
