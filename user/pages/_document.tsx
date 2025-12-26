@@ -11,7 +11,7 @@ class MyDocument extends Document {
       <Html lang="ko"> 
         <Head>          
           <link rel="icon" href="/favicon.ico" />
-          <link href='https://jyplevel2storage01.blob.core.windows.net/system/SpoqaHanSans-kr.css' rel='stylesheet' type='text/css' />
+          <link href='https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansJP-lite.css' rel='stylesheet' type='text/css' />
           <link href="https://fonts.googleapis.com/css2?family=Montserrat+Subrayada:wght@700&family=Montserrat:wght@700&display=swap" rel="stylesheet" />
         </Head>
         <body>
