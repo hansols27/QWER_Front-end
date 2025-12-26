@@ -1,111 +1,64 @@
 .galleryCont {
   position: relative;
-  width: 1900px;
+  width: 100%;             /* 전체 너비 사용 */
+  max-width: 1900px;       /* 하지만 최대 1900px까지만 */
   height: auto;
-  overflow: hidden;
+  overflow: visible;       /* 자식 요소가 잘리지 않게 설정 */
   margin: 120px auto; 
   z-index: 111;
-  padding: 0;
+  padding: 0 40px;         /* 화면 끝에 붙지 않게 여백 추가 */
   background: #0e1726;
+  box-sizing: border-box;
 }
 
-/* 컨테이너 */
 .galleryCont.gallery .galleryList {
-  display: flex;
-  gap: 0;
-  justify-content: center;
-  max-width: 1900px;
+  display: block;
+  width: 100%;
   margin: 80px auto;
   height: auto;
-  box-sizing: border-box;
 }
 
 .galleryList ul {
   display: grid;
-  grid-template-columns: repeat(10, 1fr); /* 한 줄 10개 */
-  gap: 10px;
+  /* PC 기본 10열 */
+  grid-template-columns: repeat(10, 1fr); 
+  gap: 15px; 
   padding: 0;
-  margin-bottom: 150px;
+  margin: 0 0 150px 0;
   list-style: none;
 }
 
 .galleryList li {
   width: 100%;
+  aspect-ratio: 2 / 3;    /* 180:270 비율 유지 */
 }
 
 .galleryList li button {
   width: 100%;
+  height: 100%;
   padding: 0;
-  margin: 0;
   border: none;
   background: none;
+  cursor: pointer;
 }
 
-.galleryList img {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
+/* --- 반응형 구간 (핵심) --- */
+
+@media (max-width: 1600px) {
+  .galleryList ul { grid-template-columns: repeat(8, 1fr); }
 }
 
-/* ===============================
-   Tablet (≤1024px)
-================================ */
-@media (max-width: 1024px) {
-  .galleryCont {
-    width: 100%;
-    margin: 100px auto;
-    padding: 0 20px;
-  }
-
-  .galleryCont.gallery .galleryList {
-    max-width: 100%;
-    margin: 60px auto;
-  }
-
-  .galleryList ul {
-    grid-template-columns: repeat(6, 1fr); /* 10 → 6 */
-    gap: 10px;
-    margin-bottom: 120px;
-  }
+@media (max-width: 1200px) {
+  .galleryList ul { grid-template-columns: repeat(6, 1fr); }
+  .galleryCont { margin: 100px auto; padding: 0 20px; }
 }
 
-/* ===============================
-   Tablet / Mobile (≤768px)
-================================ */
 @media (max-width: 768px) {
-  .galleryCont {
-    margin: 80px auto;
-    padding: 0 16px;
-  }
-
-  .galleryCont.gallery .galleryList {
-    margin: 50px auto;
-  }
-
-  .galleryList ul {
-    grid-template-columns: repeat(4, 1fr); /* 6 → 4 */
-    gap: 8px;
-    margin-bottom: 100px;
-  }
+  .galleryList ul { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .galleryCont { margin: 80px auto; }
 }
 
-/* ===============================
-   Mobile (≤480px)
-================================ */
 @media (max-width: 480px) {
-  .galleryCont {
-    margin: 60px auto;
-    padding: 0 12px;
-  }
-
-  .galleryCont.gallery .galleryList {
-    margin: 40px auto;
-  }
-
-  .galleryList ul {
-    grid-template-columns: repeat(2, 1fr); /* 4 → 2 */
-    gap: 6px;
-    margin-bottom: 80px;
-  }
+  .galleryList ul { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .galleryCont { margin: 60px auto; padding: 0 10px; }
 }
