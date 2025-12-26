@@ -1,64 +1,101 @@
 .galleryCont {
   position: relative;
-  width: 100%;             /* 전체 너비 사용 */
-  max-width: 1900px;       /* 하지만 최대 1900px까지만 */
+  /* 💡 고정 width 대신 max-width를 사용하여 화면이 작아질 때 잘림 방지 */
+  width: 100%;
+  max-width: 1400px; 
   height: auto;
-  overflow: visible;       /* 자식 요소가 잘리지 않게 설정 */
+  overflow: visible; /* hidden은 스크롤을 방해하므로 visible 권장 */
   margin: 120px auto; 
   z-index: 111;
-  padding: 0 40px;         /* 화면 끝에 붙지 않게 여백 추가 */
+  padding: 0 20px;
   background: #0e1726;
   box-sizing: border-box;
 }
 
+/* 컨테이너 */
 .galleryCont.gallery .galleryList {
-  display: block;
+  display: block; /* flex보다 grid 제어에 유리 */
   width: 100%;
   margin: 80px auto;
   height: auto;
+  box-sizing: border-box;
 }
 
 .galleryList ul {
   display: grid;
-  /* PC 기본 10열 */
-  grid-template-columns: repeat(10, 1fr); 
-  gap: 15px; 
+  /* 💡 180px 너비로 최대 7개 배치, 남는 공간은 자동으로 채움 */
+  grid-template-columns: repeat(7, 180px); 
+  /* 중앙 정렬 */
+  justify-content: center; 
+  gap: 20px; /* 이미지 사이의 여유 간격 */
   padding: 0;
-  margin: 0 0 150px 0;
+  margin-bottom: 150px;
   list-style: none;
 }
 
 .galleryList li {
-  width: 100%;
-  aspect-ratio: 2 / 3;    /* 180:270 비율 유지 */
+  width: 180px;
+  height: 270px; /* 요청하신 세로 크기 고정 */
 }
 
 .galleryList li button {
   width: 100%;
   height: 100%;
   padding: 0;
+  margin: 0;
   border: none;
   background: none;
-  cursor: pointer;
 }
 
-/* --- 반응형 구간 (핵심) --- */
-
-@media (max-width: 1600px) {
-  .galleryList ul { grid-template-columns: repeat(8, 1fr); }
+.galleryList img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 이미지가 180*270 안에서 비율에 맞게 채워짐 */
+  border-radius: 6px;
 }
 
-@media (max-width: 1200px) {
-  .galleryList ul { grid-template-columns: repeat(6, 1fr); }
-  .galleryCont { margin: 100px auto; padding: 0 20px; }
+/* ===============================
+   반응형 구간: 화면이 좁아지면 개수를 줄여서 짤림 방지
+================================ */
+
+/* Tablet (1025px ~ 1350px) */
+@media (max-width: 1350px) {
+  .galleryList ul {
+    /* 7개 → 5개로 축소 */
+    grid-template-columns: repeat(5, 180px);
+  }
 }
 
+/* Mobile / Tablet (≤ 1024px) */
+@media (max-width: 1024px) {
+  .galleryCont {
+    margin: 100px auto;
+  }
+  .galleryList ul {
+    /* 5개 → 4개로 축소 및 이미지 크기 유동적 변경 시작 */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+  }
+  .galleryList li {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 180 / 270; /* 비율 유지 */
+  }
+}
+
+/* Mobile (≤ 768px) */
 @media (max-width: 768px) {
-  .galleryList ul { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .galleryCont { margin: 80px auto; }
+  .galleryList ul {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
 }
 
+/* Small Mobile (≤ 480px) */
 @media (max-width: 480px) {
-  .galleryList ul { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .galleryCont { margin: 60px auto; padding: 0 10px; }
+  .galleryList ul {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
 }

@@ -21,7 +21,8 @@ type GalleryItem = {
 };
 
 export default function GalleryPage() {
-  const itemsPerPage = 20;
+  // 한 줄에 7개씩 보여주기 위해 7의 배수인 21로 유지
+  const itemsPerPage = 21;
 
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,12 +47,11 @@ export default function GalleryPage() {
   const fetchGalleryItems = useCallback(async () => {
     setLoading(true);
     try {
-      // 💡 잦은 API 호출 부하를 줄이기 위해 캐시 활용 권장 (필요시 timestamp 제거 가능)
       const res = await api.get<{ success: boolean; data: GalleryItem[] }>(
         `/api/gallery`, 
         {
           headers: {
-            "Cache-Control": "max-age=60", // 1분간은 브라우저 캐시 활용
+            "Cache-Control": "max-age=60",
           },
         }
       );
@@ -126,12 +126,12 @@ export default function GalleryPage() {
           <>
             {/* ===== GALLERY LIST ===== */}
             <div className={styles.galleryList}>
-              <ul style={{ display: "flex", flexWrap: "wrap", gap: "20px", listStyle: "none", padding: 0 }}>
+              {/* 인라인 스타일 flex 삭제 -> 외부 CSS Grid 사용 */}
+              <ul>
                 {currentImages.map((item, index) => (
                   <li key={item.id}>
                     <button
                       type="button"
-                      style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
                       onClick={() => {
                         setPhotoIndex(startIndex + index);
                         setIsOpen(true);
@@ -139,24 +139,22 @@ export default function GalleryPage() {
                     >
                       <div
                         style={{
-                          width: "180px",
-                          height: "270px",
+                          width: "100%", // CSS에서 정의한 li(180px)를 꽉 채움
+                          height: "100%", // CSS에서 정의한 li(270px)를 꽉 채움
                           position: "relative",
                           overflow: "hidden",
                           borderRadius: "6px",
-                          backgroundColor: "#2a2a2a", // 💡 로딩 전 회색 배경으로 레이아웃 깨짐 방지
+                          backgroundColor: "#2a2a2a",
                         }}
                       >
                         <Image
-                          src={item.url || "https://via.placeholder.com/300?text=No+Image"}
+                          src={item.url || "https://via.placeholder.com/180x270?text=No+Image"}
                           alt={item.alt ?? `Gallery ${item.id}`}
                           fill
                           sizes="180px"
                           style={{ objectFit: "cover" }}
-                          // 💡 서버 CPU 부하를 막기 위해 S3 원본 직접 로드
                           unoptimized
-                          // 💡 현재 페이지 상단 4개 이미지는 즉시 로드(LCP 최적화)
-                          priority={index < 4}
+                          priority={index < 7} // 첫 줄 7개 우선 로드
                         />
                       </div>
                     </button>
@@ -166,7 +164,7 @@ export default function GalleryPage() {
             </div>
 
             {/* ===== PAGINATION ===== */}
-            <div className="page-btn-box" style={{ marginTop: "40px", textAlign: "center" }}>
+            <div className="page-btn-box">
               <button
                 type="button"
                 className="prev-btn"
@@ -175,7 +173,7 @@ export default function GalleryPage() {
               >
                 이전
               </button>
-              <span className="page-number" style={{ margin: "0 20px" }}>
+              <span className="page-number">
                 <strong>{currentPage}</strong> / <em>{totalPages}</em>
               </span>
               <button
@@ -209,7 +207,7 @@ export default function GalleryPage() {
                     >
                       <div
                         style={{
-                          width: "90%", // 모바일 대응을 위해 비율 조정
+                          width: "90%",
                           maxWidth: "600px",
                           height: "80vh",
                           position: "relative",
@@ -219,7 +217,7 @@ export default function GalleryPage() {
                           src={slide.src}
                           alt={slide.title ?? ""}
                           fill
-                          unoptimized // 💡 라이트박스에서도 고화질 원본 바로 표시
+                          unoptimized
                           sizes="(max-width: 768px) 100vw, 80vw"
                           style={{ objectFit: "contain" }}
                         />
