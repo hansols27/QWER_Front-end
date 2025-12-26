@@ -9,7 +9,7 @@ const HomePage: React.FC = () => {
         <title>QWER 팬사이트</title>
         <meta
           name="description"
-          content="QWER 팬사이트에서 멤버 프로필, 앨범, 갤러리, 영상, 공지사항, 스케줄 등 최신 QWER 콘텐츠를 확인하세요."
+          content="QWER 팬사이트에서 최신 QWER 콘텐츠를 확인하세요."
         />
         <meta name="robots" content="index, follow" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
