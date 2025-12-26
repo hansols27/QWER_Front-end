@@ -2,6 +2,8 @@
 
 import type { AppProps } from 'next/app';
 import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+
 import '@front/styles/global.css';
 import Header from '@components/layout/Header';
 import Footer from '@components/layout/Footer';
@@ -37,31 +39,47 @@ const MyApp = ({ Component, pageProps, router }: AppProps) => {
   }, [isHome]);
 
   return (
-    <div id="wrap" style={{ position: 'relative', minHeight: '100vh' }}>
-      
-      {/* 배경 처리 영역 */}
-      <div
-        className={isHome ? 'main_bgimg' : ''}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: -1,
-          backgroundImage: isHome && mainImageUrl ? `url(${mainImageUrl})` : 'none',
-          backgroundColor: isHome ? 'transparent' : '#0e1726',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
+    <>
+      {/* ✅ 전역 공통 SEO */}
+      <Head>
+        <meta name="robots" content="index, follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-      <Header />
+        {/* Open Graph 공통 */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="QWER 팬사이트" />
+        <meta
+          property="og:image"
+          content="https://qwerfansite.com/logo.svg"
+        />
+      </Head>
 
-      <main id="main-content">
-        <Component {...pageProps} />
-      </main>
+      <div id="wrap" style={{ position: 'relative', minHeight: '100vh' }}>
+        {/* 배경 처리 영역 */}
+        <div
+          className={isHome ? 'main_bgimg' : ''}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: -1,
+            backgroundImage:
+              isHome && mainImageUrl ? `url(${mainImageUrl})` : 'none',
+            backgroundColor: isHome ? 'transparent' : '#0e1726',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
 
-      <Footer />
-    </div>
+        <Header />
+
+        <main id="main-content">
+          <Component {...pageProps} />
+        </main>
+
+        <Footer />
+      </div>
+    </>
   );
 };
 

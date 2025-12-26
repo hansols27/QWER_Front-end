@@ -1,36 +1,24 @@
-import React from 'react';
 import Head from 'next/head';
 
-const HomePage: React.FC = () => {
+const HomePage = () => {
   return (
     <>
       <Head>
-        {/* 기본 SEO */}
         <title>QWER 팬사이트</title>
         <meta
           name="description"
-          content="QWER 팬사이트에서 최신 QWER 콘텐츠를 확인하세요."
+          content="최신 QWER 콘텐츠를 확인하세요."
         />
-        <meta name="robots" content="index, follow" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        {/* Canonical */}
         <link
           rel="canonical"
           href="https://qwerfansite.com"
         />
 
-        {/* Open Graph */}
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="QWER 팬사이트" />
         <meta property="og:title" content="QWER 팬사이트" />
         <meta
           property="og:description"
-          content="QWER의 모든 팬 콘텐츠를 한 곳에서 확인하세요."
-        />
-        <meta
-          property="og:image"
-          content="https://qwerfansite.com/logo.svg"
+          content="QWER의 콘텐츠를 한 곳에서 확인하세요."
         />
         <meta
           property="og:url"
@@ -48,7 +36,6 @@ const HomePage: React.FC = () => {
           </p>
         </section>
       </main>
-
     </>
   );
 };
