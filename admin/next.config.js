@@ -8,19 +8,19 @@ const nextConfig = {
         NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     },
 
-    // 👈 이미지 설정 추가 시작
     images: {
+        // 1. 서버 부하 방지의 핵심: 최적화 기능을 끄고 S3 원본을 브라우저가 직접 로드하게 함
+        unoptimized: true, 
+        
         remotePatterns: [
             {
                 protocol: 'https',
-                // S3 버킷 도메인 hostname을 정확하게 입력
                 hostname: 'qwerfansite.s3.ap-northeast-2.amazonaws.com', 
                 port: '',
-                pathname: "/**", // 버킷 전체 접근
+                pathname: "/**",
             },
         ],
     },
-    // 👈 이미지 설정 추가 끝
 
     webpack: (config) => {
         config.resolve.alias = {
